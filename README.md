@@ -1,9 +1,14 @@
 ## Analítica Aplicada a los Negocios
 
 Este curso comprende una introducción a las técnicas analíticas aplicadas a la toma de decisiones empresariales basadas en su totalidad en información extraida de los datos. Agradezco especialmente al profesor [Theodoros Evgeniou](https://faculty.insead.edu/theodoros-evgeniou/) por permitirme utilizar el material de su curso [Data Analytics for Business](http://inseaddataanalytics.github.io/INSEADAnalytics/) impartido en [INSEAD](https://www.insead.edu/home/), la mejor escuela de negocios del mundo; así como a mis profesores en [Georgia Tech](https://www.scheller.gatech.edu/index.html), mi alma máter.
-Eduardo Aguilar no es el autor de ninguno de los materiales contenidos en este repositorio, solamente ha adaptado una versión en español lo que los autores realizaron.
+Eduardo Aguilar no es el autor de ninguno de los materiales contenidos en este repositorio, solamente ha adaptado una versión en español lo que los autores realizaron, todo el crédito es de ellos.
+
+La Universidad Centroamericana José Simeón Cañas [UCA] (http://www.uca.edu.sv/) impartirá a partir de 2019 un curso de Analítica Aplicada como complemento al postgrado de Business Intelligence. Este será desarrollado de inicio a fin en el software [R](https://www.r-project.org/). El objetivo principal es equipar al estudiante con herramientas para el diseño de modelos predictivos y análisis de datos como apoyo a la toma de decisiones empresariales.
+
+El curso comprende una introducción a las metodologías analíticas aplicadas a problemas de negocios. Se desarrollarán casos de estudio haciendo uso del paquete estadístico [Rstudio](https://www.rstudio.com/) y del repositorio [Github](https://github.com/) para implementar algoritmos de machine learning en problemas relacionados a finanzas y marketing. Todos los participantes deberán instalar Rstudio y crear una cuenta en Github una semana antes del inicio de clases. **No es una clase hablada ni se basará en diapositivas**, si usted quiere aprovechar al máximo este curso deberá aprender a programar o en su defecto ensamblar código para el análisis de datos.
 
 
+... en construcción
 
 You can use the [editor on GitHub](https://github.com/conciclicboy/AnalyticsUCA/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
