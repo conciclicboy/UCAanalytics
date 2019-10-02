@@ -1,0 +1,512 @@
+---
+title: "Análisis de Clusters y Segmentación: Herramienta interactiva"
+author: "T. Evgeniou (traducción por Eduardo Aguilar)"
+runtime: shiny
+output: 
+  html_document:
+    theme: paper
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r echo=FALSE, message=FALSE}
+source("../../AnalyticsLibraries/library.R")
+
+ggthemr('fresh')  # ggplot theme
+opts_knit$set(progress=FALSE, verbose=FALSE)
+opts_chunk$set(echo=FALSE, fig.align="center")
+options(knitr.kable.NA = '')
+
+tags$style(type="text/css", "p { text-align:justify; }")
+tags$style(type="text/css", "label { display: none; }")
+tags$style(type="text/css", ".c3 svg, .dendroNetwork svg text { font-size:13px; font-family:\"Roboto\", \"Helvetica Neue\", Helvetica, Arial, sans-serif !important; }")
+tags$style(type="text/css", ".formattable_widget { overflow:auto; max-height:425px; margin-bottom:23px; }")
+tags$style(type="text/css", ".formattable_widget table { margin-bottom:0; }")
+tags$style(type="text/css", ".formattable_widget td, .formattable_widget th { white-space: nowrap; }")
+
+MAX_VARIABLES <- 20     # limits initial dataset filters
+MAX_VARIABLES_PROFILE <- 100     # limits initial dataset filters
+SAMPLE_ROWS <- 10       # limits sample dataset presentations
+SAMPLE_XPOINTS <- 100   # limits sample dataset plots
+
+normalize.abs <- function(x, min=0, max=1, na.rm=FALSE) normalize(abs(x), min, max, na.rm)
+dformat <- function(df) {
+  if (class(df) != "data.frame")
+    df <- as.data.frame(df)
+  x <- lapply(colnames(df), function(col) {
+    if (is.numeric(df[, col]))
+      color_bar(rgb(238, 238, 238, max=255), normalize.abs, min=0.1, na.rm=TRUE)
+    else
+      formatter("span")
+  })
+  names(x) <- colnames(df)
+  formattable(df, x)
+}
+```
+
+
+# Clusterización y Segmentación en 9 pasos
+
+Esta herramienta sigue los 9 pasos para análisis de clusteres descritos en el archivo [Cluster Analysis and Segmentation](http://inseaddataanalytics.github.io/INSEADAnalytics/Report_s45.html) del curso. 
+
+Primero carguemos los datos (`data/Mall_Visits.csv` por default):
+
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+# Por favor Ingrese el nombre del archivo con los datos utilizados. El archivo debe contener una matriz con una fila por observación (por ej: persona) y una columna por atributo.
+
+fileInput("dataFile", "",
+          accept = c(
+            "text/csv",
+            "text/comma-separated-values,text/plain",
+            ".csv"),
+          width = "100%"
+          )
+ProjectDataX <- eventReactive(input$dataFile, ignoreNULL=FALSE, {
+  datapath <- input$dataFile$datapath
+  if (is.null(datapath))
+    datapath <- "data/Mall_Visits.csv"
+  df <- try(read.csv(datapath, stringsAsFactors=FALSE), silent=TRUE)
+  df.valid <- class(df) == "data.frame" && any(sapply(df, is.numeric))
+  if (!df.valid) {
+    showModal(modalDialog(title="Error", HTML("Este archivo contiene variables no numéricas.<br><br>Por favor asegúrese que puede ser procesado con el comando `read.csv`. Problemas comunes incluyen un separador de columnas diferente a la coma (`,`) y un punto decila diferente de (`.`).")))
+    shiny::validate(need(df.valid, message=FALSE))
+  }
+  if (is.null(rownames(df)) || identical(rownames(df), as.character(1:nrow(df))))
+    rownames(df) <- paste0("observation ", sprintf("%02i", 1:nrow(df)))
+  df
+})
+```
+
+También necesitamos seleccionar cuáles variables a considerar para el análisis de clústers (a lo sumo `r MAX_VARIABLES`): 
+
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+selectizeInput("segmentationAttributes", "",
+               choices = NULL,
+               multiple = TRUE,
+               options = list(
+                 plugins = c("remove_button","drag_drop"),
+                 maxItems = MAX_VARIABLES,
+                 placeholder = "None"
+               ),
+               width="100%"
+               )
+observeEvent(ProjectDataX(), {
+  attributes <- colnames(ProjectDataX())
+  attributes <- attributes[sapply(ProjectDataX(), is.numeric)]
+  updateSelectizeInput(session, "segmentationAttributes", choices=attributes, selected=head(attributes, MAX_VARIABLES))
+})
+
+ProjectData_segmentX <- eventReactive(input$segmentationAttributes, {
+  ProjectDataX()[, input$segmentationAttributes, drop=F]
+})
+```
+
+Así se ven las primeras `r SAMPLE_ROWS` columnas:
+
+```{r}
+renderFormattable(dformat(head(ProjectData_segmentX(), SAMPLE_ROWS)))
+```
+
+
+### Paso 1: Confirmar que los datos son métricos
+
+Los datos que utilizamos tienen las siguientes estadísticas descriptivas:
+
+```{r}
+renderFormattable(dformat(round(my_summary(ProjectData_segmentX()), 2)))
+```
+
+
+## Paso 2: Escalar los datos
+
+Seleccione las variables a estandarizar:
+
+```{r}
+# Por favor ingrese las variables que quisiera estandarizar: 
+
+selectizeInput("standardizedVariables", "",
+               choices = NULL,
+               multiple = TRUE,
+               options = list(
+                 plugins = c("remove_button","drag_drop"),
+                 placeholder = "None"
+               ),
+               width="100%"
+               )
+observeEvent(ProjectData_segmentX(), {
+  attributes <- colnames(ProjectData_segmentX())
+  updateSelectizeInput(session, "standardizedVariables", choices=attributes, selected=attributes)
+})
+
+ProjectData_scaledX <- eventReactive(input$standardizedVariables, ignoreNULL=FALSE, {
+  df <- ProjectData_segmentX()
+  columns <- input$standardizedVariables
+  if (length(columns) == 0)
+    return(df)
+  df[, columns] <- apply(df[, columns, drop=F], 2, function(r) {
+    if (sd(r) != 0) 
+      (r - mean(r)) / sd(r)
+    else
+      0*r
+  })
+  df
+})
+
+```
+
+Estas son las estadísticas descriptivas de nuestros datos escalados:
+
+```{r}
+renderFormattable(dformat(round(my_summary(ProjectData_scaledX()), 2)))
+```
+
+
+## Paso 3: Seleccionar las Variables de Segmentación
+
+Hicimos esto al inicio. 
+
+
+## Paso 4: Definir la medida de similitud
+
+Ahora seleccionemos una métrica de distancia que eventualmente será utilizada para segmentar en el caso de clusterización jerárquica (ver `help(dist)`):
+
+```{r}
+# Por favor ingrese la métrica de distancia a utilizar para la clusterización en el caso de clusterización jerárquica (por ej: "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski" - ver help(dist)). La distancia predefinida es "euclidean"
+selectizeInput("distance_used", "",
+               choices = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
+```
+
+
+## Paso 5: Visualizar las distancias en pares 
+
+Este es el histograma de distancias para el tipo de distancia `r renderText(input$distance_used)` :
+
+```{r}
+tags$div(style='height:480px', renderC3({
+  Pairwise_Distances <- dist(ProjectData_scaledX(), method=input$distance_used)
+  Pairwise_Histogram <- hist(Pairwise_Distances, plot=FALSE)
+  c3(data.frame(x=head(Pairwise_Histogram$breaks, -1), Frequency=Pairwise_Histogram$counts), x="x", y="Frequency") %>% c3_bar(bar_width=0.90)
+}))
+```
+
+
+## Paso 6: Método y Número de Segmentos
+
+Seleccionar el método de clusterización jerárquica a utilizar (ver `help(hclust)`)
+
+```{r}
+# Por favor ingrese el método de clusterización jerárquica a utilizar (las opciones son:
+# "ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median" or "centroid")
+# El método predefinido es "ward"
+selectizeInput("hclust_method", "",
+               choices = c("ward.D", "ward.D2", "single", "complete",
+                           "average", "mcquitty", "median", "centroid"))
+
+Hierarchical_ClusterX <- eventReactive({
+  input$hclust_method
+  input$distance_used
+  ProjectData_scaledX()
+},{
+  Hierarchical_Cluster_distances <- dist(ProjectData_scaledX(), method=input$distance_used)
+  Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=input$hclust_method)
+  Hierarchical_Cluster
+})
+```
+
+y el número de clusteres a eventualmente utilizar para el análisis:
+
+```{r}
+# Por favor ingrese el número de clusters a eventualmente utilizar en este reporte
+sliderInput("numb_clusters_used", "", min=1, max=10, value=3)
+```
+
+Este es el dendograma de clusterización jerárquica:
+
+```{r}
+dendroNetworkOutput("cluster", height="480px")
+output$cluster <- renderDendroNetwork({
+  margins <- list(top=10, right=0, bottom=120, left=0)
+  cluster <- Hierarchical_ClusterX()
+  if (length(cluster$labels) > 40) cluster$labels <- NULL
+  dendroNetwork(cluster, fontSize=14, treeOrientation="vertical", margins=margins, textRotate=90)
+})
+```
+
+Esta es la gráfica de "distancias" recorrida antes que necesitemos fusionar cualquier cluster de menor tamaño - las medidas de las ramas del árbol que unen los clusters a medida recorremos el árbol desde sus hojas hasta la raiz. Si tememos `n` observaciones, esta gráfica tendrá `n-1` números:
+
+```{r}
+renderFormattable(dformat({
+  h <- Hierarchical_ClusterX()$height
+  df <- cbind(h[length(h):1], 1:length(h))
+  colnames(df) <- c("distances","index")
+  head(round(df, 2), SAMPLE_XPOINTS)
+}))
+```
+
+También podemos ver el segmento de cada observación (encuestado en este caso) para las primeras `r SAMPLE_ROWS` personas:
+
+```{r}
+renderFormattable(dformat({
+  cluster_memberships_hclust <- as.vector(cutree(Hierarchical_ClusterX(), k=input$numb_clusters_used)) # cut tree into 3 clusters
+  cluster_ids_hclust=unique(cluster_memberships_hclust)
+
+  ProjectData_with_hclust_membership <- cbind(1:length(cluster_memberships_hclust),cluster_memberships_hclust)
+  colnames(ProjectData_with_hclust_membership)<-c("Observation Number","Cluster_Membership")
+  round(head(ProjectData_with_hclust_membership, SAMPLE_ROWS), 2)
+}))
+```
+
+
+### Usando Clusterización Kmean
+
+Seleccione el método de clusterización kmeans a utilizar (ver `help(kmeans)`):
+
+```{r}
+# Por favor ingrese el método de kmeans a utilizar (las opciones son:
+# "Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"
+# La opción predefinida es "Lloyd"
+selectizeInput("kmeans_method", "",
+               choices = c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"),
+               selected = "Lloyd")
+```
+
+Estos son los clusters a los que pertenecen nuestras observaciones cuando seleciconamos `r renderText(input$numb_clusters_used)` clusters y el método de kmeans tipo `r renderText(input$kmeans_method)`, para los primeros `r SAMPLE_ROWS` datos (note que los ID's de los cluster IDs pueden diferir de aquellos encontrados con clusterización jerárquica):
+
+```{r}
+renderFormattable(dformat({
+  kmeans_clusters <- kmeans(ProjectData_scaledX(), centers=input$numb_clusters_used, iter.max=2000, algorithm=input$kmeans_method)
+
+  ProjectData_with_kmeans_membership <- cbind(1:length(kmeans_clusters$cluster),kmeans_clusters$cluster)
+  colnames(ProjectData_with_kmeans_membership)<-c("Observation Number","Cluster_Membership")
+  rownames(ProjectData_with_kmeans_membership)<-NULL
+  round(head(ProjectData_with_kmeans_membership, SAMPLE_ROWS), 2)
+}))
+```
+
+
+## Paso 7: Perfil e interpretación de los segmentos
+
+Ahora seleccionamos los atributos originales a utilizar para la perfilación de los segmentos, los "atributos de perfilación" (`r MAX_VARIABLES_PROFILE` a lo sumo)
+
+```{r}
+# Por favor ingrese los atributos originales a utilizar para la perfilación de los segmentos, los ("atributos de perfilación")
+selectizeInput("profile_attributes_used", "",
+               choices = NULL,
+               multiple = TRUE,
+               options = list(
+                 plugins = c("remove_button","drag_drop"),
+                 maxItems = MAX_VARIABLES_PROFILE,
+                 placeholder = "None"
+               ),
+               width="100%"
+               )
+observeEvent(ProjectDataX(), {
+  attributes <- colnames(ProjectDataX())
+  attributes <- attributes[sapply(ProjectDataX(), is.numeric)]
+  updateSelectizeInput(session, "profile_attributes_used", choices=attributes, selected=head(attributes, MAX_VARIABLES))
+})
+
+ProjectData_profileX <- eventReactive(input$profile_attributes_used, {
+  ProjectDataX()[, input$profile_attributes_used, drop=F]
+})
+```
+
+y el método usado para la perfilación:
+
+```{r}
+# Por favor ingrese el método utilizado para la perfilación (por ej: "hclust" o "kmeans"):
+selectizeInput("profile_with", "",
+               choices = c("hclust", "kmeans"))
+```
+
+```{r}
+## A MODIFICAR: ESTO SE CONVIRTIÓ EN ALGO INTERACTIVO
+
+# Por favor ingrese el mínimo número bajo el cual quisiera no imprimir - esto hace que las tablas sea más fáciles de leer. Los valores predefinidos 10e6 (para imprimir todo) o 0.5. Intente ambos para ver la diferencia.
+MIN_VALUE=0.5
+
+```
+
+Los valores medios de nuestros datos para la población total así como para cada segmento son:
+
+```{r}
+cluster.profileX <- eventReactive({
+  input$profile_with
+  ProjectData_profileX()
+  input$kmeans_method
+  input$numb_clusters_used
+  input$hclust_method
+  input$distance_used
+},{
+  cluster_memberships <- if (input$profile_with == "hclust"){
+    Hierarchical_Cluster_distances <- dist(ProjectData_profileX(), method=input$distance_used)
+    Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=input$hclust_method)
+    as.vector(cutree(Hierarchical_Cluster, k=input$numb_clusters_used))
+
+  } else { # kmeans
+    kmeans_clusters <- kmeans(ProjectData_profileX(), centers=input$numb_clusters_used, iter.max=2000, algorithm=input$kmeans_method)
+    kmeans_clusters$cluster
+  }
+  cluster_ids <- unique(cluster_memberships)
+
+  # A MODIFICAR: GUARDE LOS DATOS en el archivo del cluster
+  # NewData = matrix(cluster_memberships,ncol=1)
+  # write.csv(NewData,file=cluster_file)
+
+  population_average <- matrix(apply(ProjectData_profileX(), 2, mean), ncol=1)
+  colnames(population_average) <- "Population"
+  Cluster_Profile_mean <- sapply(sort(cluster_ids), function(i) apply(ProjectData_profileX()[(cluster_memberships==i), ], 2, mean))
+  if (ncol(ProjectData_profileX()) <2)
+    Cluster_Profile_mean=t(Cluster_Profile_mean)
+  colnames(Cluster_Profile_mean) <- paste("Segment", 1:length(cluster_ids), sep=" ")
+  cluster.profile <- cbind (population_average,Cluster_Profile_mean)
+  cluster.profile
+})
+
+renderFormattable(dformat(round(cluster.profileX(),2)))
+```
+
+Podemos también "visualizar" los segmentos usando **diagramas de serpiente** para cada cluster. Por ejemplo, podemos graficar las medias de las variables de perfilación para cada cluster y así visualizar las diferencias entre segmentos. Para mejor visualización podemos graficar las variables de perfilación estandarizadas.
+
+```{r}
+ProjectData_scaled_profileX <- eventReactive(ProjectData_profileX(), {
+  df <- ProjectData_profileX()
+  columns <- colnames(df)
+  df[, columns] <- apply(df[, columns, drop=F], 2, function(r) {
+    if (sd(r) != 0) 
+      (r - mean(r)) / sd(r)
+    else
+      0*r
+  })
+  df
+})
+
+Cluster_Profile_standar_meanX <- eventReactive({
+  input$profile_with
+  ProjectData_scaled_profileX()
+  input$kmeans_method
+  input$numb_clusters_used
+  input$hclust_method
+  input$distance_used
+},{
+  cluster_memberships <- if (input$profile_with == "hclust"){
+    Hierarchical_Cluster_distances <- dist(ProjectData_scaled_profileX(), method=input$distance_used)
+    Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=input$hclust_method)
+    as.vector(cutree(Hierarchical_Cluster, k=input$numb_clusters_used))
+
+  } else { # kmeans
+    kmeans_clusters <- kmeans(ProjectData_scaled_profileX(), centers=input$numb_clusters_used, iter.max=2000, algorithm=input$kmeans_method)
+    kmeans_clusters$cluster
+  }
+  cluster_ids <- unique(cluster_memberships)
+
+  Cluster_Profile_standar_mean <- sapply(sort(cluster_ids), function(i) apply(ProjectData_scaled_profileX()[(cluster_memberships==i), ,drop = F], 2, mean))
+  if (ncol(ProjectData_scaled_profileX()) < 2)
+  Cluster_Profile_standar_mean = t(Cluster_Profile_standar_mean)
+  colnames(Cluster_Profile_standar_mean) <- paste("Segment", 1:length(cluster_ids), sep=" ")
+  Cluster_Profile_standar_mean
+})
+
+tags$div(style='height:480px', renderC3({
+  c3(melt(as.data.frame(cbind(n=as.numeric(1:nrow(Cluster_Profile_standar_meanX())), Cluster_Profile_standar_meanX())), id="n"), x="n", y="value", group="variable") %>% c3_line('spline') %>%  xAxis(label="Profiling variables (standardized)") %>% yAxis(label="Mean of cluster")
+}))
+```
+
+Podemos también comparar las medias de las variables de perfilación para cada segmento relativo al promedio de las variables para la población tota. Esto puede ayudarnos a entender mejor si en efecto hay clusters en nuestros datos (por ej: si todos los segmentos son similares a la población total, en realidad no existen dichos segmentos). Por ejemplo, podemos medir las proporciones del promedio en cada cluster con el promedio general menos 1 por ej: `avg(cluster)` `/` `avg(population)` `-1`) y explorar la matriz similar a la siguiente:
+
+```{r}
+cluster_profile_ratiosX <- eventReactive({
+  input$profile_with
+  ProjectData_profileX()
+  input$kmeans_method
+  input$numb_clusters_used
+  input$hclust_method
+  input$distance_used
+},{
+  cluster_memberships <- if (input$profile_with == "hclust"){
+    Hierarchical_Cluster_distances <- dist(ProjectData_profileX(), method=input$distance_used)
+    Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=input$hclust_method)
+    as.vector(cutree(Hierarchical_Cluster, k=input$numb_clusters_used))
+
+  } else { # kmeans
+    kmeans_clusters <- kmeans(ProjectData_profileX(), centers=input$numb_clusters_used, iter.max=2000, algorithm=input$kmeans_method)
+    kmeans_clusters$cluster
+  }
+  cluster_ids <- unique(cluster_memberships)
+
+  population_average <- matrix(apply(ProjectData_profileX(), 2, mean), ncol=1)
+  colnames(population_average) <- "Population"
+  Cluster_Profile_mean <- sapply(sort(cluster_ids), function(i) apply(ProjectData_profileX()[(cluster_memberships==i), ], 2, mean))
+  if (ncol(ProjectData_profileX()) <2)
+    Cluster_Profile_mean=t(Cluster_Profile_mean)
+  colnames(Cluster_Profile_mean) <- paste("Segment", 1:length(cluster_ids), sep=" ")
+  
+  population_average_matrix <- population_average[,"Population",drop=F] %*% matrix(rep(1,ncol(Cluster_Profile_mean)),nrow=1)
+  cluster_profile_ratios <- (ifelse(population_average_matrix==0, 0,Cluster_Profile_mean/population_average_matrix-1))
+  colnames(cluster_profile_ratios) <- paste("Segment", 1:ncol(cluster_profile_ratios), sep=" ")
+  rownames(cluster_profile_ratios) <- colnames(ProjectData_profileX())
+  cluster_profile_ratios
+})
+
+renderFormattable(dformat(round(cluster_profile_ratiosX(), 2)))
+```
+
+
+## Paso 8: Análisis de Robustez
+
+Para las dos soluciones de `r renderText(input$numb_clusters_used)` segmentos encontradas arriba (uno usando Kmeans y otro usando Clusterización Jerárquica ), esos porcentajes son los siguientes:
+
+```{r}
+per_cluster_observations_overlappingX <- eventReactive({
+  ProjectData_profileX()
+  input$kmeans_method
+  input$numb_clusters_used
+  input$hclust_method
+  input$distance_used
+},{
+  Hierarchical_Cluster_distances <- dist(ProjectData_profileX(), method=input$distance_used)
+  Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=input$hclust_method)
+  cluster_memberships_hclust <- as.vector(cutree(Hierarchical_Cluster, k=input$numb_clusters_used))
+  cluster_ids_hclust <- unique(cluster_memberships_hclust)
+
+  kmeans_clusters <- kmeans(ProjectData_profileX(), centers=input$numb_clusters_used, iter.max=2000, algorithm=input$kmeans_method)
+  cluster_memberships_kmeans <- kmeans_clusters$cluster
+  cluster_ids_kmeans <- unique(cluster_memberships_kmeans)
+
+# First, make sure the segment ids are correctly aligned
+cluster_overlaps <- Reduce(cbind,lapply(1:length(cluster_ids_kmeans), function(i) {
+  overlaps <- sapply(1:length(cluster_ids_hclust), function(j) {
+    length(intersect(which(cluster_memberships_kmeans==i),
+                     which(cluster_memberships_hclust==j))) } );
+  overlaps}))
+max_cluster_overlap = rep(0,length(cluster_ids_kmeans))
+for (i in 1:length(cluster_ids_kmeans)){
+  highest_now = which.max(cluster_overlaps)
+  hclust_id_now = highest_now %% length(cluster_ids_kmeans)
+  hclust_id_now = ifelse(hclust_id_now == 0, 3, hclust_id_now)
+  kmeans_id_now = ceiling(highest_now/length(cluster_ids_kmeans))
+  max_cluster_overlap[kmeans_id_now] <- hclust_id_now
+  cluster_overlaps[hclust_id_now,] <- 0
+  cluster_overlaps[,kmeans_id_now] <- 0
+}
+cluster_memberships_kmeans_aligned <- rep(0,length(cluster_memberships_kmeans))
+for (i in 1:length(cluster_ids_kmeans))
+  cluster_memberships_kmeans_aligned[(cluster_memberships_kmeans==i)] <- max_cluster_overlap[i]
+
+# Now calculate the overlaps
+# First, the total overlap
+total_observations_overlapping <- 100*sum(cluster_memberships_kmeans_aligned==cluster_memberships_hclust) / length(cluster_memberships_hclust)
+# Then, per cluster
+per_cluster_observations_overlapping <- sapply(1:length(cluster_ids_kmeans), function(i) 100*length(intersect(which(cluster_memberships_kmeans_aligned==i),which(cluster_memberships_hclust==i)))/sum(cluster_memberships_kmeans_aligned==i))
+per_cluster_observations_overlapping <- matrix(per_cluster_observations_overlapping, nrow=1)
+colnames(per_cluster_observations_overlapping) <- paste("Segment",1:length(per_cluster_observations_overlapping),sep=" ")
+per_cluster_observations_overlapping
+})
+
+renderFormattable(dformat(per_cluster_observations_overlappingX()))
+```
+
+<div style="height: 450px;" class="tocify-extend-page" data-unique="tocify-extend-page">
+</div>

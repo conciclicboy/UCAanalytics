@@ -1,0 +1,484 @@
+---
+title: "Análisis de Clusters y Segmentación"
+author: "T. Evgeniou, INSEAD (traducción por Eduardo Aguilar)"
+output:
+  html_document:
+    css: ../../AnalyticsStyles/default.css
+    theme: paper
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    includes:
+      in_header: ../../AnalyticsStyles/default.sty
+---
+
+
+```{r setup, echo=FALSE, message=FALSE}
+# Preparación
+# Cuando se ejecute el caso en su computadora local, modifique esta parte en caso haya cambiado de directorio el caso 
+# (por ej: local_directory <- "C:/user/MyDocuments" )
+# escriba en la consola abajo help(getwd) y help(setwd) para más información
+local_directory <- "."
+source(paste(local_directory,"../../AnalyticsLibraries/library.R", sep="/"))
+source(paste(local_directory,"../../AnalyticsLibraries/heatmapOutput.R", sep = "/"))
+
+# Paquetes
+ggthemr('fresh')  # tema de ggplot
+opts_knit$set(progress=FALSE, verbose=FALSE)
+opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.5)
+options(knitr.kable.NA = '')
+
+# Por favor escriba el nombre del archivo con los datos utilizados. El archivo deberá contener una matriz con una fila por observación (por ej: personas) y una columna por atributo. EL NOMBRE DE ESTA MATRIZ NECESITA SER ProjectData (de otro modo usted necesitará reemplazar el nombre de la variable ProjectData con el nuevo nombre de su variable, lo cual podrá ver en su ventana de Workspace después que cargue el archivo)
+#datafile_name="Boats" # no agregue .csv al final! asegúrese que los datos son numéricos!!!! revise su archivo!
+datafile_name="Mall_Visits" # no agregue .csv al final! asegúrese que los datos son numéricos!!!! revise su archivo!
+
+# Por favor agregue los atributos originales a utilizar en la segmentación (los "atributos de la segmentación")
+# Por favor utilice números, no nombres de columnas, por ej: c(1:5, 7, 8) usa las columnas 1,2,3,4,5,7,8
+segmentation_attributes_used = c(2:7) 
+
+# Por favor agregue los atributos originales a utilizar en la perfilación de segmentos (los "atributos de la perfilación")
+# Please use numbers, not column names! e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
+profile_attributes_used = c(2:9) # for boats use c(2:82), for Mall_Visits use c(2:9)
+
+# Por favor ingrese el número de clusters a eventualmente utilizar en este reporte
+numb_clusters_used = 3 # para los botes posiblemente use 5, para Visitas al Mall use 3
+
+# Por favor ingrese el método a utilizar para la perfilación:
+profile_with = "hclust" #  "hclust" o "kmeans"
+
+# Por favor ingrese la medida de distancia a eventualmente utilizar para el caso de clusterización jerárquica
+# (por ej: "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski" - vea help(dist)). 
+# La medida predefinida es "euclidean"
+distance_used="euclidean"
+
+# Por favor ingrese el método de clusterización jerárquica a utilizar (las opciones son:
+# "ward", "single", "complete", "average", "mcquitty", "median" or "centroid")
+# El método predefinido es "ward"
+hclust_method = "ward.D"
+
+# Por favor ingrese el método de clusterización kmeans a utilizar (las opciones son:
+# "Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"
+# El método predefinido es "Lloyd"
+kmeans_method = "Lloyd"
+
+# Por favor ingrese el mínimo número bajo el cual quisiera no imprimir - esto hace que las tablas sean más fáciles de leer. Los valores predefinidos son 10e6 (para imprimir todo) o 0.5. Intente con ambos para ver la diferencia.
+MIN_VALUE=0.5
+
+# Por favor ingrese el máximo número de observaciones a mostrar en este reporte y diapositivas 
+# (El número predefinido es 50. Si el número es muy grande el reporte y diapositivas puede no ser generado - será muy lento o fallará!!)
+max_data_report = 10 # puede también cambiarlo en server.R
+
+
+# esto carga los datos seleccionados: No edite esta línea
+ProjectData <- read.csv(paste(paste(local_directory, "data", sep="/"), paste(datafile_name,"csv", sep="."), sep = "/")) # esto contiene solamente la matriz ProjectData
+ProjectData=data.matrix(ProjectData) 
+if (datafile_name == "Boats")
+  colnames(ProjectData)<-gsub("\\."," ",colnames(ProjectData))
+
+segmentation_attributes_used = unique(sapply(segmentation_attributes_used,function(i) min(ncol(ProjectData), max(i,1))))
+profile_attributes_used = unique(sapply(profile_attributes_used,function(i) min(ncol(ProjectData), max(i,1))))
+
+ProjectData_segment=ProjectData[,segmentation_attributes_used]
+ProjectData_profile=ProjectData[,profile_attributes_used]
+# este es el archivo donde CLUSTER_IDs de las observaciones será guardado
+cluster_file = paste(paste(local_directory,"data", sep="/"),paste(paste(datafile_name,"cluster", sep="_"), "csv", sep="."), sep="/")
+
+```
+
+
+# ¿Para qué es esto?
+
+En Analítica frecuentemente tenemos conjuntos de datos muy grandes (muchas observaciones - "filas en el archivo plano"), las cuales son similares entre ellas por lo tanto quisieramos organizarlas en unos cuantos clusters con observaciones similares dentro de cada uno de ellos. Por ejemplo, en el caso de los datos de consumidores, aunque podamos tener datos de millones de consumidores, esos consumidores pueden pertenecer a unos pocos segmentos: consumidores similares dentro de cada segmento pero diferentes entre segmentos. Frecuentemente necesitaremos analizar cada segmento de forma separada, ya que ellos se comportan de modo diferente (por ej: diferentes segmentos de mercado pueden diferir en sus preferencias de productos y patrones de comportamiento).
+
+En tales situaciones, para identificar los segmentos en los datos uno puede utilizar técnicas estadísticas ampliamente conocidas llamadas técnicas de **Clusterización**. Basado en como se definen las "similitudes" y "diferencias" entre observaciones (por ej: clientes o activos), las cuales pueden también ser definidas matemáticamente usando **métricas de distancia**, uno puede encontrar diferentes soluciones de segmentación. Un ingrediente clave de clusterización y segmentación es precisamente la definición de esas medidas de distancia(entre observaciones), las cuales necesitan ser definidas creativamente basadas en el conocimiento contextual y no solo utilizando la "caja negra" de ecuaciones y técnicas matemáticas. 
+
+> Las técnicas de clusterización son utilizadas para agrupar datos/observaciones en unos pocos segmentos de modo que los datos dentro de cada segmento sean similares entre sí mientras que los datos entre segmentos difieran. Definir lo que queremos decir por observaciones "similares" o "diferentes" es una parte clave de el análisis de clusters lo cual frecuentemente requiere mucho análisis contextualy creatividad mas allá de lo que las técnicas estadísticas pueden utilizar. 
+
+El análisis de clusters es utilizado en muchas aplicaciones. Por ejemplo, puede ser utilizado para identificar segmentos de consumidores, o grupos de productos competitivos, o grupos de activos cuyos precios pueden estar cointegrados(moverse juntos), o para segmentaciones geodemográficas, etc. En general, frecuentemente es necesario dividir nuestros datos en segmentos y realizar un subsecuente análisis dentro de cada segmento para desarrollar (potencialmente más refinado) conclusiones de cada segmento en específico. Esto puede ser el caso si no hay segmentos que sean intuitivamente "naturales"" en nuestros datos.
+
+
+# Clusterización y Segmentación usando un ejemplo
+
+En estos apuntos revisaremos el proceso de clusterización y segmentación usando un conjunto de datos muy simple que describe las actitudes de las personas hacia comprar en un centro comercial. Como este es un conjunto de datos pequeños, uno podría incluso explorar "manualmente" los datos para encontrar "visualmente" segmentos de consumidores (lo cual es muy factible para este pequeño grupo de datos, aunque la clusterización es en general un problema muy difícil incluso cuando el número de datos es muy pequeño).
+
+
+Antes de leer más, no trate de pensar cuáles segmentos podrían definirse utilizando estos datos. Como siempre, usted verá en este relativamente sencillo caso que no es tan obvio lo que los segmentos deben ser, y usted probablemente no estará de acuerdo con sus colegas acerca de ellos: el propósito después de todo es dejar a los números y estadísticas ayudarnos a ser más **objetivos y estadísticamente correctos**.
+
+
+## La "decisión de negocios"
+
+El equipo gerencial de un gran centro comercial quisiera entender los tipos de personas que visitan o potencialmente visiten su centro comericial. Ellos tienen razones para creer que hay unos pocos segmentos de mercado, y están considerando diseñar y posicionar los servicios del centro comercial para atraer principalmente a los segmentos más rentables, o para diferenciar sus servicios (por ej: invitaciones a eventos, descuentos, etc.) entre los segmentos de mercado. 
+
+## Los datos
+
+Para hacer esas decisiones, el equipo gerencial realiza una investigación de mercados de unos pocos consumidores potenciales. En este caso era una pequeña encuesta a pocas personas, en donde cada persona contestó 6 preguntas actitudinales y una pregunta concerniente a que tan seguido visitaban el centro comercial, todo en una escala del 1 al 7, así como una pregunta concerniente a su ingreso familiar:
+
+Nombre      | Descripción                                         | Escala
+-----------:|:----------------------------------------------------|:-----
+V1          | Comprar es Divertido                                | 1-7
+V2          | Comprar es malo para su presupuesto                 | 1-7
+V3          | Yo combino comprar con comer                        | 1-7
+V4          | Yo trato de obtener las mejores productos           | 1-7
+V5          | No me interesa ir de compras                        | 1-7
+V6          | Usted puede ahorrar mucho dinero comparando precios | 1-7
+Ingresos    | El ingreso familiar del entrevistado                | Dollars
+Mall.Visits | ¿Qué tan seguido visita el centro comercial?        | 1-7
+
+```{r}
+# transformemos los datos en una class data.matrix para que lo podamos visualizar más facilmente
+ProjectData = data.matrix(ProjectData)
+```
+
+Cuarenta personas respondieron a estas 6 preguntas. Estas son las respuestas para las primeras `r min(max_data_report,nrow(ProjectData))` personas:
+
+```{r}
+knitr::kable(round(head(ProjectData, max_data_report), 2))
+```
+
+Veremos unas cuantas estadísticas descriptivas en los datos posteriores, cuando entremos en el análisis estadístico.
+
+¿Cómo puede la compañía segmentar esas `r nrow(ProjectData)` personas? ¿Hay de verdad segmentos en este mercado? Veamos **un** proceso de clusterización y segmentación, el propósito de este reporte. 
+
+## Un Proceso de Clusterización y Segmentación
+
+Como siempre: 
+
+> Es importante recordar que los proyectos de Data Analytics requieren un delicado balance entre experimentación, intuición, pero también seguir un proceso (de vez en cuando) para evitar ser engañado por la aletoriedad y "encontrar datos y patrones" que estén explicados principalmente por nuestros propios sesgos y no por hechos en sí.
+
+No hay *un único* proceso para clusterización y segmentación. Sin embargo, tenemos que empezar por algo, así que usaremos el siguiente proceso:
+
+# Clusterización y Segmentación en 8 pasos
+
+1. Confirmar que los datos son métricos
+2. Escalar los datos
+3. Seleccionar las Variables de Segmentación
+4. Definir la medida de similitud
+5. Visualizar Distancias entre Pares 
+6. Método y Número de Segmentos
+7. Perfil e interpretación de los segmentos 
+8. Análisis de Robustes
+
+Sigamos esos pasos.
+
+## Paso 1: Confirmar que los datos son métricos
+
+Aunque uno puede sergmentar datos incluso si estos no son métricos, muchos métodos estadísticos disponibles para clusterización requieren que los datos sean así: esto significa no solamente que los datos sean números, pero también que los números tengan un significado numérico, esto es, 1 es menor que 2, que es menor a 3. La principal razón de esto es que uno necesita definir distancias entre observaciones (ver paso 4 abajo), y frecuentemente ("caja negra" matemática) distancias (por ej: "Distancia Euclídea") son definidas solo por datos métricos.  
+
+Sin embargo, potencialmente se podrían definir medidas para datos no métricos. Por ejemplo, si nuestros datos son nombres de personas, uno simplemente podría definir la distancia entre dos personas como 0 cuando tienen el mismo nombre y 1 en cualquier otro caso. Esto es porque, aunque la mayoría de métodos estadísticos disponibles (los cuales usaremos más adelante) requieren que los datos sean métricos, no es una condición necesaria mientras estemos dispuestos a "intervenir la clusterización manualmente, por ejemplo, definiendo medidas de distancia entre nuestras observaciones de forma manual". Mostraremos un ejemplo simple de tal intervención manual más adelante. Es posible (en este reporte).
+
+> En general, la "mejor práctica" para segmentación es definir creativamente métricas de distancia entre nuestras observaciones. 
+
+En nuestro caso los datos son métricos, así que continuaremos el siguiente paso. Pero antes de hacerlo, chequearemos las estadísticas descriptivas de nuestros datos para obtener, como siempre, un mejor entendimiento de los mismos.
+Nuestros datos tienen las siguientes estadísticas descriptivas:
+
+```{r}
+knitr::kable(round(my_summary(ProjectData),2))
+```
+
+> Note que se puede llevar mucho tiempo en obtener una idea de los datos basado en simples estadísticas descriptivas y visualizaciones: la buena analítica de datos requiere que entendamos nuestros datos muy bien.
+
+## Paso 2: Escalar los datos
+
+Este es un paso opcional. Note que para estos datos, mientras 6 de los datos de la "encuesta" son similares en escala, digamos de 1 a 7, hay una variable que es 2 ceros de magnitud más grander: la variable Ingresos. 
+
+Que haya variables con escalas muy diferentes puede crear problemas: **la mayoría de "resultados" pueden ser derivados de los valores más grandes**, más de lo que desearíamos. Para evitar esos problemas, uno tiene que considerar si **estandarizar los datos** o no transformandolos a media cero y desviación estándar 1 (por ej: `scaledIncome` `=` `(Income-mean(Income))` `/` `sd(Income)`), o escalar los datos entre cero y 1 (por ej: `scaledIncome` `=` `(Income-min(Income))` `/` `(max(Income)-min(Income))`). Este es un ejemplo de código en R para el primer enfoque, si deseamos estandarizar todos los atributos:
+
+```{r, echo=TRUE, tidy=TRUE}
+ProjectData_scaled=apply(ProjectData,2, function(r) {if (sd(r)!=0) res=(r-mean(r))/sd(r) else res=0*r; res})
+```
+
+Notemos ahora las estadísticas descriptivas de los datos escalados:
+
+```{r}
+knitr::kable(round(my_summary(ProjectData_scaled),2))
+```
+
+Como esperábamos todas las variables tienen media 0 y desviación estándar 1.
+
+Mientras este es un paso típicamente necesario, uno siempre tiene que hacerlo con mucho cuidado: a veces usted quisiera que sus conclusiones analíticas estén basadas principalmente por pocos atributos que tomen valores grandes; otras veces tener atributos con diferentes escalas pueden implicar algo acerca de esos atributos. En muchos casos uno puede omitir el paso 2 para algunos atributos.
+
+## Paso 3: Seleccionar las Variables de Segmentación
+
+La decisión de cuales variables utilizar para la clusterización es una **decisión críticamente importante** que tendrá un impacto en la solución de clusterización. Entonces necesitamos pensar cuidadosamente acerca de las variables que elegiremos para la clusterización. Una buena investigación explorativa que puede darnos una idea de que variables son capaces de distinguir personas o productos o activos o regiones es crítico. Claramente estees un paso donde mucho conocimiento contextual, creatividad, y experimentación/iteraciones son necesarias.
+
+Además, frecuentemente utilizamos solo unos pocos atributos para la segmentación (**atributos de segmentación**) y usamos algunos de los restantes (**atributos de perfilación**) sólo para perfilar los clusters, como se discutirá en el paso 8. Por ejemplo, en investigación de mercados y segmentación de mercados, uno puede usar datos actitudinales para segmentación (para segmentar los consumidores basados en sus necesidades y actitudes hacia los productos y servicios) y después datos demográficos y de comportamiento para perfilar los segmentos encontrados.
+
+En nuestro caso, podemos utilizar 6 preguntas actitudinales para segmentación, y las restantes 2 (Ingresos y visitas al mall) para perfilarlos más adelante.
+
+## Paso 4: Definir una medida de similitud
+
+Recordemos que el propósito de clusterizar y segmentar es agrupar observaciones basadas en que tan similares son. Es entonces **crucial** que tengamos un buen entendimiento de que hace que dos observaciones (por ej: clientes, productos, compañías, activos, inversiones, etc.) sean "similares".
+
+> Si el usuario no tiene un buen entendimiento de que hace que dos observaciones (por ej: clientes, productos, compañías, activos, inversiones, etc.) sean "similares"", ningún método estadístico será capaz de descubrir la respuesta a esa pregunta.
+
+La mayoría de métodos estadísticos para clusterización y segmentación usan medidas matemáticas de distancia comunes. Típicamente las medidas son, por ejemplo, la **distancia Euclídea** o la distancia **Manhattan** (ver `help(dist)` en R para más ejemplos). 
+
+> Hay literalmente miles de rigurosas definiciones matemáticas de distancia entre observaciones/vectores! Además, cómo notará arriba, el usuario podría manualmente definir dichas métricas de distancias, como mostramos en el ejemplo de abajo - note sin embargo, que para hacerlo uno debe de asegurarse que las distancias definidas sean en efecto "válidas" (enm un sentido matemático, un tema más allá del alcance de estos apuntes).
+
+En nuestro caso exploramos dos métricas de distancia: la comúnmente utilizada **distancia Euclídea** así como la simple que definimos manualmente.
+
+La distancia Euclídea entre dos observaciones (en nuestro caso, clientes) es simplemente la raiz cuadrada del promedio de la diferencia de atributos elevada al cuadrado de dos observaciones (en nuestro caso, clientes). Por ejemplo, las distancias entre los primeros `r max_data_report` clientes en nuestros datos, usando sus respuestas a las 6 preguntas actitudinales son:
+
+```{r}
+euclidean_pairwise <- as.matrix(dist(head(ProjectData_segment, max_data_report), method="euclidean"))
+euclidean_pairwise <- euclidean_pairwise*lower.tri(euclidean_pairwise) + euclidean_pairwise*diag(euclidean_pairwise) + 10e10*upper.tri(euclidean_pairwise)
+euclidean_pairwise[euclidean_pairwise==10e10] <- NA
+
+knitr::kable(round(euclidean_pairwise))
+```
+
+Notemos por ejemplo que si usamos, por ejemplo, la distancia Manhattan, esas distancias cambian así:
+
+```{r}
+manhattan_pairwise <- as.matrix(dist(head(ProjectData_segment, max_data_report), method="manhattan"))
+manhattan_pairwise <- manhattan_pairwise*lower.tri(manhattan_pairwise) + manhattan_pairwise*diag(manhattan_pairwise) + 10e10*upper.tri(manhattan_pairwise)
+manhattan_pairwise[manhattan_pairwise==10e10] <- NA
+
+knitr::kable(manhattan_pairwise)
+```
+
+Definamos ahora nuestra propia métrica de distancia, como un ejemplo. Digamos que el equipo gerencial cree que dos consumidores son similares si ellos no difieren en sus ratings de preguntas actitudinales en más de 2 puntos. Podemos manualmente asignar la distancia de 1 para cada pregunta por la cual dos clientes dieron una respuesta que difiere en más de 2 puntos, y 0 para lo contrario. Es fácil escribir esta función de distancia en R:
+
+
+```{r, echo=TRUE, tidy=TRUE}
+My_Distance_function<-function(x,y){sum(abs(x-y)>2)}
+```
+
+Así se verían las distancias entre los entrevistados ahora:
+
+```{r}
+Manual_Pairwise=apply(head(ProjectData_segment,max_data_report),1,function(i) apply(head(ProjectData_segment,max_data_report),1,function(j) My_Distance_function(i,j) ))
+Manual_Pairwise <- Manual_Pairwise * lower.tri(Manual_Pairwise) + Manual_Pairwise * diag(Manual_Pairwise) + 10e10*upper.tri(Manual_Pairwise)
+Manual_Pairwise[Manual_Pairwise == 10e10] <- NA
+
+knitr::kable(Manual_Pairwise, col.names= 1:ncol(Manual_Pairwise))
+```
+
+En general se dee dedicar mucho pensamiento creativo y análisis explorativo a esta parte, y como siempre uno podría necesitar volver a este paso incluso depsués de finalizar por completo el proceso de segmentación- múltiples veces.
+
+## Paso 5: Visualizar las Distancias entre pares 
+
+Habiendo definido que significa que "dos observaciones son similares", el siguiente paso es obtener un primer entendimiento de los datos a traves de visualizaciones por ejemplo de atributos individuales así como de distancias entre observaciones (usando varias métricas de distancia). Si hay en efecto múltiples segmentos en nuestros datos, algunos de esas gráficas deberían mostrar "montañas y valles" con las montañas teniendo potencial de conformar segmentos.
+
+Por ejemplo, en nuestro caso podemos ver el histograma de las primeras 2 variables:
+
+```{r}
+do.call(grid.arrange, lapply(1:2, function(n) {
+  qplot(ProjectData_segment[, n], xlab=paste("Histogram of Variable", n), ylab="Frequency", binwidth=1)
+}))
+```
+
+o el histograma de distancias entre observaciones para la distancia `r distance_used`:
+
+```{r}
+Pairwise_Distances <- dist(ProjectData_segment, method = distance_used) 
+qplot(as.vector(Pairwise_Distances), xlab="Histogram of all pairwise Distances between observations", ylab="Frequency", binwidth=1)
+```
+
+> La visualización es muy importante para data analytics, ya que esta puede proveerun primer entendimiento de los datos.
+
+## Paso 6: Método y Número de Segmentos
+
+Hay muchos métodos estadísticos para clusterización y segmentación. En la práctica uno puede usar varias opciones para luego eventualmente seleccionar la solución que es estadísticamente más robusta (ver el último paso abajo), interpretable, y accionable - entre otros criterios.
+
+En estos apuntes usaremos principalmente dos métodos: **Método de Clusterización Kmedias (Kmeans)** y **Método de Clusterización Jerárquica**. Cómo todos los métodos de clusterización, estos dos también requieren que hayamos decidido cómo medir la distancia/similitud entre nuestras observaciones. Explicar cómo funcionan estos métodos está fuera del contenido de este curso. La única diferencia a remarcar es que Kmeans requiere que el usuario defina cuántos segmentos se crearán, mientras que la clusterización jerárquica no. 
+
+Usemos primero el método de **Clusterización Jerárquica**, ya que no sabemos cuantos segmentos hay en nuestros datos. La clusterización Jerárquica es un método que también nos ayuda a visualizar como se deben agrupar los datos entre si. Este genera un gráfico llamado **Dendograma** el cual es útil para visualización - pero debe ser usado con cuidado. Por ejemplo, en este caso el dendograma, usando la métrica de distancia `r distance_used`de los pasos anterioresy la opción de clusterización jerárquica `r hclust_method` (ver más abajo así como `help(hclust)` en R para más información), es como sigue:
+
+```{r}
+Hierarchical_Cluster_distances <- dist(ProjectData_segment, method=distance_used)
+Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=hclust_method)
+# Display dendogram
+ggdendrogram(Hierarchical_Cluster, theme_dendro=FALSE) + xlab("Our Observations") + ylab("Height")
+# TODO: Draw dendogram with red borders around the 3 clusters
+# rect.hclust(Hierarchical_Cluster, k=numb_clusters_used, border="red") 
+```
+
+<!-- Note que podemos dibujar tantos clústers como seleccionamos (por ej en este caso seleccionamos `r numb_clusters_used` clusters) alrededor de las ramas del Dendrograma. -->
+
+El Dendograma indica cómo este método de clusterización funciona: las observaciones son "agrupadas juntas", empezando desde pares de observaciones individuales que son las más cercanas a ellas y fusionando grupos pequeños en grupos más grandes dependiendo de que grupos son los más cercanos entre sí. Eventualmente todos nuestros datos se fusionarán en un segmento. Las medidas de las ramas del árbol indican que los clusters abajo son muy diferentes. Como esperábamos, las medidas de las ramas del árbol incrementan a medida lo recorremos de las hojas finales a la raiz: el método fusiona datos desde los más cercanos hasta los más lejanos.
+
+Los Dendogramas son una herramienta de visualización muy útil para la segmentación, incluso si el número de observaciones es muy alto, el árbol típicamente crece logarítmicamente con el número de datos. Sin embargo, esto puede ser engañoso. Notemos que una vez dos observaciones son fusionadas en el mismo segmento estas permanecen en el mismo segmento en todo el árbol. Esta "rigidez" del método de Clusterización Jerárquica puede llevar a segmentaciones que son subóptimas en muchas formas. Sin embargo, los dendogramas son útiles en práctica para ayudarnos a entender los datos, incluyendo el potencial número de segmentos que tenemos en nuestros datos. Además, hay varias formas de construir dendogramas, no solamente dependendiendo de la métrica de distancia que definimos en etapas anteriores, pero también dependiendo de como son agregados los datos en clusters (ver `help(hclust)` en R, por ejemplo, la cual provee las siguientes opciones para construir el árbol: "ward", "single", "complete", "average", "mcquitty", "median" o "centroid").
+
+Podemos también graficar las "distancias" recorridas antes que necesitemos fusionar cualquiera de los clusters de menor tamaño en uno más grande - las medidas de las ramas del árbol que vinculan los clusters a medida se recorre el árbol desde las hojas hasta su raiz. Si tenemos n observaciones, esta gráfica tiene n-1 números.
+
+```{r}
+num <- nrow(ProjectData) - 1
+df1 <- cbind(as.data.frame(Hierarchical_Cluster$height[length(Hierarchical_Cluster$height):1]), c(1:num))
+colnames(df1) <- c("distances","index")
+ggplot(df1, aes(x=index, y=distances)) + geom_line() + xlab("Number of Components") +ylab("Distances")
+```
+
+Como regla de oro, uno puede seleccionar el número de clusters como el "codo" de la gráfica: el lugar del árbol donde, si recorremos el árbol desde las horas hasta su raiz, necesitamos hacer el "salto más largo" antes de fusionarse con segmentos en ese nivel. Por supuesto que el número de real segmentos pude ser muy diferente del cual esta regla indica: en la práctica podemos explorar diferenes números de segmentos, posiblemente empezando por lo que el dendograma de la clusterización jerárquica nos indica, y eventualmente seleccionamos la solución de segmentación final usando análisis estadístico y criterio cualitativo, como discutiremos más adelante.
+
+> Seleccionar el número de clusters requiere razonamiento, criterio e interpretabilidad de los clusters, valor procesable de los grupos encontrados, y muchos otros criterios cuantitativos y cualitativos.En la práctica se debe explorar diferentes números de segmentos, y la selección final debe hacerse en base a tanto análisis estadístico como criterio cualitativo.
+
+Por ahora consideremos la solución de `r numb_clusters_used`-segmentos encontrada por el método de clusterización jerárquica ( usando la distancia `r distance_used` y la opción hclust`r hclust_method`). Podemos también ver el segmento en cada observación (encuestados en nuestro caso) que pertenecen a nuestros primeras `r min(max_data_report,nrow(ProjectData))` personas:
+
+```{r}
+cluster_memberships_hclust <- as.vector(cutree(Hierarchical_Cluster, k=numb_clusters_used)) # cut tree into 3 clusters
+cluster_ids_hclust=unique(cluster_memberships_hclust)
+
+ProjectData_with_hclust_membership <- cbind(1:length(cluster_memberships_hclust),cluster_memberships_hclust)
+colnames(ProjectData_with_hclust_membership)<-c("Observation Number","Cluster_Membership")
+
+knitr::kable(round(head(ProjectData_with_hclust_membership, max_data_report), 2))
+```
+
+**Usando Clusterización de K-medias**
+
+Como siempre, así como la Clusterización Jerárquica puede ser realizada usando varias métricas de distancia, también se puede con Kmeans. Además hay muchas variaciones de Kmeans (por ej: "Hartigan-Wong", "Lloyd", o "MacQueen" - ver `help(kmeans)` en R) que uno puede explorar, las ciales están más allá del alcance de estos apuntes. **Nota**: Kmeans no necesarimanete llega a la misma solución cada vez que se corre.
+
+Estos son los clusters de nuestras observaciones cuando seleccionamos `r numb_clusters_used` clusters y el método de kmeans `r kmeans_method`, para las primeras `r min(max_data_report,nrow(ProjectData))` personas (note que los ID's de clusters pueden diferir de los obtenidos con clusterización jerárquica):
+
+```{r}
+kmeans_clusters <- kmeans(ProjectData_segment,centers= numb_clusters_used, iter.max=2000, algorithm=kmeans_method)
+
+ProjectData_with_kmeans_membership <- cbind(1:length(kmeans_clusters$cluster),kmeans_clusters$cluster)
+colnames(ProjectData_with_kmeans_membership)<-c("Observation Number","Cluster_Membership")
+
+knitr::kable(round(head(ProjectData_with_kmeans_membership, max_data_report), 2))
+```
+
+Note que las observaciones no necesitan estar en los mismos clusters cuando usamos métodos diferentes, ni tampoco los perfiles de segmentos que encontraremos después. Sin embargo, una característica de una **segmentación estadísticamente robusta** es que nuestras observaciones están agrupadas en segmentos similares que son independientes del enfoque que usemos. Además, los perfiles de los segmentos no deben de variar mucho cuando utilizamos diferentes enfoques o pequeñas variaciones en los datos. Examinaremos este detalle en el último paso, después de discutir primero como perfilar los segmentos.
+
+> Los segmentos encontrados deben ser relativamente robustos a cambios en la metodología de clusterización y subconjuntos de datos utilizados. La mayoría de observaciones deben pertenecer a los mismos clusters independientemente de como son encontrados. Grandes cambios indican que nuestra segmentación no es válida. Por otro lado, los perfiles de los clusters encontrados usando diferentes metodologías deben ser consistentes tanto como sea posible. Juzgar la calidad de una segmentación es un problema de robustez estadística de los segmentos (cambios respecto a diferentes métodos y datos) así como de muchos criterios cualitativos: interpretabilidad, accionabilidad, estabilidad en el tiempo, etc.
+
+## Paso 7: Perfilación e interpretación de los segmentos 
+
+Haiendo decidido (por ahora) cuantos clusters vamos a usar, quisieramos obtener una mejor idea de quienes son los consumidores en esos clusters e interpretar los segmentos.
+
+> La analítica de datos es utilizada para eventualmente tomar decisiones, y eso es posible solamente cuando nos sentimos conformes con nuestro entendimiento de los resultados analíticos, incluyendo nuestra habilidad para interpretarlos claramente.
+
+Para este propósito, uno necesita invertir tiempo visualizando y entendiendo los segmentos en cada segmento seleccionado. Por ejemplo, uno puede ver cómo las estadísticas descriptivas ( medias, desviaciones estándar, etc) de los **atributos de perfilamiento** difieren entre segmentos. 
+
+En nuestro caso, asumiendo que decidimos usar `r numb_clusters_used` segmentos que encontramos usando `r profile_with` como mencionamos arriba (un perfilamiento similar puede ser efectuado con los resultados de otros métodos), podemos ver como las respuestas de la encuesta difieren entre segmentos. Los valores promedios de nuestros datos para la población total y para segmento son:
+
+```{r}
+cluster_memberships_kmeans <- kmeans_clusters$cluster 
+cluster_ids_kmeans <- unique(cluster_memberships_kmeans)
+
+if (profile_with == "hclust"){
+  cluster_memberships <- cluster_memberships_hclust
+  cluster_ids <-  cluster_ids_hclust  
+}
+if (profile_with == "kmeans"){
+  cluster_memberships <- cluster_memberships_kmeans
+  cluster_ids <-  cluster_ids_kmeans
+}
+
+# SAVE THE DATA in the cluster file
+NewData = matrix(cluster_memberships,ncol=1)
+write.csv(NewData,file=cluster_file)
+
+population_average = matrix(apply(ProjectData_profile, 2, mean), ncol=1)
+colnames(population_average) <- "Population"
+Cluster_Profile_mean <- sapply(sort(cluster_ids), function(i) apply(ProjectData_profile[(cluster_memberships==i), ], 2, mean))
+if (ncol(ProjectData_profile) <2)
+  Cluster_Profile_mean=t(Cluster_Profile_mean)
+colnames(Cluster_Profile_mean) <- paste("Segment", 1:length(cluster_ids), sep=" ")
+cluster.profile <- cbind (population_average,Cluster_Profile_mean)
+
+knitr::kable(round(cluster.profile, 2))
+```
+
+Podemos también "visualizar" los segmentos usando **gráficas de serpientes** para cada cluster. Por ejemplo, podemos graficar las medias de las variables de perfilamiento de las variables de perfilación de cada cluster para visualizar diferencias entre segmentos. Para una mejor visualización graficamos el perfilamiento con las variables estandarizadas.
+
+```{r}
+ProjectData_scaled_profile = ProjectData_scaled[, profile_attributes_used,drop=F]
+
+Cluster_Profile_standar_mean <- sapply(sort(cluster_ids), function(i) apply(ProjectData_scaled_profile[(cluster_memberships==i), ,drop = F], 2, mean))
+if (ncol(ProjectData_scaled_profile) < 2)
+  Cluster_Profile_standar_mean = t(Cluster_Profile_standar_mean)
+colnames(Cluster_Profile_standar_mean) <- paste("Segment", 1:length(cluster_ids), sep=" ")
+
+ggplot(melt(as.data.frame(cbind(id=1:nrow(Cluster_Profile_standar_mean), Cluster_Profile_standar_mean)), id="id"), aes(x=id, y=value, colour=variable)) + geom_line() + xlab("Profiling variables (standardized)") + ylab("Mean of cluster")
+```
+
+¿Podemos ver diferencias entre los segmentos? ¿Los segmentos difieren en términos del ingreso promedio y de que tan seguido visitan el mall? ¿Qué más podemos decir de esos segmentos? 
+
+Podemos también comparar los promedios de las variables de perfilación de cada segmento relativas al promedio de las variables respecto a toda la población. Esto también puede ayudarnos a entender mejor si hay clusters en los datos (por ej. si todos los segmentos se parecen a la población generalno deberían existir segmentos). Por ejemplo, quisieramos medir las razones entre los promedios de cada clusters con los promedios de la población y substraer 1 ( `avg(cluster)` `/` `avg(population)` `- 1`) y explorar la matriz:
+
+```{r}
+population_average_matrix <- population_average[,"Population",drop=F] %*% matrix(rep(1,ncol(Cluster_Profile_mean)),nrow=1)
+cluster_profile_ratios <- (ifelse(population_average_matrix==0, 0,Cluster_Profile_mean/population_average_matrix-1))
+colnames(cluster_profile_ratios) <- paste("Segment", 1:ncol(cluster_profile_ratios), sep=" ")
+rownames(cluster_profile_ratios) <- colnames(ProjectData)[profile_attributes_used]
+## printing the result in a clean-slate table
+knitr::kable(round(cluster_profile_ratios, 2))
+```
+
+
+> Cuanto más lejos sea una proporción a 0, más importante será ese atributo para un segmento relativo a la población total.
+
+Tanto el gráfico de serpiente como esta matriz de valores relativos de los atributos de perfilamiento para cada cluster son maneras de visualizar nuestros segmentos e interpretarlos.
+
+## Paso 8: Análisi de Robustes
+
+El proceso de segmentación descrito hasta ahora puede ser seguido por muchos diferentes enfoques, por ejemplo:
+
+- usando diferentes subconjuntos de los datos originales
+- usando variaciones de los atributos de segmentación originales
+- usando diferentes métricas de distancia
+- usando diferentes métodos de segmentación
+- usando diferentes números de clusters
+
+> Así como cualquier análisis de datos, la segmentación es un proceso iterativo con muchas variaciones de datos, métodos, números de clusters, y perfiles generados hasta que se alcance una solución satistactoria. 
+
+Claramente explorar todas las variaciones va más allá del alcance de estos apuntes. Pero si abordamos, sin embargo, un ejemplo de como evaluar la **robustez estadística** y la **estabilidad de interpretación** de los clusters encontrados usando dos enfoques diferentes: Kmeans y Clusterización Jerárquica, como se mencionó antes.
+
+Dos evaluaciones básicas a efectuar son:
+
+1. ¿Qué tanto se intersectan los clusters usando diferentes enfoques? Específicamente, ¿qué porcentaje de nuestras observaciones son las mismas entre diferentes soluciones de agrupamiento?
+2. ¿Qué tan parecidos son los perfiles de los segmentos encontrados? Específicamente, ¿qué tan parecidos son los promedios de los atributos de perfilamiento de los clústeres encontrados usando diferentes enfoques?
+
+Cómo podemos tener pertenencias a grupos de todos los modelos de clusterización, podemos medir tanto el porcentaje total de observaciones que permanecen en el mismo cluster como el porcentaje de cada cluster de forma separada. Por ejemplo, para las dos soluciones de `r numb_clusters_used`-segmentos encontradas (una con Kmeans y otra con Clusterización Jerárquica), esos porcentajes son los siguientes:
+
+
+```{r}
+# First, make sure the segment ids are correctly aligned
+cluster_overlaps <- Reduce(cbind,lapply(1:length(cluster_ids_kmeans), function(i) {
+  overlaps <- sapply(1:length(cluster_ids_hclust), function(j) {
+    length(intersect(which(cluster_memberships_kmeans==i), 
+                     which(cluster_memberships_hclust==j))) } );
+  overlaps}))
+max_cluster_overlap = rep(0,length(cluster_ids_kmeans))
+for (i in 1:length(cluster_ids_kmeans)){
+  highest_now = which.max(cluster_overlaps)
+  hclust_id_now = highest_now %% length(cluster_ids_kmeans)
+  hclust_id_now = ifelse(hclust_id_now == 0, 3, hclust_id_now)
+  kmeans_id_now = ceiling(highest_now/length(cluster_ids_kmeans))
+  max_cluster_overlap[kmeans_id_now] <- hclust_id_now
+  cluster_overlaps[hclust_id_now,] <- 0
+  cluster_overlaps[,kmeans_id_now] <- 0
+}
+cluster_memberships_kmeans_aligned <- rep(0,length(cluster_memberships_kmeans))
+for (i in 1:length(cluster_ids_kmeans))
+  cluster_memberships_kmeans_aligned[(cluster_memberships_kmeans==i)] <- max_cluster_overlap[i]
+
+# Now calculate the overlaps
+# First, the total overlap
+total_observations_overlapping <- 100*sum(cluster_memberships_kmeans_aligned==cluster_memberships_hclust) / length(cluster_memberships_hclust)
+total_observations_overlapping <- as.matrix(total_observations_overlapping)
+colnames(total_observations_overlapping) <- "Total"
+# Then, per cluster
+per_cluster_observations_overlapping <- sapply(1:length(cluster_ids_kmeans), function(i) 100*length(intersect(which(cluster_memberships_kmeans_aligned==i),which(cluster_memberships_hclust==i)))/sum(cluster_memberships_kmeans_aligned==i))
+per_cluster_observations_overlapping <- matrix(per_cluster_observations_overlapping, nrow=1)
+colnames(per_cluster_observations_overlapping) <- paste("Segment",1:length(per_cluster_observations_overlapping),sep=" ")
+
+observations_overlapping <- cbind(total_observations_overlapping,per_cluster_observations_overlapping)
+
+knitr::kable(observations_overlapping)
+```
+
+Claramente, usando diferente número de clusters puede llevar a diferentes porcentajes de intersección (pruebe por ejemplo usando 2 clusters): la robustez de nuestra solución puede también indicar cuantos clusters hay en nuestros datos - **si hay**. Sin embargo, en general no hay un "correcto porcentaje de interscción", ya que esto depende de que tan difícil pueda ser el agrupamiento (por ej: considere el caso donde un cluster de series de tiempo de precios de acciones): la robustez de nuestra solución es frecuentemente "relativa a otras soluciones". Por otro lado:
+
+> Una segmentación sólida requiere eventualmente de robustez de nuestras decisiones a través de muchos "buenas" enfoques de clusterización utilizados.
+
+Solo después de cierto número de evaluaciones de robustez, perfilamientos e interpretaciones, podemos tener una segmentación final. Durante el análisis de segmentación podríamos necesitar repetir el proceso múltiples veces, con muchas variaciones de las selecciones que hicimos en cada etapa del proceso, antes de alcanzar una solución final (si hay en efecto segmentos en nuestros datos) - la cual por supuesto puede ser revisada en cualquier punto en el futuro.
+
+> Data Analytics es un proceso iterativo, por lo tanto podríamos necesitar retornar a nuestros datos originales en cualquier punto y seleccionar nuevos atributos así como nuevos clusters.
+
+**Hasta entonces...**
