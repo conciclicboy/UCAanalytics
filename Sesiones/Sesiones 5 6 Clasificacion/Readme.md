@@ -16,7 +16,7 @@ Sesiones 5-6 del curso de Analítica Aplicada de la UCA: Clasificación
 
 **Afiliaciones del Autor:** INSEAD (traductor afiliado a UCA)
 
-INSTRUCCIONES DE LA CARPETA
+INSTRUCCIONES DEL PROYECTO
 ---------------------------------------------------------
 
 (*NOTA: La primera vez que usted ejecute este proyecto puede tomar un par de minutos y podría incluso descargar e instalar las librerías necesarias.*).

@@ -1,30 +1,31 @@
-Data Analytics Course Session: 
+Sesión del curso de Analítica Aplicada: 
 ---------------------------------------------------------
-Sessions 4-5 of INSEAD Data Analytics for Business Course: Clustering and Segmentation
----------------------------------------------------------
-
-
-**Organization:** INSEAD
-
-**Industry:** Education
-
-**Project Description:** Introduction to Data Analytics for Business (INSEAD COURSE)
-
-**Data Description:** Basic Example Data
-
-**Author(s):** T. Evgeniou
-
-**Author(s)' Affiliations:** INSEAD
-
-INSTRUCTIONS FOR PROJECT
+Sesiones 7-8 del curso de Analítica Aplicada de la UCA: Segmentación
 ---------------------------------------------------------
 
-(*NOTE: The very first time you run the project it may take a couple of minutes as it will also install all necessary R libraries.*).
 
-[1] Please open and source the file ClusterAnalysisReading.Rmd 
+**Organización:** UCA
 
-This will reproduce the readings for this project
+**Industria:** Educación
 
-**MODIFYING AND RE-RUNNING**
+**Project Description:** Introducción a la Analítica  aplicada a los Negocios (basado en el curso de http://inseaddataanalytics.github.io/INSEADAnalytics/)
 
-[2] To modify the project parameters, please edit them in the file  ClusterAnalysisReading.Rmd and source that file again. 
+**Data Description:** Ejemplo de Datos Básicos
+
+**Author(s):** T. Evgeniou (traducción por Eduardo Aguilar, UCA)
+
+**Author(s)' Affiliations:** INSEAD (traductor afiliado a UCA)
+
+INSTRUCCIONES DEL PROYECTO
+---------------------------------------------------------
+
+(*NOTA: La primera vez que usted ejecute este proyecto puede tomar un par de minutos y podría incluso descargar e instalar las librerías necesarias.*).
+
+
+[1] Por favor abra el archivo Analisis_de_Clasificacion.Rmd
+
+Esto reproducirá los apuntes de este proyecto
+
+**MODIFICANDO Y CORRIENDO**
+
+[2] Para modificar los parámetros del proyecto, por favor edite el archivo Analisis_de_Cluster.Rmd y actualice los cambios.
