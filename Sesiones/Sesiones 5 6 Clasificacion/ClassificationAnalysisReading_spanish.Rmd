@@ -1,0 +1,941 @@
+---
+title: "Métodos de Clasificación"
+author: "T. Evgeniou (traducción por Eduardo Aguilar)"
+output:
+  html_document:
+    css: ../../AnalyticsStyles/default.css
+    theme: paper
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    includes:
+      in_header: ../../AnalyticsStyles/default.sty
+---
+
+
+```{r echo=FALSE, message=FALSE}
+make_pdf_file = 0 # SET THIS TO 1 IF WE COMPILE PDF FILE, 0 OTHERWISE (FOR HTML)
+
+local_directory = "."
+source(paste(local_directory,"../../AnalyticsLibraries/library.R", sep="/"))
+source(paste(local_directory,"../../AnalyticsLibraries/heatmapOutput.R", sep = "/"))
+
+# Package options
+ggthemr('fresh')  # ggplot theme
+opts_knit$set(progress=FALSE, verbose=FALSE)
+opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.2)
+options(knitr.kable.NA = '')
+
+dformat <-function(df) {
+  if (class(df) != "data.frame")
+    df <- as.data.frame(df)
+  x <- lapply(colnames(df), function(col) {
+    if (is.numeric(df[, col]))
+      normalize_bar(rgb(238, 238, 238, max=255), min=0.1, na.rm=TRUE)
+    else
+      formatter("span")
+  })
+  names(x) <- colnames(df)
+  formattable(df, x)
+}
+
+if (make_pdf_file) {
+  dformat<- function(df) knitr::kable(df)
+}
+
+# SET UP
+
+# When running the case on a local computer, modify this in case you saved the case in a different directory 
+# (e.g. local_directory <- "C:/user/MyDocuments" )
+# type in the Console below help(getwd) and help(setwd) for more information
+#local_directory <- paste(getwd(),"CourseSessions/Sessions67", sep="/")
+#local_directory <- "~INSEADAnalytics/CourseSessions/Sessions67"
+
+# Please ENTER the filename that indicates subsets of the data to use (e.g. only a specific cluster)
+# This file need to have 2 columns with the second one indicating the cluster ID of the observation. 
+# The rows of this files are aligned with those of the datafile_name one
+# This is used ONLY for the report "MyBoatsDrivers"
+cluster_file_ini = "Boats_cluster" # make sure this file exists in the "data" directory
+datafile_name = "Boats"
+# Please ENTER the class (dependent) variable:
+# Please use numbers, not column names! e.g. 82 uses the 82nd column are dependent variable.
+# YOU NEED TO MAKE SURE THAT THE DEPENDENT VARIABLES TAKES ONLY 2 VALUES: 0 and 1!!!
+dependent_variable= 82
+
+# Please ENTER the attributes to use as independent variables 
+# Please use numbers, not column names! e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
+independent_variables= c(54:80) # use 54-80 for boats
+
+# Please ENTER the profit/cost values for the correctly and wrong classified data:
+actual_1_predict_1 = 100
+actual_1_predict_0 = -75
+actual_0_predict_1 = -50
+actual_0_predict_0 = 0
+
+# Please ENTER the probability threshold above which an observations  
+# is predicted as class 1:
+Probability_Threshold=50 # between 1 and 99%
+
+# Please ENTER the percentage of data used for estimation
+estimation_data_percent = 80
+validation_data_percent = 10
+
+# Please enter 0 if you want to "randomly" split the data in estimation and validation/test
+random_sampling = 0
+
+# Tree parameter
+# PLEASE ENTER THE Tree (CART) complexity control cp (e.g. 0.001 to 0.02, depending on the data)
+CART_cp = 0.01
+
+# Please enter the minimum size of a segment for the analysis to be done only for that segment
+min_segment = 100
+
+# Please enter the maximum number of observations to show in the report and slides 
+# (DEFAULT is 50. If the number is large the report and slides may not be generated - very slow or will crash!!)
+max_data_report = 10 # can also chance in server.R
+
+
+Probability_Threshold = Probability_Threshold/100 # make it between 0 and 1
+ProjectData <- read.csv(paste(paste(local_directory, "data", sep="/"), paste(datafile_name,"csv", sep="."), sep = "/")) # this contains only the matrix ProjectData
+ProjectData=data.matrix(ProjectData)
+
+# if (datafile_name == "Boats")
+#   colnames(ProjectData)<-gsub("\\."," ",colnames(ProjectData))
+
+dependent_variable = unique(sapply(dependent_variable,function(i) min(ncol(ProjectData), max(i,1))))
+independent_variables = unique(sapply(independent_variables,function(i) min(ncol(ProjectData), max(i,1))))
+
+if (length(unique(ProjectData[,dependent_variable])) !=2){
+  cat("\n*****\n BE CAREFUL, THE DEPENDENT VARIABLE TAKES MORE THAN 2 VALUES...")
+  cat("\nSplitting it around its median...\n*****\n ")
+  new_dependent = ProjectData[,dependent_variable] >= median(ProjectData[,dependent_variable])
+  ProjectData[,dependent_variable] <- 1*new_dependent
+}
+
+Profit_Matrix = matrix(c(actual_1_predict_1, actual_0_predict_1, actual_1_predict_0, actual_0_predict_0), ncol=2)
+colnames(Profit_Matrix)<- c("Predict 1", "Predict 0")
+rownames(Profit_Matrix) <- c("Actual 1", "Actual 0")
+test_data_percent = 100-estimation_data_percent-validation_data_percent
+CART_control = rpart.control(cp = CART_cp)
+
+
+```
+
+
+# ¿Para qué sirve?
+
+Un banco está interesado en conocer cuales consumidores son más propensos a caer en impago de sus cuotas de préstamo. El banco también está interesado en conocer qué características de los consumidores podrían explicar su comportamiento de pago. Un mercadólogo está interesado en seleccionar el conjunto de consumidores que son más propensos a responder positivamente a una campaña. Un gerente de adquisiciones está interesado en conocer que órdenes son más propensas a sufrir retrasos, basado en el comportamiento reciente de los proveedores. Un inversionista está interesado en conocer que activos son más propensos a incrementar su valor.
+
+Las técnicas de clasificación (o categorización) son extremadamente útiles para responder tales preguntas. Ellas pueden predecir la pertenencia a cierto grupo (o clase - por eso se les llama **técnicas de clasificación**) de determinados individuos (datos), para una **pertenencia predefinida** (por ejemplo, ocurrencia o no ocurrencia para una clasificación **binaria**, el enfoque de esta clase), y también de describir cuáles características de los individuos pueden determinar dicha pertenencia. Ejemplos de clases podrían ser (1) consumidores leales vs consumidores que cambiarán de marca; (2) consumidores altamente sensibles a los cambios en precios vs consumidores poco sensibles; (3) consumidores satisfechas vs consumidores insatisfechos; (4) compradores vs no compradores; (5) activos que incrementan en valor o no; (6) productos que podrían ser una buena recomendación o no; etc. Las características que suelen ser útiles para clasificar individuos/datos en predeterminados grupos/clases pueden incluir por ejemplo (1) demográficas; (2) psicológicas; (3) comportamiento pasado; (4) actitudes respecto a determinados productos; (5) datos de redes sociales; etc.
+
+Hay muchas técnicas para resolver problemas de clasificación: regresión logística, árboles de decisión, bosques aleatorios (RandomForest), support vector machines, redes neuronales, XGBoost, deep learning, etc.
+Existen también muchos  <a href="https://cran.r-project.org/web/views/MachineLearning.html">  paquetes en R </a> para todo lo desarrollado en el pasado (incluyendo los métodos de moda como <a href="http://deeplearning.netl">  deep learning </a>  -ver noticias <a href="http://www.bloomberg.com/news/articles/2015-12-08/why-2015-was-a-breakthrough-year-in-artificial-intelligence">   aquí </a> o <a href="http://www.bloomberg.com/news/articles/2015-12-08/why-2015-was-a-breakthrough-year-in-artificial-intelligence">   aquí </a>  o <a href="http://www.forbes.com/sites/anthonykosner/2014/12/29/tech-2015-deep-learning-and-machine-intelligence-will-eat-the-world/#3e2e74bf282c">   aquí </a> por ejemplo. Microsoft también tiene su solución comercial en <a href="https://azure.microsoft.com/en-us/documentation/articles/machine-learning-algorithm-choice/">  Azure. </a> En este reporte, por simplicidad nos enfocaremos en las primeras dos, aunque uno puede siempre utilizar otros métodos en logar de los mencionados acá. El enfoque. El enfoque de estas notas no es explicar el algoritmo de clasificación ("la caja negra"), sino más bien describir el proceso de clasificación independientemente del modelo seleccionado.
+
+Una pregunta importante cuando se utilizan métodos de clasificación es evaluar el desempeño relativo de los métodos/modelos para poder seleccionar el mejor de acuerdo a nuestro criterio. Tomando en cuenta este fin se definen una serie de **métricas para evaluar los modelos de clasificación**, dichas métricas se discutirán más adelante en estos apuntes.
+
+
+# Clasificación utilizando un ejemplo.
+
+## La "decisión de negocios".
+
+Una compañía de barcos se convirtió en una víctima más de la deprimida industria de botes. El problema de negocios para los botes, aunque hipotético, describe muy bien el tipo de problemas de negocio al que se enfrentan muchas compañías en el mundo real por un ambiente cada vez más saturado de datos.  La gerencia ha explorado varias opciones de crecimiento. Expandirse más en algunos mercados, particularmente en Norte América, no era más una opción a considerar en el largo plazo, sino más bien una necesidad inmediata
+
+El equipo creía que, para desarrollar una estrategia en Norte América, necesitaban entender mejor los actuales y potenciales clientes en ese mercado. Ellos creían que tenían que construir botes diseñados a la medida de los segmentos más importantes allí. Con ese propósito, la compañía había oficializado un proyecto para ese mercado. Siendo una empresa con cultura de datos, la decisión fue tomada desarrollando un entendimiento de los consumidores a partir de los datos.
+
+La compañía quisiera entender quiénes son los consumidores más propensos a comprar un bote en el futuro o recomendar la marca a otros, así como determinar cuáles son los **factores de compra claves** que afectan estas decisiones de comprar o recomendar.
+
+## Los Datos.
+
+Con la ayuda de una empresa de investigación de mercados, la compañía de botes reunió información acerca del mercado de botes en los Estados Unidos a través de entrevistas con alrededor de 3,000 dueños de barcos. Los datos consistían, entre otros, a 29 actitudes hacia la navegación, que los encuestados indicaban en una escala de 5 puntos. Estas se presentan más adelante. Otros tipos de información han sido recolectados, tales como datos demográficos, así como información específica acerca de los botes, tal como la longitud del bote que poseen, y el precio de los mismos.
+
+Después de analizar los datos de la encuesta (utilizando por ejemplo análisis de factores y clusters), los gerentes de la compañía decidieron enfocarse solo en pocos factores de decisión que ellos consideraron los más importantes. Ellos decidieron efectuar la clasificación y análisis de factores de decisión utilizando solo las respuestas a las siguientes preguntas:
+
+
+Nombre   | Descripción
+:------|:--------------------------------------------------------------------
+Q16.1  | ¿Es una marca que ha estado presente por largo tiempo?
+Q16.2  | ¿Tiene el mejor servicio al cliente en su clase?
+Q16.3  | ¿Tiene una sólida red de distribuidores?
+Q16.4  | ¿Es el líder en tecnología de punta?
+Q16.5  | ¿Es un líder seguro?
+Q16.6  | ¿Es conocida por sus productos innovadores?
+Q16.7  | ¿Es una marca para personas que toman seriamente la navegación?
+Q16.8  | ¿Es una buena marca para personas que son nuevas en navegación?
+Q16.9  | ¿Es una marca que se ve en el mar siempre?
+Q16.10 | ¿Ofrecen botes que proveen una experiencia de navegación rápida y poderosa?
+Q16.11 | Ofrecen los mejores botes para socializar?
+Q16.12 | ¿Ofrecen los mejores botes para deportes acuáticos como esquí acuático?
+Q16.13 | ¿Ofrecen botes con estilo interior superior?
+Q16.14 | ¿Ofrecen botes con estilo exterior superior?
+Q16.15 | ¿Ofrecen botes que se distinguen del montón?
+Q16.16 | ¿Ofrecen botes que lucen geniales?
+Q16.17 | ¿Ofrecen botes que pueden soportar condiciones climáticas adversas o agua agitada?
+Q16.18 | ¿Ofrecen botes que toleran el uso frecuente y pesado?
+Q16.19 | ¿Ofrecen una amplia variedad de productos y accesorios?
+Q16.20 | ¿Ofrecen botes que se pueden llevar a cualquier lado con seguridad?
+Q16.21 | ¿Ofrecen botes que son fáciles de mantener y reparar?
+Q16.22 | ¿Ofrecen botes que son fáciles de usar?
+Q16.23 | ¿Ofrecen botes que son fáciles de limpiar?
+Q16.24 | ¿Tienen precios bajos?
+Q16.25 | ¿Es una marca que me da tranquilidad?
+Q16.26 | ¿Me hace sentir que tomé una decisión inteligente?
+Q16.27 | ¿Es una marca que impresiona otros?"
+
+Procedamos a leer los datos y verlos para algunos clientes. Así es como los primeros 10 de 2813 filas se ven:
+
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+# let's make the data into data.matrix classes so that we can easier visualize them
+ProjectData = data.matrix(ProjectData)
+
+knitr::kable({
+  df <- t(head(round(ProjectData[,independent_variables],2), max_data_report))
+  colnames(df) <- sprintf("%02d", 1:ncol(df))
+  df
+})
+```
+
+Veremos algunas estadísticas descriptivas de los datos más adelante, cuando entremos en análisis estadístico.
+
+## El Proceso de clasificación
+
+> Es importante recordar que los proyectos de analítica requieren de un delicado balance entre experimentación e intuición, pero también siguiendo (de vez en cuando) un proceso para evitar ser engañado por la aleatoriedad en los datos y encontrar "patrones y resultados" que pueden estar explicados principalmente por nuestro propio sesgo y no por hechos/datos en sí. 
+
+No existe tal cosa cómo el **mejor proceso** de clasificación. Sin embargo, tenemos que empezar por algo, así que haremos uso del siguiente proceso:
+
+# Clasificación en 6 pasos
+
+1. Crear un conjunto de estimación y dos conjuntos de evaluación dividiendo los datos en tres grupos. Los pasos 2-5 a continuación serán efectuados solo en el conjunto de estimación y el primer conjunto de validación. Usted debe efectuar el paso 6 una vez en el segundo conjunto de validación, llamado **datos de evaluación**, y reportar el desempeño en ese (segundo) conjunto sólo para tomar la decisión de negocios final.
+
+2. Establecer la variable dependiente (como una variable categórica 0-1; clasificación múltiple también es posible, y similar, pero no exploraremos en eso en estos apuntes).
+
+3. Hacer un diagnóstico preliminar acerca de la importancia relativa de las variables explicativas utilizando herramientas de clasificación y simples estadísticas descriptivas.
+
+4. Estimar el modelo de clasificación utilizando los datos de estimación, e interpretando los resultados.
+
+5. Evaluar la precisión de la clasificación en el primer conjunto de validación, posiblemente repitiendo os pasos 2-5 unas cuantas veces en diferentes maneras para mejorar el desempeño.
+6. Finalmente, evaluar la precisión de la clasificación en el segundo modelo de validación. Usted eventualmente usará/reportará todas las medidas y gráficas de desempeño solamente en el segundo conjunto de validación.
+
+Sigamos esos pasos.
+
+## Paso 1: Dividir los datos
+Es muy importante que usted mida y reporte (o espera ver de parte del científico de datos encargado del proyecto) el desempeño de su modelo en **datos que no han sido utilizados durante el análisis, estos son llamados "out-of-sample set", "test dataset" o "conjunto de evaluación"** (pasos 2-5). La idea es que en la práctica deseamos utilizar los modelos para predecir la clase de observaciones que no han sido observadas aún (por ejemplo "los datos futuros"): aunque el desempeño del método de clasificación puede ser alto en los datos utilizados para estimar los parámetros del modelo, este puede ser significativamente deficiente en datos que no han sido utilizados para calcularlo, como el **out-of-sample set** (datos futuros) en la práctica. 
+
+El segundo conjunto de validación representa esos datos, y el desempeño de este conjunto de validación es una mejor aproximación del desempeño que uno podría esperar del modelo seleccionado en la práctica. Esta es la razón porque dividimos los datos en un conjunto de estimación y dos conjuntos de dos conjuntos de validación, utilizando cierta técnica de selección aleatoria.  Los datos de estimación y el primer conjunto de datos de validación son utilizados en los pasos 2-5(con unas pocas iteraciones), mientras que el segundo conjunto de datos de validación sólo se utiliza una vez al final de todo antes de hacer la decisión de negocios final basada en el análisis. Esta división puede ser, por ejemplo, 80% datos de estimación, 10% validación y 10% evaluación, dependiendo del número de observaciones (por ejemplo, cuando hay muchos datos, usted puede preservar sólo unos pocos cientos de estos para los conjuntos de validación y evaluación, y el resto para la estimación).
+
+Mientras se preparan los conjuntos de estimación y validación, usted puede también verificar que la proporción de las clases se mantenga estable, por ejemplo, que el porcentaje de personas que desean comprar un bote sea similar en ambos conjuntos, usted debe mantener el mismo balance de la variable dependiente cómo en los datos iniciales.
+
+Por simplicidad, en estos apuntes **no** haremos iteraciones de los pasos 2-5. De nuevo, esto no debe ser hecho en práctica, porque nosotros deberíamos iterar los pasos 2-5 unas cuantas veces utilizando el primer conjunto de validación cada vez, y hacer nuestra evaluación final del modelo utilizando el conjunto de evaluación sólo una vez (idealmente).
+
+
+```{r}
+if (random_sampling){
+  estimation_data_ids=sample.int(nrow(ProjectData),floor(estimation_data_percent*nrow(ProjectData)/100))
+  non_estimation_data = setdiff(1:nrow(ProjectData),estimation_data_ids)
+  validation_data_ids=non_estimation_data[sample.int(length(non_estimation_data), floor(validation_data_percent/(validation_data_percent+test_data_percent)*length(non_estimation_data)))]
+  } else {
+    estimation_data_ids=1:floor(estimation_data_percent*nrow(ProjectData)/100)
+    non_estimation_data = setdiff(1:nrow(ProjectData),estimation_data_ids)
+    validation_data_ids = (tail(estimation_data_ids,1)+1):(tail(estimation_data_ids,1) + floor(validation_data_percent/(validation_data_percent+test_data_percent)*length(non_estimation_data)))
+    }
+
+test_data_ids = setdiff(1:nrow(ProjectData), union(estimation_data_ids,validation_data_ids))
+
+estimation_data=ProjectData[estimation_data_ids,]
+validation_data=ProjectData[validation_data_ids,]
+test_data=ProjectData[test_data_ids,]
+```
+
+A los tres conjuntos de datos se les denomina típicamente como **estimation_data** (conjunto de estimación `r estimation_data_percent`%), **validation_data** (conjunto de validación `r validation_data_percent`%) y **test_data** (conjunto de evaluación `r 100 - estimation_data_percent  -  validation_data_percent`%). 
+
+En nuestro caso nosotros utilizamos, por ejemplo, `r nrow(estimation_data)` observaciones para el conjunto de estimación, `r nrow(validation_data)` en el conjunto de validación y `r nrow(test_data)` en el conjunto de evaluación. 
+
+## Paso 2: Elegir la variable dependiente
+
+Primero, asegurarse que la variable dependiente ha sido definida como categórica 0-1. En este ejemplo ilustrativo, la "intención de recomendar" o la "intención de comprar" son variables 0-1: utilizaremos la última como nuestra variable dependiente pero un análisis similar se puede hacer para la primera.
+
+Los datos, sin embargo, pueden no estar disponibles inmediatamente como variables categóricas. Supongamos una cadena minorista quiere entender que discrimina los consumidores leales de los que no lo son. Si ellos tienen datos de las cantidades que los consumidores gastan en su tienda o la frecuencia de sus compras, ellos pueden crear una variable categórica ("leal vs no leal") utilizando una definición como: "Un consumidor leal es aquel que gasta X cantidad en la tienda y hace al menos Y compras al año". Ellos pueden codificar con "1" a los consumidores leales y con "0" a los que no lo son.  Ellos también podrían establecer determinados límites de "X" e "Y", y esta decisión puede tener un impacto significativo en el análisis global. Esta decisión es la más crucial de todo el análisis de datos: una selección incorrecta en este paso podría llevar a un desempeño pobre más adelante, así como ideas irrelevantes. Uno debería revisar varias veces la elección realizada en este paso, iterando los pasos 2-3 y 2-5.
+
+
+> Decidir cuidadosamente la definición de la variable dependiente 0/1 puede ser la parte más crítica del proceso de clasificación. Esta decisión típicamente depende del conocimiento contextual y debe revisarse varias veces a lo largo de un proyecto de analítica de datos.
+
+En nuestros datos, el número 0/1 del conjunto de estimación se distribuye de esta forma:
+
+```{r}
+class_percentages=matrix(c(sum(estimation_data[,dependent_variable]==1),sum(estimation_data[,dependent_variable]==0)), nrow=1); colnames(class_percentages)<-c("Clase 1", "Clase 0")
+rownames(class_percentages)<-"# of Observaciones"
+knitr::kable(class_percentages)
+```
+
+mientras que en el conjunto de validación son:
+
+```{r}
+class_percentages=matrix(c(sum(validation_data[,dependent_variable]==1),sum(validation_data[,dependent_variable]==0)), nrow=1); colnames(class_percentages)<-c("Clase 1", "Clase 0")
+rownames(class_percentages)<-"# of Observaciones"
+knitr::kable(class_percentages)
+```
+
+## Paso 3: Análisis simple
+
+La buena analítica de datos comienza con un buen conocimiento contextual, así como con análisis exploratorio simple y visualizaciones elementales. En el caso de la clasificación, uno puede explorar esas "clasificaciones simples"" evaluando como difieren las clases a lo largo de cualquiera de las variables independientes. Por ejemplo, estas son las estadísticas de nuestras variables independientes a lo largo de las dos clases, clase 1, "compra":
+
+```{r}
+knitr::kable(round(my_summary(estimation_data[estimation_data[,dependent_variable]==1,independent_variables]),2))
+```
+
+y clase 0, "no compra":
+
+```{r}
+knitr::kable(round(my_summary(estimation_data[estimation_data[,dependent_variable]==0,independent_variables]),2))
+```
+
+El propósito de dicho análisis de clases es obtener una idea inicial o una intuición de si las clases son en efecto separables, así como entender cuáles de las variables independientes tienen más poder discriminativo. ¿Puede usted observar diferencias entre las dos clases en la tabla de arriba?
+
+Notemos sin embargo que:
+
+> Aunque cada variable independiente podría no diferir entre clases, la clasificación podrían aún ser posible: una (lineal o no lineal) combinación de variables independientes podría aún ser discriminativa.
+
+Una simple herramienta de visualización que puede evaluar el poder discriminativo de las variables independientes es el **box plot** (diagrama de caja). Esa visualización representa simple resumen de las estadísticas de una variable independiente (media, mediana, máximo, mínimo, cuantiles, etc.) Por ejemplo, considere el box plot para nuestros datos de la clase 0: 
+
+```{r, fig.height=4.5}
+DVvalues = unique(estimation_data[,dependent_variable])
+x0 = estimation_data[which(estimation_data[,dependent_variable]==DVvalues[1]),independent_variables]
+x1 = estimation_data[which(estimation_data[,dependent_variable]==DVvalues[2]),independent_variables]
+colnames(x0) <- 1:ncol(x0)
+colnames(x1) <- 1:ncol(x1)
+
+swatch.default <- as.character(swatch())
+set_swatch(c(swatch.default[1], colorRampPalette(RColorBrewer::brewer.pal(12, "Paired"))(ncol(x0))))
+ggplot(melt(cbind.data.frame(n=1:nrow(x0), x0), id="n"), aes(x=n, y=value, colour=variable)) + geom_boxplot(fill="#FFFFFF", size=0.66, position=position_dodge(1.1*nrow(x0)))
+set_swatch(swatch.default)
+```
+
+y clase 1:
+
+```{r, fig.height=4.5}
+swatch.default <- as.character(swatch())
+set_swatch(c(swatch.default[1], colorRampPalette(RColorBrewer::brewer.pal(12, "Paired"))(ncol(x1))))
+ggplot(melt(cbind.data.frame(n=1:nrow(x1), x1), id="n"), aes(x=n, y=value, colour=variable)) + geom_boxplot(fill="#FFFFFF", size=0.66, position=position_dodge(1.1*nrow(x1)))
+set_swatch(swatch.default)
+```
+
+
+¿Puede ver cuáles variables parecen ser las más discriminativas?
+
+## Paso 4: Clasificación e Interpretación
+
+Una vez se decide cuáles variables dependientes e independientes a utilizar (las cuáles pueden ser revisadas en iteraciones posteriores), uno puede usar un gran número de métodos de clasificación para desarrollar un modelo que pueda separar ambas clases.
+
+> Algunos de los métodos de clasificación utilizados ampliamente son: árboles de clasificación y regresión (CART), boosted trees, support vector machines, k vecinos más cercanos (KNN), regresión logística, lasso, bosques aleatorios, deep learning methods, etc. 
+
+En estos apuntes, por simplicidad solamente vamos a considerar **regresión logística** y **árboles de decisión (CART)**. Sin embargo, reemplazar estos modelos por los otros es relativamente simple (aunque algún conocimiento de cómo funcionan esos métodos siempre es necesario- vea la ayuda de R para los métodos si es necesario). Entender cómo funcionan esos métodos va más allá del alcance de estos apuntes, pero hay muchas fuentes de información disponibles en línea para todos los métodos de clasificación.
+
+**CART** es un método ampliamente utilizado porque el modelo de clasificación estimado es fácil de interpretar. Esta herramienta de clasificación divide iterativamente los datos usando la variable independiente más discriminativa en cada paso, construyendo un árbol (cómo se muestra más adelante) en el camino. Los métodos CART **limitan el tamaño del árbol** utilizando varias técnicas estadísticas para evitar el **sobreajuste**. Por ejemplo, utilizando las funciones rpart y rpart.control de R, podemos limitar el tamaño del árbol seleccionando las funciones **complexity control** parámetro **cp** (lo que esto hace va más allá del alcance de estos apuntes. Para las funciones rpart y rpart.control en R, pequeños valores, por ejemplo cp=0.001, conducen a árboles más grandes, como veremos más adelante).
+
+
+
+> Uno de los riesgos más grande cuando se construye un modelo de clasificación es el sobreajuste (overfitting): mientras siempre sea trivial construir un modelo (por ejemplo un árbol) que clasifique cualquier conjunto (estimación) de datos de manera perfecta sin ningún error, pero no se garantiza que la calidad del clasificador en el conjunto de validación sea cercana a la del conjunto de validación. Encontrar el balance correcto entre "sobreajuste" y "desajuste" (**overfitting** y **underfitting**) es uno de los aspectos más importantes de la analítica de datos. Aunque existen algunas técnicas estadísticas que nos ayudan a encontrar ese balance (incluyendo el conjunto de validación) es más una combinación de buen análisis estadístico y buen criterio cualitativo (como la simplicidad o interpretabilidad de los modelos estimados) la que nos llevará a construir modelos de clasificación que funcionen bien en la práctica.
+
+Al implementar un modelo CART con complexity control cp=`r CART_cp`,  nos lleva al siguiente árbol(**NOTA**: para mejor visibilidad del árbol,  llamaremos a las variables independientes IV1 a `r paste("IV", length(independent_variables), sep="")` cuando se use un CART):
+
+```{r}
+# just name the variables numerically so that they look ok on the tree plots
+independent_variables_nolabel = paste("IV", 1:length(independent_variables), sep="")
+
+estimation_data_nolabel = cbind(estimation_data[,dependent_variable], estimation_data[,independent_variables])
+colnames(estimation_data_nolabel)<- c(colnames(estimation_data)[dependent_variable],independent_variables_nolabel)
+
+validation_data_nolabel = cbind(validation_data[,dependent_variable], validation_data[,independent_variables])
+colnames(validation_data_nolabel)<- c(dependent_variable,independent_variables_nolabel)
+
+test_data_nolabel = cbind(test_data[,dependent_variable], test_data[,independent_variables])
+colnames(test_data_nolabel)<- c(dependent_variable,independent_variables_nolabel)
+
+estimation_data_nolabel = data.frame(estimation_data_nolabel)
+validation_data_nolabel = data.frame(validation_data_nolabel)
+test_data_nolabel = data.frame(test_data_nolabel)
+
+estimation_data = data.frame(estimation_data)
+validation_data = data.frame(validation_data)
+test_data = data.frame(test_data)
+
+formula=paste(colnames(estimation_data)[dependent_variable],paste(Reduce(paste,sapply(head(independent_variables_nolabel,-1), function(i) paste(i,"+",sep=""))),tail(independent_variables_nolabel,1),sep=""),sep="~")
+CART_tree<-rpart(formula, data= estimation_data_nolabel,method="class", control=CART_control)
+
+rpart.plot(CART_tree, box.palette="OrBu", type=3, extra=1, fallen.leaves=F, branch.lty=3)
+```
+
+Las hojas del árbol indican el número de observaciones del conjunto de estimación que pertenecen a cada clase y alcanzan "esa hoja", así como el porcentaje de todos los datos que llegan a cada hoja. Una clasificación perfecta sólo tendría un dato de cada clase en cada hoja. Sin embargo, una clasificación tan perfecta es más propensa o no clasificar bien los datos de validación debido al sobreajuste en los datos de estimación.
+
+Uno puede estimar árboles más grandes cambiando el parámetro **complexity control** del modelo (en este caso rpart.control argument cp). Por ejemplo, así es como se vería un árbol con `cp = 0.005`.
+
+
+```{r}
+CART_tree_large<-rpart(formula, data= estimation_data_nolabel,method="class", control=rpart.control(cp = 0.005))
+rpart.plot(CART_tree_large, box.palette="OrBu", type=3, extra=1, fallen.leaves=F, branch.lty=3)
+```
+
+Uno puede también usar el porcentaje de datos en cada hoja del árbol para tener una probabilidad estimada de las observaciones que pertenecen a esa clase. La **pureza de la hoja** puede indicar la probabilidad de que una observación que alcanza una hoja pertenezca a determinada clase. En nuestro caso, la probabilidad de nuestros datos de validación de pertenecer a la clase 1(por ejemplo, que un consumidor es propenso a comprar el bote) para las primeras observaciones, usando el CART de arriba es:
+
+```{r}
+# Let's first calculate all probabilites for the estimation, validation, and test data
+estimation_Probability_class1_tree<-predict(CART_tree, estimation_data_nolabel)[,2]
+estimation_Probability_class1_tree_large<-predict(CART_tree_large, estimation_data_nolabel)[,2]
+
+validation_Probability_class1_tree<-predict(CART_tree, validation_data_nolabel)[,2]
+validation_Probability_class1_tree_large<-predict(CART_tree_large, validation_data_nolabel)[,2]
+
+test_Probability_class1_tree<-predict(CART_tree, test_data_nolabel)[,2]
+test_Probability_class1_tree_large<-predict(CART_tree_large, test_data_nolabel)[,2]
+
+estimation_prediction_class_tree=1*as.vector(estimation_Probability_class1_tree > Probability_Threshold)
+estimation_prediction_class_tree_large=1*as.vector(estimation_Probability_class1_tree_large > Probability_Threshold)
+
+validation_prediction_class_tree=1*as.vector(validation_Probability_class1_tree > Probability_Threshold)
+validation_prediction_class_tree_large=1*as.vector(validation_Probability_class1_tree_large > Probability_Threshold)
+
+test_prediction_class_tree=1*as.vector(test_Probability_class1_tree > Probability_Threshold)
+test_prediction_class_tree_large=1*as.vector(test_Probability_class1_tree_large > Probability_Threshold)
+
+Classification_Table=rbind(validation_data[,dependent_variable],validation_Probability_class1_tree)
+rownames(Classification_Table)<-c("Actual Class","Probability of Class 1")
+colnames(Classification_Table)<- paste("Obs", 1:ncol(Classification_Table), sep=" ")
+
+Classification_Table_large=rbind(validation_data[,dependent_variable],validation_Probability_class1_tree)
+rownames(Classification_Table_large)<-c("Actual Class","Probability of Class 1")
+colnames(Classification_Table_large)<- paste("Obs", 1:ncol(Classification_Table_large), sep=" ")
+
+knitr::kable(head(t(round(Classification_Table,2)), max_data_report))
+```
+
+En la práctica necesitamos seleccionar el **umbral de probabilidad** para el cual considerar la pertenencia a la clase 1: esto es una elección muy importante que discutiremos más adelante. Pero antes discutamos otro modelo de clasificación ampliamente utilizado, que se llama regresión logística.
+
+La **regresión logística** es un método similar a una regresión lineal con la excepción que la variable dependiente es discreta (por ejemplo 0 o 1). La regresión logística lineal estima los coeficientes de un modelo lineal utilizando las variables independientes seleccionadas mientras se optimiza un criterio de clasificación. Por ejemplo, estos son los parámetros de la regresión logística para nuestros datos: 
+
+```{r}
+formula_log=paste(colnames(estimation_data[,dependent_variable,drop=F]),paste(Reduce(paste,sapply(head(independent_variables,-1), function(i) paste(colnames(estimation_data)[i],"+",sep=""))),colnames(estimation_data)[tail(independent_variables,1)],sep=""),sep="~")
+
+logreg_solution <- glm(formula_log, family=binomial(link="logit"),  data=estimation_data)
+log_coefficients <- round(summary(logreg_solution)$coefficients,1)
+
+knitr::kable(round(log_coefficients,2))
+```
+
+Dado un conjunto de variables independientes, el resultado de la regresión logística esperada (la suma de productos de las variables independientes con los correspondientes coeficientes de la regresión) puede ser utilizada para evaluar la probabilidad de que una observación pertenezca a determinada clase. Específicamente, el resultado de la regresión puede ser transformado en una probabilidad de pertenecer a, digamos, la clase 1 de cada observación. En nuestro caso, la probabilidad de que una observación pertenece a la clase 1 en nuestro conjunto de validación (por ejemplo, que el consumidor es propenso a comprar el bote) para las primeras observaciones utilizando la regresión logística es:
+
+```{r}
+# Let's get the probabilities for the 3 types of data again
+estimation_Probability_class1_log<-predict(logreg_solution, type="response", newdata=estimation_data[,independent_variables])
+validation_Probability_class1_log<-predict(logreg_solution, type="response", newdata=validation_data[,independent_variables])
+test_Probability_class1_log<-predict(logreg_solution, type="response", newdata=test_data[,independent_variables])
+
+estimation_prediction_class_log=1*as.vector(estimation_Probability_class1_log > Probability_Threshold)
+validation_prediction_class_log=1*as.vector(validation_Probability_class1_log > Probability_Threshold)
+test_prediction_class_log=1*as.vector(test_Probability_class1_log > Probability_Threshold)
+
+Classification_Table=rbind(validation_data[,dependent_variable],validation_Probability_class1_log)
+rownames(Classification_Table)<-c("Actual Class","Probability of Class 1")
+colnames(Classification_Table)<- paste("Obs", 1:ncol(Classification_Table), sep=" ")
+
+knitr::kable(head(t(round(Classification_Table,2)), max_data_report))
+```
+
+
+La decisión tradicional es clasificar cada observación en el grupo con la mayor probabilidad, pero uno puede cambiar esa decisión, como veremos más adelante.
+
+Seleccionar el mejor subconjunto de variables independientes para la regresión logística, un caso especial del problema general de **selección de variables**, es un proceso iterativo donde se toman en cuenta tanto la significancia de los coeficientes de la regresión como el desempeño del modelo en el primer conjunto de validación. Unas cuantas variantes son evaluadas en la práctica, cada una terminando en diferentes resultados, que se discutirán más adelante.
+
+En nuestro caso podemos ver la importancia relativa de las variables independientes las funciones `variable.importance` para árboles de decisión (ver `help(rpart.object)` en R) o los valores de Z para la regresión logística. Para visualizarlo más fácil, se escalaron los valores entre -1 y 1 (la escala se hace para cada método de forma separada, note que CART no entrega el signo de los coeficientes). De esta tabla podemos ver los **factores clave** de la clasificación de acuerdo a cada modelo.
+
+
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE, results='asis'}
+log_importance = tail(log_coefficients[,"z value", drop=F],-1) # remove the intercept
+log_importance = log_importance/max(abs(log_importance))
+
+tree_importance = CART_tree$variable.importance
+tree_ordered_drivers = as.numeric(gsub("\\IV"," ",names(CART_tree$variable.importance)))
+tree_importance_final = rep(0,length(independent_variables))
+tree_importance_final[tree_ordered_drivers] <- tree_importance
+tree_importance_final <- tree_importance_final/max(abs(tree_importance_final))
+tree_importance_final <- tree_importance_final*sign(log_importance)
+
+large_tree_importance = CART_tree_large$variable.importance
+large_tree_ordered_drivers = as.numeric(gsub("\\IV"," ",names(CART_tree_large$variable.importance)))
+large_tree_importance_final = rep(0,length(independent_variables))
+large_tree_importance_final[large_tree_ordered_drivers] <- large_tree_importance
+large_tree_importance_final <- large_tree_importance_final/max(abs(large_tree_importance_final))
+large_tree_importance_final <- large_tree_importance_final*sign(log_importance)
+
+Importance_table <- cbind(tree_importance_final,large_tree_importance_final, log_importance)
+colnames(Importance_table) <- c("CART 1", "CART 2", "Logistic Regr.")
+rownames(Importance_table) <- rownames(log_importance)
+## printing the result in a clean-slate table
+knitr::kable(round(Importance_table,2))
+```
+
+En general, no es necesario que todos los modelos coincidan en los factores más importantes: cuando hay una diferencia mayor, particularmente entre modelos que tengan resultados satisfactorios como discutiremos después, podríamos necesitar cambiar el análisis global, incluyendo el objetivo del análisis, así como los datos usados, ya que los resultados podrían no ser robustos. **Como siempre, interpretar y usar los resultados de analítica de datos requiere un balance entre análisis cuantitativo y cualitativo.**
+
+
+## Paso 5: Precisión del conjunto de validación.
+
+Utilizando las probabilidades de las predicciones del conjunto de validación, cómo se mencionó antes, se puede generar cuatro medidas básicas de desempeño de la clasificación. Antes de discutirlas, notemos que, dada la probabilidad de pertenecer a una clase, **una opción de predicción razonable sería simplemente predecir la clase que tenga la probabilidad de ocurrencia más alta (o la más frecuente)**. Sin embargo, esta no tiene que ser la única opción en la práctica.
+
+> Seleccionar un límite de probabilidad para decidir la clase a la que pertenece una observación es una decisión importante que el usuario debe hacer. Mientras en algunos casos una probabilidad razonable es 50%, en otros debería ser 99.9% o 0.01%. ¿pueden pensar acerca de esos casos?
+
+Para diferentes opciones del umbral de probabilidad, uno puede medir varias métricas de desempeño, las cuales se describen a continuación.
+
+### 1.  Proporción de aciertos (Hit ratio)
+Es simplemente el porcentaje de observaciones que han sido correctamente clasificadas (la clase predecida es la clase real). Podemos simplemente contar el número de (los primeros) datos de validación clasificados correctamente y dividir ese número entre el número total de observaciones del conjunto de validación, utilizando dos CART y una regresión logística, los siguientes son los porcentajes de acierto utilizando un umbral de probabilidad de `r Probability_Threshold*100`% para los datos de validación:
+
+```{r}
+validation_actual=validation_data[,dependent_variable]
+validation_predictions = rbind(validation_prediction_class_tree,
+                               validation_prediction_class_tree_large,
+                               validation_prediction_class_log)
+validation_hit_rates = rbind(
+  100*sum(validation_prediction_class_tree==validation_actual)/length(validation_actual), 
+  100*sum(validation_prediction_class_tree_large==validation_actual)/length(validation_actual), 
+  100*sum(validation_prediction_class_log==validation_actual)/length(validation_actual)
+  )
+colnames(validation_hit_rates) <- "Hit Ratio"
+rownames(validation_hit_rates) <- c("First CART", "Second CART", "Logistic Regression")
+knitr::kable(validation_hit_rates)
+```
+
+Mientras que para los datos de estimación las tasas de precisión son:
+
+```{r}
+estimation_actual=estimation_data[,dependent_variable]
+estimation_predictions = rbind(estimation_prediction_class_tree,
+                               estimation_prediction_class_tree_large,
+                               estimation_prediction_class_log)
+estimation_hit_rates = rbind(
+  100*sum(estimation_prediction_class_tree==estimation_actual)/length(estimation_actual), 
+  100*sum(estimation_prediction_class_tree_large==estimation_actual)/length(estimation_actual), 
+  100*sum(estimation_prediction_class_log==estimation_actual)/length(estimation_actual)
+  )
+colnames(estimation_hit_rates) <- "Hit Ratio"
+rownames(estimation_hit_rates) <- c("First CART", "Second CART", "Logistic Regression")
+knitr::kable(estimation_hit_rates)
+```
+
+**¿Por qué el desempeño en el conjunto de estimación y el de validación son diferentes? ¿Qué tan diferentes pueden ser? ¿De qué depende esta diferencia?** ¿Es la proporción de aciertos satisfactoria? ¿Qué método de clasificación deberíamos usar? ¿Cuál sería un acertado punto de comparación con el que cual deberíamos comparar la tasa de aciertos?
+
+Un simple punto de referencia para comparar el desempeño de un modelo de clasificación es el **criterio de la máxima oportunidad**. Esto mide la proporción de la clase más grande. Para nuestros datos de validación el grupo más grande son las personas que no tienen la intención de comprar un bote: `r sum(!validation_actual)` de `r length(validation_actual)` personas. Claramente, sin hacer ningún tipo de análisis, si clasificamos todos los individuos dentro del grupo más grande, podemos tener una tasa de aciertos del `r round(100*sum(!validation_actual)/length(validation_actual), 2)`%, sin hacer ningún trabajo. Uno puede alcanzar al menos una tasa de aciertos de al menos la máxima oportunidad, aunque como veremos más adelante aún hay más criterios de desempeño a considerar.
+
+
+### 2. Matriz de Confusión.
+
+La matriz de confusión muestra el número de datos que ha sido clasificado correctamente para cada clase. Por ejemplo, para el método con la tasa de aciertos más alta en los datos de validación (entre la regresión logística y los dos modelos CART), la matriz de confusión sería:
+
+```{r}
+validation_prediction_best = validation_predictions[which.max(validation_hit_rates),]
+conf_matrix = matrix(rep(0,4),ncol=2)
+conf_matrix[1,1]<- 100*sum(validation_prediction_best*validation_data[,dependent_variable])/sum(validation_data[,dependent_variable])
+conf_matrix[1,2]<- 100*sum((!validation_prediction_best)*validation_data[,dependent_variable])/sum(validation_data[,dependent_variable])
+conf_matrix[2,1]<- 100*sum((!validation_prediction_best)*(!validation_data[,dependent_variable]))/sum((!validation_data[,dependent_variable]))
+conf_matrix[2,2]<- 100*sum((validation_prediction_best)*(!validation_data[,dependent_variable]))/sum((!validation_data[,dependent_variable]))
+conf_matrix = round(conf_matrix,2)
+
+colnames(conf_matrix) <- c("Predicted 1", "Predicted 0")
+rownames(conf_matrix) <- c("Actual 1", "Actual 0")
+knitr::kable(conf_matrix)
+```
+
+Note que los porcentajes deben sumar 100% para cada fila: ¿entiende por qué? Además, una buena matriz de confusión debería tener valores en la diagonal bastante grandes y pequeñas cantidades en los otros dos. ¿Puede ver por qué?
+
+### 3. Curva ROC.
+
+Recuerde que cada observación es clasificada por nuestro modelo de acuerdo a las probabilidades Pr(0) y Pr(1) y un determinado umbral de probabilidad. Comúnmente se establece el umbral de probabilidad en 0.5 (así que las observaciones con Pr(1)>0.5 son clasificadas como 1). Sin embargo, podemos variar este umbral, por ejemplo si estamos interesados en clasificar correctamente todos los 1's pero no nos interesa perder los 0's (y viceversa), puede usted pensar en tal escenario?
+
+Cuando cambiamos el umbral de probabilidad obtenemos diferentes valores de proporción de aciertos, falsos positivos, falsos negativos, o cualquier otra medida de desempeño. Podemos graficar, por ejemplo, cómo cambian los falsos positivos vs los verdaderos positivos a medida cambiamos el umbral de probabilidad, y generamos la curva ROC.
+
+Las curvas ROC para los datos de validación para ambos CARTs arriba así como para la regresión logística son:
+
+```{r}
+validation_actual_class <- as.numeric(validation_data[,dependent_variable])
+
+pred_tree <- prediction(validation_Probability_class1_tree, validation_actual_class)
+pred_tree_large <- prediction(validation_Probability_class1_tree_large, validation_actual_class)
+pred_log <- prediction(validation_Probability_class1_log, validation_actual_class)
+
+test1<-performance(pred_tree, "tpr", "fpr")
+df1<- cbind(as.data.frame(test1@x.values),as.data.frame(test1@y.values))
+colnames(df1) <- c("False Positive rate CART 1", "True Positive CART 1")
+plot1 <- ggplot(df1, aes(x=`False Positive rate CART 1`, y=`True Positive CART 1`)) + geom_line()
+test2<-performance(pred_log, "tpr", "fpr")
+df2<- cbind(as.data.frame(test2@x.values),as.data.frame(test2@y.values))
+colnames(df2) <- c("False Positive rate log reg", "True Positive log reg")
+plot2 <- ggplot(df2, aes(x=`False Positive rate log reg`, y=`True Positive log reg`)) + geom_line()
+test3<-performance(pred_tree_large, "tpr", "fpr")
+df3<- cbind(as.data.frame(test3@x.values),as.data.frame(test3@y.values))
+colnames(df3) <- c("False Positive rate CART 2", "True Positive CART 2")
+plot3 <- ggplot(df3, aes(x=`False Positive rate CART 2`, y=`True Positive CART 2`)) + geom_line()
+
+# we can plot the curves individually here, but we're going to combine them below, instead
+# grid.arrange(plot1, plot2, plot3)   # use `fig.height=7.5` for the grid plot
+
+df.all <- do.call(rbind, lapply(list(df1, df2, df3), function(df) {
+  df <- melt(df, id=1)
+  df$variable <- sub("True Positive ", "", df$variable)
+  colnames(df)[1] <- "False Positive rate"
+  df
+}))
+ggplot(df.all, aes(x=`False Positive rate`, y=value, colour=variable)) + geom_line() + ylab("True Positive rate")
+```
+
+¿Cómo debería verse una buena curva ROC? La regla básica para evaluar una curva ROC es que entre más "alta" mejor, porque el área bajo la curva es más grande. Usted podría también seleccionar un punto en la curva ROC (el mejor para nuestro propósito) y utilizar que el desempeño de los falsos positivos y falsos negativos (y su correspondiente umbral para P(1)) para evaluar el modelo.**¿Cuál punto en la curva ROC deberíamos de seleccionar?**
+
+
+### 4. Curva Lift
+
+Cambiando el umbral de probabilidad podemos también generar la lift curve, la cual es útil en ciertas aplicaciones como marketing y riesgo de crédito. Por ejemplo, considere el caso de capturar fraude examinando unas cuantas transacciones en lugar de cada una de ellas. En este caso nosotros quisiéramos examinar tan pocas cómo nos fuera posible capturando al mismo tiempo el máximo número de fraudes posibles. Podemos medir el porcentaje de todos los fraudes si seleccionamos, por decir algo, x% de los casos (el top x% en términos de probabilidad). Si graficamos esos puntos (porcentaje de la clase 1 capturado vs el porcentaje de todos los datos examinados) mientras cambiamos el umbral, obtenemos una gráfica llamada la **curva lift**.
+
+Las curvas lift para el conjunto de validación de nuestros tres clasificadores son las siguientes:
+
+```{r}
+validation_actual <- validation_data[,dependent_variable]
+all1s <- sum(validation_actual); 
+
+probs <- validation_Probability_class1_tree
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- 100*Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= 1-prob)
+  c(length(useonly)/length(validation_actual), sum(validation_actual[useonly])/all1s) 
+}))
+frame1 <- data.frame(
+  `CART 1 % of validation data` = res[1,],
+  `CART 1 % of class 1` = res[2,],
+  check.names = FALSE
+)
+plot1 <- ggplot(frame1, aes(x=`CART 1 % of validation data`, y=`CART 1 % of class 1`)) + geom_line()
+
+probs <- validation_Probability_class1_tree_large
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- 100*Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= 1-prob)
+  c(length(useonly)/length(validation_actual), sum(validation_actual[useonly])/all1s) 
+}))
+frame2 <- data.frame(
+  `CART 2 % of validation data` = res[1,],
+  `CART 2 % of class 1` = res[2,],
+  check.names = FALSE
+)
+plot2 <- ggplot(frame2, aes(x=`CART 2 % of validation data`, y=`CART 2 % of class 1`)) + geom_line()
+
+probs <- validation_Probability_class1_log
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- 100*Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= prob)
+  c(length(useonly)/length(validation_actual), sum(validation_actual[useonly])/all1s) 
+}))
+frame3 <- data.frame(
+  `log reg % of validation data` = res[1,],
+  `log reg % of class 1` = res[2,],
+  check.names = FALSE
+)
+plot3 <- ggplot(frame3, aes(x=`log reg % of validation data`, y=`log reg % of class 1`)) + geom_line()
+
+# we can plot the curves individually here, but we're going to combine them below, instead
+# grid.arrange(plot1, plot2, plot3)   # use `fig.height=7.5` for the grid plot
+
+df.all <- do.call(rbind, lapply(list(frame1, frame2, frame3), function(df) {
+  df <- melt(df, id=1)
+  df$variable <- sub(" % of class 1", "", df$variable)
+  colnames(df)[1] <- "Percent of validation data"
+  df
+}))
+ggplot(df.all, aes(x=`Percent of validation data`, y=value, colour=variable)) + geom_line() + ylab("Percent of class 1")
+```
+
+¿Cómo debería verse una buena curva lift? Notemos que, si examinamos aleatoriamente transacciones, **la curva lift de una "predicción aleatoria"" sería una línea recta de 45°** (¿por qué?)! Entonces entre más **arriba** de la línea de 45° esté nuestra curva lift, mejor. Además, así como la curva ROC, uno puede seleccionar el umbral de probabilidad apropiadamente de modo que cualquier punto de la curva lift es seleccionado. **¿Cuál punto de la curva lift deberíamos seleccionar en la práctica?**
+
+
+### 5. Curva de Ganancias 
+
+Finalmente, podemos generar la llamada curva de ganancias, la cual se utiliza frecuentemente para tomar ña decisión final. La intuición es la siguiente. Considere una campaña directa de marketing, y suponga el costo de enviar publicidad como $1, y una ganancia esperada de una persona que responde positivamente de $45. Suponga que tiene una base de datos de 1 millón de personas a las que se les puede potencialmente enviar publicidad. ¿Qué fracción del millón de personas debería enviarle la publicidad? (las típicas tasas de respuesta son 0.05%). Para responder este tipo de preguntas necesitamos crear la curva de ganancias, la cual es generada cambiando el umbral de probabilidad para clasificar las observaciones: para cada valor de umbral de probabilidad podemos simplemente medir la **ganancia esperada** (o pérdida) que generaríamos. Esto es simplemente igual a:
+
+
+> Ganancia total esperada = (% de 1's correctamente predecidos) x (valor de capturar un 1) + (% de 0's correctamente predecidos) x (valor de capturar un 0) + (% de 1's incorrectamente predecidos como 0) x (valor de perder un 1) + (% de 0's incorrectamente predecidos como 1) x (valor de perder un 0)
+> 
+> Calcular la ganancia esperada requiere de tener una estimación de los 4 valores: valor de capturar un 0 o 1, y costo de perder un 0 o 1 o viceversa.
+
+Dados los valores y costos de clasificar correcta e incorrectamente, podemos graficar la ganancia total esperada (o pérdida) a medida cambiamos el umbral de probabilidad, como cuando generamos las curvas ROC y Lift. La siguiente es la curva de ganancias para nuestro ejemplo si consideramos las siguientes ganancias y pérdidas para los correctamente clasificados y los errores: 
+
+```{r}
+knitr::kable(Profit_Matrix)
+```
+
+Basado en esos estimados de ganancias y pérdidas, las curvas de ganancias para los datos de validación de los tres clasificadores son:
+
+```{r}
+actual_class <- validation_data[,dependent_variable]
+
+probs <- validation_Probability_class1_tree
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= prob)
+  predict_class <- 1*(probs >= prob)
+  theprofit <- Profit_Matrix[1,1]*sum(predict_class==1 & actual_class ==1)+
+    Profit_Matrix[1,2]*sum(predict_class==0 & actual_class ==1)+
+    Profit_Matrix[2,1]*sum(predict_class==1 & actual_class ==0)+
+    Profit_Matrix[2,2]*sum(predict_class==0 & actual_class ==0)
+  c(100*length(useonly)/length(actual_class), theprofit) 
+}))
+frame1 <- data.frame(
+  `CART 1 % selected` = res[1,],
+  `CART 1 est. profit` = res[2,],
+  check.names = FALSE
+)
+plot1 <- ggplot(frame1, aes(x=`CART 1 % selected`, y=`CART 1 est. profit`)) + geom_line()
+
+probs <- validation_Probability_class1_tree_large
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= prob)
+  predict_class <- 1*(probs >= prob)
+  theprofit <- Profit_Matrix[1,1]*sum(predict_class==1 & actual_class ==1)+
+    Profit_Matrix[1,2]*sum(predict_class==0 & actual_class ==1)+
+    Profit_Matrix[2,1]*sum(predict_class==1 & actual_class ==0)+
+    Profit_Matrix[2,2]*sum(predict_class==0 & actual_class ==0)
+  c(100*length(useonly)/length(actual_class), theprofit) 
+}))
+frame2 <- data.frame(
+  `CART 2 % selected` = res[1,],
+  `CART 2 est. profit` = res[2,],
+  check.names = FALSE
+)
+plot2 <- ggplot(frame2, aes(x=`CART 2 % selected`, y=`CART 2 est. profit`)) + geom_line()
+
+probs <- validation_Probability_class1_log
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= prob)
+  predict_class <- 1*(probs >= prob)
+  theprofit <- Profit_Matrix[1,1]*sum(predict_class==1 & actual_class ==1)+
+    Profit_Matrix[1,2]*sum(predict_class==0 & actual_class ==1)+
+    Profit_Matrix[2,1]*sum(predict_class==1 & actual_class ==0)+
+    Profit_Matrix[2,2]*sum(predict_class==0 & actual_class ==0)
+  c(100*length(useonly)/length(actual_class), theprofit) 
+}))
+frame3 <- data.frame(
+  `log reg % selected` = res[1,],
+  `log reg est. profit` = res[2,],
+  check.names = FALSE
+)
+plot3 <- ggplot(frame3, aes(x=`log reg % selected`, y=`log reg est. profit`)) + geom_line()
+
+# we can plot the curves individually here, but we're going to combine them below, instead
+# grid.arrange(plot1, plot2, plot3)   # use `fig.height=7.5` for the grid plot
+
+df.all <- do.call(rbind, lapply(list(frame1, frame2, frame3), function(df) {
+  df <- melt(df, id=1)
+  df$variable <- sub(" est. profit", "", df$variable)
+  colnames(df)[1] <- "Percent selected"
+  df
+}))
+ggplot(df.all, aes(x=`Percent selected`, y=value, colour=variable)) + geom_line() + ylab("Estimated profit")
+```
+
+Podemos ahora seleccionar un umbral de probabilidad que maximice la ganancia esperada (o pérdida mínima, si es necesario).
+
+Notemos que para maximizar la ganancia esperada necesitamos tener una estimación de la ganancia o pérdida para cada uno de los 4 escenarios. Esto puede ser difícil de evaluar, entonces normalmente se necesita realizar cierto análisis de sensibilidad a las ganancias y pérdidas que han sido asumidas: por ejemplo, podemos generar diferentes curvas de ganancia (el peor caso, el mejor caso, y el caso promedio) y ver cuánto varía la mejor ganancia, y más importante ver **como varía nuestro modelo de clasificación y umbral de probabilidad** ya que es lo que eventualmente debemos decidir.
+
+## Paso 6: Precisión del modelo
+
+Habiendo iterado los pasos 2-5 hasta que estemos satisfechos con el desempeño del modelo en los datos de validación, en este paso necesitamos hacer el análisis del desempeño mencionado en los pasos 2-5 para los datos de evaluación (test set). Esta es la medida de desempeño que mejor representa lo que uno esperaría en la práctica una vez implementada la solución, **asumiendo (como siempre) que los datos utilizados en el análisis son representativos de la situación en la que será implementado el sistema.**
+
+Veamos en nuestro caso la **matriz de confusión, curva ROC, curva Lift, y curva de ganancias** para los datos de evaluación. **¿Será el desempeño en los datos de evaluación igual a los datos de validación? Más importante: ¿deberíamos esperar que el desempeño de nuestro clasificador en la realidad esté cercano al que obtuvimos en los datos de evaluación? ¿Por qué sí o no? ¿qué deberíamos hacer si son diferentes?**
+
+
+```{r}
+######for train data#####
+test_actual=test_data[,dependent_variable]
+test_predictions = rbind(test_prediction_class_tree,
+                         test_prediction_class_tree_large,
+                         test_prediction_class_log)
+test_hit_rates = rbind(
+  100*sum(test_prediction_class_tree==test_actual)/length(test_actual), 
+  100*sum(test_prediction_class_tree_large==test_actual)/length(test_actual), 
+  100*sum(test_prediction_class_log==test_actual)/length(test_actual)
+  )
+colnames(test_hit_rates) <- "Hit Ratio"
+rownames(test_hit_rates) <- c("First CART", "Second CART", "Logistic Regression")
+
+knitr::kable(test_hit_rates)
+```
+
+La matriz de confusión para el modelo con la mejor proporción de aciertos en nuestros datos de validación:
+
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+test_prediction_best = test_predictions[which.max(validation_hit_rates),]
+conf_matrix = matrix(rep(0,4),ncol=2)
+conf_matrix[1,1]<- 100*sum(test_prediction_best*test_data[,dependent_variable])/sum(test_data[,dependent_variable])
+conf_matrix[1,2]<- 100*sum((!test_prediction_best)*test_data[,dependent_variable])/sum(test_data[,dependent_variable])
+conf_matrix[2,1]<- 100*sum((!test_prediction_best)*(!test_data[,dependent_variable]))/sum((!test_data[,dependent_variable]))
+conf_matrix[2,2]<- 100*sum((test_prediction_best)*(!test_data[,dependent_variable]))/sum((!test_data[,dependent_variable]))
+conf_matrix = round(conf_matrix,2)
+
+colnames(conf_matrix) <- c("Predicted 1", "Predicted 0")
+rownames(conf_matrix) <- c("Actual 1", "Actual 0")
+knitr::kable(conf_matrix)
+```
+
+Curva ROC para los datos de evaluación:
+
+```{r}
+test_actual_class <- as.numeric(test_data[,dependent_variable])
+
+pred_tree_test <- prediction(test_Probability_class1_tree, test_actual_class)
+pred_tree_large_test <- prediction(test_Probability_class1_tree_large, test_actual_class)
+pred_log_test <- prediction(test_Probability_class1_log, test_actual_class)
+
+test<-performance(pred_tree_test, "tpr", "fpr")
+df1<- cbind(as.data.frame(test@x.values),as.data.frame(test@y.values))
+colnames(df1) <- c("False Positive rate CART 1", "True Positive CART 1")
+test2<-performance(pred_tree_large_test, "tpr", "fpr")
+df2<- cbind(as.data.frame(test2@x.values),as.data.frame(test2@y.values))
+colnames(df2) <- c("False Positive rate CART 2", "True Positive CART 2")
+test3<-performance(pred_log_test, "tpr", "fpr")
+df3<- cbind(as.data.frame(test1@x.values),as.data.frame(test1@y.values))
+colnames(df3) <- c("False Positive rate log reg", "True Positive log reg")
+
+df.all <- do.call(rbind, lapply(list(df1, df2, df3), function(df) {
+  df <- melt(df, id=1)
+  df$variable <- sub("True Positive ", "", df$variable)
+  colnames(df)[1] <- "False Positive rate"
+  df
+}))
+ggplot(df.all, aes(x=`False Positive rate`, y=value, colour=variable)) + geom_line() + ylab("True Positive rate")
+```
+
+Curva Lift para los datos de evaluación:
+
+```{r}
+test_actual <- test_data[,dependent_variable]
+all1s <- sum(test_actual)
+
+probs <- test_Probability_class1_tree
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- 100*Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= 1-prob)
+  c(length(useonly)/length(test_actual), sum(test_actual[useonly])/all1s) 
+}))
+frame1 <- data.frame(
+  `CART 1 % of validation data` = res[1,],
+  `CART 1 % of class 1` = res[2,],
+  check.names = FALSE
+)
+
+probs <- test_Probability_class1_tree_large
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- 100*Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= 1-prob)
+  c(length(useonly)/length(test_actual), sum(test_actual[useonly])/all1s) 
+}))
+frame2 <- data.frame(
+  `CART 2 % of validation data` = res[1,],
+  `CART 2 % of class 1` = res[2,],
+  check.names = FALSE
+)
+
+probs <- test_Probability_class1_log
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- 100*Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= 1-prob)
+  c(length(useonly)/length(test_actual), sum(test_actual[useonly])/all1s) 
+  }))
+frame3 <- data.frame(
+  `log reg % of validation data` = res[1,],
+  `log reg % of class 1` = res[2,],
+  check.names = FALSE
+)
+
+df.all <- do.call(rbind, lapply(list(frame1, frame2, frame3), function(df) {
+  df <- melt(df, id=1)
+  df$variable <- sub(" % of class 1", "", df$variable)
+  colnames(df)[1] <- "Percent of test data"
+  df
+}))
+ggplot(df.all, aes(x=`Percent of test data`, y=value, colour=variable)) + geom_line() + ylab("Percent of class 1")
+```
+
+Finalmente, curva de ganancias para los datos de evaluación, usando las mismas estimaciones de pérdidas y ganancias que hicimos arriba:
+
+```{r}
+actual_class<- test_data[,dependent_variable]
+
+probs <- test_Probability_class1_tree
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= prob)
+  predict_class <- 1*(probs >= prob)
+  theprofit <- Profit_Matrix[1,1]*sum(predict_class==1 & actual_class ==1)+
+    Profit_Matrix[1,2]*sum(predict_class==0 & actual_class ==1)+
+    Profit_Matrix[2,1]*sum(predict_class==1 & actual_class ==0)+
+    Profit_Matrix[2,2]*sum(predict_class==0 & actual_class ==0)
+  c(100*length(useonly)/length(actual_class), theprofit) 
+}))
+frame1 <- data.frame(
+  `CART 1 % selected` = res[1,],
+  `CART 1 est. profit` = res[2,],
+  check.names = FALSE
+)
+
+probs <- test_Probability_class1_tree_large
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= prob)
+  predict_class <- 1*(probs >= prob)
+  theprofit <- Profit_Matrix[1,1]*sum(predict_class==1 & actual_class ==1)+
+    Profit_Matrix[1,2]*sum(predict_class==0 & actual_class ==1)+
+    Profit_Matrix[2,1]*sum(predict_class==1 & actual_class ==0)+
+    Profit_Matrix[2,2]*sum(predict_class==0 & actual_class ==0)
+  c(100*length(useonly)/length(actual_class), theprofit) 
+}))
+frame2 <- data.frame(
+  `CART 2 % selected` = res[1,],
+  `CART 2 est. profit` = res[2,],
+  check.names = FALSE
+)
+
+probs <- test_Probability_class1_log
+xaxis <- sort(unique(c(0,1,probs)), decreasing = TRUE)
+res <- Reduce(cbind,lapply(xaxis, function(prob){
+  useonly <- which(probs >= prob)
+  predict_class <- 1*(probs >= prob)
+  theprofit <- Profit_Matrix[1,1]*sum(predict_class==1 & actual_class ==1)+
+    Profit_Matrix[1,2]*sum(predict_class==0 & actual_class ==1)+
+    Profit_Matrix[2,1]*sum(predict_class==1 & actual_class ==0)+
+    Profit_Matrix[2,2]*sum(predict_class==0 & actual_class ==0)
+  c(100*length(useonly)/length(actual_class), theprofit) 
+}))
+frame3 <- data.frame(
+  `log reg % selected` = res[1,],
+  `log reg est. profit` = res[2,],
+  check.names = FALSE
+)
+
+df.all <- do.call(rbind, lapply(list(frame1, frame2, frame3), function(df) {
+  df <- melt(df, id=1)
+  df$variable <- sub(" est. profit", "", df$variable)
+  colnames(df)[1] <- "Percent selected"
+  df
+}))
+ggplot(df.all, aes(x=`Percent selected`, y=value, colour=variable)) + geom_line() + ylab("Estimated profit")
+```
+
+
+# ¿Qué pasa si consideramos un análisis específico de un segmento?
+
+Frecuentemente nuestros datos (ej: personas) pertenecen a diferentes segmentos. En dichos casos, si construimos el clasificador usando todos los segmentos juntos no seremos capaces de obtener modelos de calidad o determinar factores clave con poder predictivo.
+
+> Cuando creamos que nuestras observaciones pertenecen a diferentes segmentos, deberíamos realizar una clasificación y análisis de factores para cada segmento por separado.
+
+En efecto, en este caso podemos mejorar la ganancia de la compañía en 5% con un poco más de esfuerzo si utilizamos un análisis de segmentación (el cuál puede ser hecho basado en las otras clases).
+
+Por supuesto, como siempre, recuerden que
+
+> Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de clasificación y modelamiento.
+
