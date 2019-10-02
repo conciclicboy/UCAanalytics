@@ -1,0 +1,465 @@
+---
+title: "dataframes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introducción a Dataframes
+Los DataFrames son un tipo de estructura de datos que constituye una de las principales herramientas de análisis de datos con R. Las Matrices están limitadas a que todos los datos estén dentro de ella deben ser del mismo tipo (numéricos, lógicos, etc.). Con los DataFrames se puede organizar todo tipo de dato.
+
+```{r cars}
+# Dataframe about states
+state.x77
+```
+
+```{r}
+# US personal expense
+USPersonalExpenditure
+```
+
+```{r}
+# Women 
+women
+```
+
+Para obtener una lista de todos los dataframes internos de R use data()
+
+```{r}
+data()
+```
+
+### Trabajando con DataFrames
+Para visualizar algunos DataFrames que son demasiado grandes usted puede usar las funciones **head()** y **tail()** que le permiten ver las primeras y últimas filas del DataFrame respectivamente.
+
+```{r}
+# Quick variable assignment to save typing
+states <- state.x77
+head(states)
+```
+
+```{r}
+tail(states)
+```
+
+### Resumen de la información
+
+Se puede usar la función **str()** para obbtener la estructura de un dataframe como los nombres de las variables y los tipos de datos. También se puede usar la función **summary()** para obtener un rápido resumen estadístico de todas las columnas de un DataFrame, y dependiendo de los datos, esto puede o no ser útil.
+
+```{r}
+# Estructura de Datos
+str(states)
+```
+
+
+```{r}
+# Resumen estadístico de los datos
+summary(states)
+```
+
+### Creando DataFrames
+
+Podemos crear DataFrames usando la función **data.frame()** y proporcionado vectores como datos de entrada. Por ejemplo:
+
+```{r pressure, echo=FALSE}
+dias <- c('lun','mar','mie','jue','vie')
+temp <- c(22.2,21,23,24.3,25)
+lluvia <- c(TRUE, TRUE, FALSE, FALSE, TRUE)
+```
+
+```{r}
+#creando el dataframe
+df<-data.frame(dias, temp, lluvia)
+```
+
+```{r}
+df
+```
+
+
+```{r}
+str(df)
+```
+ 
+```{r}
+summary(df)
+```
+
+## Operaciones con Data Frames
+Los Data Frames, a pesar de ser tan sencillos, son de las herramientas más poderosas de R. A continuación Creating Data Frames
+daremos un vistazo a:
+•Creación de Data Frames
+•Importar y Exportar Datos
+•Obtener infomación acerca de Data Frames
+•Referenciación de Celdas
+•Referenciación de Filas
+•Referenciación de Columnas
+•Añadir Filas
+•Añadir Columnas
+•Agregando Nombres a Columnas
+•Seleccionando múltiples filas
+•Selecting múltiples columnas
+•Lidiando con valores faltantes
+
+
+### Creando Data Frames
+
+```{r}
+empty <- data.frame() # data frame vacío
+
+c1 <- 1:10 # vector de enteros
+
+c2 <- letters[1:10] # vector de caracteres
+
+df <- data.frame(col.name.1=c1,col.name.2=c2)
+```
+
+```{r}
+df
+```
+
+### Importando y Exportando Datos
+
+```{r}
+#Ingrese el nombre de un archivo csv
+d2 <- read.csv('algun_archivo.csv')
+
+# For Excel Files
+# Load the readxl package
+library(readxl)
+# Call info from the sheets using read.excel
+df <- read_excel('Sample-Sales-Data.xlsx',sheet='Sheet1')
+
+# Output to csv
+write.csv(df, file='otro_archivo.csv')
+```
+
+
+### Información del Data Frame
+
+```{r}
+# Conteo de filas y columnas
+nrow(df)
+ncol(df)
+```
+
+```{r}
+# Nombres de columnas
+colnames(df)
+```
+
+
+```{r}
+# Nombres de filas
+head(rownames(df),10)
+```
+
+### Referenciando celdas
+Se pude pensar en 2 pares de corchetes para una celda individual y solo un par de corchetes para múltiples celdas.
+
+
+```{r}
+vec <- df[[5, 2]] # get cell by [[row,col]] num
+
+newdf <- df[1:5, 1:2] # get multiplt cells in new df
+
+df[[2, colnames(df)[1]]] <- 99999 # reassign a single cell
+```
+
+```{r}
+df
+```
+
+
+### Referenciando columnas
+Usualmente se usará el formato **[fila,]**
+
+```{r}
+# retorna un data frame (no un vector!)
+rowdf <- df[1, ]
+```
+
+```{r}
+rowdf
+```
+
+```{r}
+# para obtener una fila como vector se usa
+vrow <- as.numeric(as.vector(df[1,]))
+vrow
+```
+
+### Referenciando columnas
+
+La mayoría de columnas retornan un vector:
+
+```{r}
+cars<- mtcars
+head(cars,3)
+```
+
+```{r}
+colv1 <- cars$mpg # retorna un vector
+colv1
+
+colv2 <- cars[, 'mpg'] # retorna un vector
+colv2
+
+colv3<- cars[, 1] # a es un int o string
+colv3
+
+colv4 <- cars[['mpg']] # retorna un vector
+colv4
+```
+
+
+```{r}
+# Maneras de Retornar un Data Frames
+mpgdf <- cars['mpg'] # retorna columna mpg de df
+head(mpgdf)
+
+mpgdf2 <- cars[1] # retorna "primera columna" de df
+head(mpgdf2)
+```
+
+### Añadiendo columnas
+
+```{r}
+colnames(df)
+```
+
+
+```{r}
+# Ambos argumentos son Data Frames
+df2 <- data.frame(Postcode=111,Sales_Rep_ID=333, Sales_Rep_Name="NUEVO DATO", Year=5, Value=10)
+df2
+
+# use rbind to bind a new row!
+dfnew <- rbind(df,df2)
+```
+
+```{r}
+tail(dfnew)
+```
+
+
+### Añadiendo columnas
+```{r}
+df$newcol <- rep(5, nrow(df)) # columna llena de valores 5
+df
+```
+
+
+```{r}
+df[, 'copia_de_col2'] <- df$Year # copy a col
+df
+```
+
+
+```{r}
+df3 <- cbind(df, df$Postcode)
+df3
+```
+
+
+### Cambiando nombre a columnas
+
+
+```{r}
+# Renombrando una columna a la vez
+colnames(df)[2] <- 'NOMBRE SEGUNDA COLUMNA'
+df
+
+# Renombrando todas las columnas e una sola vez con un vector
+colnames(df) <- c('col.name.1', 'col.name.2', 'newcol', 'copy.of.col2' ,'col1.times.2')
+df
+```
+
+
+### Seleccionando múltiples filas
+
+```{r}
+primeras.cinco.filas <- df[1:5, ] # Mismo que head(df, 5)
+primeras.cinco.filas
+```
+
+```{r}
+# Todas las filas menos la fila 2
+everything.but.row.two <- df[-2, ]
+everything.but.row.two
+```
+
+```{r}
+# Selección Condicional
+
+# Opción 1
+sub1 <- df[ (df$col.name.1 > 8 & df$col1.times.2 > 10), ]
+sub1
+
+#Opción 2
+sub2 <- subset(df, col.name.1 > 8 & col1.times.2 > 10)
+sub2
+
+```
+
+
+### Seleccionando múltiples columnas
+
+Por índice
+```{r}
+df[, c(1, 2, 3)] #Grab cols 1 2 3
+```
+
+Por nombre
+```{r}
+df[, c('col.name.1', 'col1.times.2')] # by name
+```
+
+
+```{r}
+df[, -1] # todo menos la primera
+```
+
+
+```{r}
+df[, -c(1, 3)] # elimina columna 1 y 3
+```
+
+### Lidiando con valores faltantes
+
+```{r}
+any(is.na(df)) # detecta cualquier valor faltante en el dataframe
+```
+
+```{r}
+any(is.na(df$col.name.1)) # detecta cualquier valor faltante en la columna
+```
+
+```{r}
+# Borra filas con valores faltantes
+df <- df[!is.na(df$col), ]
+```
+
+```{r}
+# reemplaza NAs con otro valor
+df[is.na(df)] <- 0 # acá reemplazamos por 0
+```
+
+```{r}
+df$col[is.na(df$col)] <- 999 # Para cierta columna
+
+```
+
+
+
+
+
+## Selección e Indexación en DataFrames 
+Podemos usar la notación con corchetes para seleccionar información dentro de un DataFrame **df[filas,columnas]**
+
+```{r}
+#Todo de la primera fila
+df[1,]
+```
+
+```{r}
+#Todo de la primera columna
+df[,1]
+```
+
+```{r}
+#Datos del viernes
+df[5,]
+```
+
+### Selección usando columnas
+
+Creemos de nuevo un Data Frames
+```{r}
+dias <- c('lun','mar','mie','jue','vie')
+temp <- c(22.2,21,23,24.3,25)
+lluvia <- c(TRUE, TRUE, FALSE, FALSE, TRUE)
+```
+
+```{r}
+#creando el dataframe
+df<-data.frame(dias, temp, lluvia)
+```
+
+
+
+```{r}
+#Todos los valores de lluvia
+df[,"lluvia"]
+```
+
+```{r}
+#días y temperatura de columnas 2 y 3
+df[2:3,c('dias','temp')]
+```
+
+### Una columna en particular
+Esto se obtiene usando simplemente **df.name$column.name**, lo cual genera un vector:
+
+```{r}
+df$lluvia
+```
+
+También se puede usar la notación en corchetes para obtener como resultado un Data Frame 
+```{r}
+df['lluvia']
+```
+
+
+```{r}
+df$dias
+```
+
+### Filtrando con la condición subset
+Se puede usar la función **subset()** para agarrar un subconjunto de los datos basado en cierta condición. Por ejemplo, si se quisiera tomar solo los días que llovieron se haría esto
+
+```{r}
+subset(df,subset=(lluvia==TRUE))
+```
+```{r}
+subset(df,subset= temp>23)
+```
+
+### Ordenando un Data Frame
+Un Data Frame puede ser ordenado usando la función **order**. Usando la columna con respecto a la que se quiere ordenar como insumo para la función **order()** se obtiene un vector que luego se pasa al Data Frame:
+
+```{r}
+sorted.temp <- order(df['temp'])
+```
+
+```{r}
+df[sorted.temp,]
+```
+
+
+Veamos el contenido de sorted.temp:
+```{r}
+sorted.temp
+```
+
+Si se requiere el orden inverso, solo cambiamos el signo:
+
+```{r}
+
+desc.temp <- order(-df['temp'])
+```
+
+```{r}
+df[desc.temp,]
+```
+
+```{r}
+sort.temp <- order(df$temp)
+df[sort.temp,]
+```
+
+
+
+

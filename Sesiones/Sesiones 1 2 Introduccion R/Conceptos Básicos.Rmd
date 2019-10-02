@@ -1,0 +1,387 @@
+---
+title: "Conceptos Básicos en R"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Aritmética Básica en R
+
+**R** es una supercalculadora que podemos utilizar de la misma forma.
+Estas son algunas de las operaciones básicas:
+
+**Suma**
+```{r}
+5+4
+```
+
+**Resta**
+```{r}
+36-29
+```
+
+**División**
+```{r}
+15/4
+```
+
+**Multiplicación**
+```{r}
+7*8
+```
+
+**Exponentes**
+```{r}
+2^3
+```
+ 
+**Módulo**
+```{r}
+17%%5
+```
+
+**Orden de las operaciones**
+```{r}
+(100 * 2) + (50 / 2)
+```
+
+##Variables
+Veamos ahora como asignar variables en R.
+Podemos usar el caracter <- para asignar una variable, el símbolo es similar a una flecha apuntando al nombre de la variable 
+
+**Asignación de valores en variables**
+```{r}
+a<-5
+```
+
+**Valor de la variable**
+```{r}
+a
+```
+
+**Operaciones con la variable**
+```{r}
+a+3
+```
+
+**Operaciones entre variables**
+```{r}
+b<-20
+a+b+100
+```
+
+
+##Tipos de Datos
+Revisemos algunas clases de datos en R
+
+###Numéricos
+Números decimales (valores flotantes) son parte de la clase numérica en R
+```{r}
+x<-3.1415
+```
+
+###Enteros
+Los números enteros también son parte de la clase numérica
+```{r}
+i<-5
+```
+
+##Lógicos
+Los valores booleanos(Verdadero y Falso) son parte de la clase lógica. En R se escriben como **TRUE** y **FALSE**.
+```{r}
+t<-TRUE
+f<-FALSE
+```
+
+```{r}
+t
+```
+
+```{r}
+f
+```
+
+## Vectores
+
+Vectores son una de las principales estructuras de datos en R. Un vector es un arreglo unidimensional que puede contener datos numéricos, caracteres o lógicos. 
+
+Podemos crear un vector usando la función **c()**. Para usar la función, ponemos elementos del arreglo separados por comas.
+
+Veamos algunos ejemplos:
+
+```{r}
+# Using c() to create a vector of numeric elements
+nvec <- c(1,2,3,4,5)
+```
+
+
+Podemos verificar el tipo de elemntos que contiene el vector usando la función **class()**
+```{r}
+class(nvec)
+```
+
+Veamos otro ejemplo
+```{r}
+# Vector of characters
+cvec <- c('U','S','A')
+cvec
+```
+
+```{r}
+class(cvec)
+```
+
+Otro ejemplo
+```{r}
+lvec <- c(TRUE,FALSE)
+lvec
+```
+
+```{r}
+class(lvec)
+```
+
+Note que no se pueden mezclar tipos de datos en un vector. Si usted mezcla datos R va transformarlos para que todos sean del mismo tipo de datos.
+Veamos unos ejemplos:
+
+```{r}
+v <- c(FALSE,2)
+```
+
+```{r}
+v
+```
+
+```{r}
+class(v)
+```
+
+otro ejemplo
+```{r}
+v <- c('A',1)
+```
+
+```{r}
+v
+```
+
+```{r}
+class(v)
+```
+
+
+## Nombres de Vectores
+Podemos usar la función **names()** para asignar nombres a los elemnetos en un vector. Por ejemplo, imagine el siguiente vector conteniendo temperaturas de la semana:
+```{r}
+temps <- c(24,25,22,25,27,26,24)
+```
+
+```{r}
+temps
+```
+
+Sabemos que hay 7 valores de temperatura para los 7 días de la semana, pero no sabemos cual es la correspondencia con respecto a los días. Esto puede ser solucionado añadiendo nombres al vector:
+
+```{r}
+names(temps)<-c('Mie', 'Jue','Vie','Sab','Dom','Lun','Mar')
+```
+
+Veamos ahora que pasa cuando se imprime el vector
+
+```{r}
+temps
+```
+
+Dependiendo del **IDE** que se use, usted verá el vector horizontal o vertical, en nuestro caso saldrá horizontal.
+Note que tampoco debe reescribir los nombres una y otra vez, usted puede simplemente asignarlos a otra variable y luego asignar esta variable como nombre del vector.
+
+```{r}
+nombres<-c('Mie', 'Jue','Vie','Sab','Dom','Lun','Mar')
+temps_SanMiguel<-c(36,34,37,40,38,37,36)
+names(temps_SanMiguel)<-nombres
+```
+
+```{r}
+temps_SanMiguel
+```
+
+## Operaciones con Vectores
+
+Podemos realizar operaciones aritméticas básicas con vectores y estas se efectuaran elemento por elemento, por ejemplo:
+
+```{r}
+v1 <- c(5,12,23)
+v2 <- c(7,6,70)
+```
+
+### Sumando vectores
+
+```{r}
+v1+v2
+```
+
+### Restando vectores
+
+```{r}
+v1-v1
+```
+
+```{r}
+v1-v2
+```
+
+### Multiplicando elemento por elemento
+```{r}
+v1*v2
+```
+
+### Dividiendo elemento por elemento
+```{r}
+v1/v2
+```
+
+## Funciones con vectores
+También se pueden diseñar funciones aplicables a vectores de la siguiente forma:
+
+**nombre_de_funcion(datos)**
+
+R tiene muchas funciones prediseñadas de uso común, pero en ocasiones se vuelve importante diseñar nuestras propias funciones.Veamos algunas funciones de uso común:
+
+```{r}
+v1
+
+```
+
+### Suma
+
+```{r}
+sum(v1)
+```
+
+
+### Media 
+```{r}
+mean(v1)
+```
+
+### Desviación Estándar
+
+```{r}
+sd(v1)
+```
+
+### Máximo
+
+```{r}
+max(v1)
+```
+
+### Mínimo
+
+```{r}
+min(v1)
+```
+
+### Producto de elementos
+
+```{r}
+prod(v1)
+```
+
+Estas no son todas las funciones de R! Usted puede encontrar muchas más en [Funciones de R](https://cran.r-project.org/doc/contrib/Short-refcard.pdf)
+
+
+## Particiones de Vectores e Indexación
+Usted puede usar la notación con corchetes para acceder a los elementos de un vector
+
+```{r}
+v1 <- c(100,200,300)
+v2 <- c('a','b','c')
+```
+
+```{r}
+v1
+v2
+```
+
+La indexación funciona usando corchetes para pasar la posición del elemento. Tenga en cuenta que a diferencia de Python y otros lenguajes, el índice comienza en 1 (no en 0).
+
+Tomemos un elemento
+```{r}
+v1[2]
+v2[3]
+```
+
+### Múltiples índices
+También se pueden seleccionar múltiples elementos a la vez usando un vector con las posiciones deseadas.
+
+```{r}
+v1[c(1,2)]
+```
+
+```{r}
+v2[c(2,3)]
+```
+
+```{r}
+v2[c(1,3)]
+```
+
+
+### Particiones
+Se puede usar dos puntos (:) para indicar un pedazo de un vector. El formato es vector[indice_inicial : indice_final] para obtener la porción del vector que se requiere. Por ejemplo:
+
+```{r}
+v <- c(1,2,3,4,5,6,7,8,9,10)
+```
+
+```{r}
+v[2:4]
+```
+```{r}
+v[6:9]
+```
+Note que los índices incluyen los extremos.
+
+### Indexando con nombres
+Previamente vimos que podemos asignar nombres a los elementos del vector como:
+
+```{r}
+v <- c(143,277,399,488)
+names(v) <- c('a','b','c','d')
+```
+
+```{r}
+v['a']
+```
+
+```{r}
+v[c('a','c','b')]
+```
+
+### Operadores de comparación y selección
+
+```{r}
+v
+```
+```{r}
+v>300
+```
+
+```{r}
+v[v>300]
+```
+
+También se podrían asignar los valores lógicos a una variable
+```{r}
+valores<- (v>300)
+```
+
+```{r}
+valores
+```
+
+
+
+
+
