@@ -1,5 +1,4 @@
-# Sync a forked copy of INSEADAnalytics with the master project. For details,
-# see https://github.com/InseadDataAnalytics/INSEADAnalytics/issues/7
+# Sync a forked copy of INSEADAnalytics with the master project.
 
 if (!suppressWarnings(require(git2r))) {
   install.packages("git2r", repos="http://cran.r-project.org/", quiet=TRUE)
