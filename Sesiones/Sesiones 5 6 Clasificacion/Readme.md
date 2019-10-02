@@ -1,31 +1,31 @@
-Data Analytics Course Session: 
+Sesión del curso de Analítica Aplicada: 
 ---------------------------------------------------------
-Sessions 6-7 of INSEAD Data Analytics for Business Course: Classification
----------------------------------------------------------
-
-
-**Organization:** INSEAD
-
-**Industry:** Education
-
-**Project Description:** Introduction to Data Analytics for Business (INSEAD COURSE)
-
-**Data Description:** Basic Example Data
-
-**Author(s):** T. Evgeniou
-
-**Author(s)' Affiliations:** INSEAD
-
-INSTRUCTIONS FOR PROJECT
+Sesiones 5-6 del curso de Analítica Aplicada de la UCA: Clasificación
 ---------------------------------------------------------
 
-(*NOTE: The very first time you run the project it may take a couple of minutes as it will also install all necessary R libraries.*).
+
+**Organization:** UCA
+
+**Industry:** Educación
+
+**Project Description:** Introducción a la Analítica  aplicada a los Negocios (basado en el curso de http://inseaddataanalytics.github.io/INSEADAnalytics/)
+
+**Descripción de los datos:** Ejemplo de Datos Básicos
+
+**Autor:** T. Evgeniou (traducción por Eduardo Aguilar, UCA)
+
+**Afiliaciones del Autor:** INSEAD (traductor afiliado a UCA)
+
+INSTRUCCIONES DE LA CARPETA
+---------------------------------------------------------
+
+(*NOTA: La primera vez que usted ejecute este proyecto puede tomar un par de minutos y podría incluso descargar e instalar las librerías necesarias.*).
 
 
-[1] Please open and source the file CLassificationReading.Rmd
+[1] Por favor abra el archivo Analisis_de_Clasificacion.Rmd
 
-This will reproduce the readings for this project
+Esto reproducirá los apuntes de este proyecto
 
-**MODIFYING AND RE-RUNNING**
+**MODIFICANDO Y CORRIENDO**
 
-[2] To modify the project parameters, please edit them in the file  CLassificationReading.Rmd and source that file again. 
+[2] Para modificar los parámetros del proyecto, por favor edite el archivo Analisis_de_Clasificacion.Rmd y actualice los cambios.
