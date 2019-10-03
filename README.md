@@ -1,3 +1,5 @@
+<div style="text-align: justify"> justify 
+
 ## Analítica Aplicada a los Negocios
 
 Este curso comprende una introducción a las técnicas analíticas aplicadas a la toma de decisiones empresariales basadas en su totalidad en información extraida de los datos. Agradezco especialmente al profesor [Theodoros Evgeniou](https://faculty.insead.edu/theodoros-evgeniou/) por permitirme utilizar el material de su curso [Data Analytics for Business](http://inseaddataanalytics.github.io/INSEADAnalytics/) impartido en [INSEAD](https://www.insead.edu/home/), la mejor escuela de negocios del mundo; así como a mis profesores en [Georgia Tech](https://www.scheller.gatech.edu/index.html), cuyo material he reutilizado en la formulación de los casos de análisis de regresión.
@@ -99,3 +101,4 @@ earnoldo.aguilar en gmail
 
 
 # ... página en construcción
+</div>
