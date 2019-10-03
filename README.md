@@ -5,19 +5,19 @@ Este curso comprende una introducción a las técnicas analíticas aplicadas a l
 
 La Universidad Centroamericana José Simeón Cañas [UCA](http://www.uca.edu.sv/) impartirá a partir de 2019 un curso de Analítica Aplicada como complemento al postgrado de Business Intelligence. La incorporación de Business Analytics tiene como objetivo equipar al profesional con herramientas modernas para el diseño de modelos predictivos y análisis de datos como apoyo a la toma de decisiones empresariales que serán cruciales en el proceso de transformación digital.
 
-###Objetivo
+### Objetivo
 Proporcionar las herramientas de análisis necesarias para la optimización de decisiones y resultados basados en los procesos y recursos que posee la organización.
 
-###Descripción
+### Descripción
 El curso comprende una introducción a herramientas analíticas aplicadas a problemas de negocios. En la actualidad existen varias herramientas Business Analytics que pueden ayudar al análisis de la información, este curso será desarrollado con el software estadístico R. Se desarrollarán casos de estudio implementando algoritmos de machine learning en finanzas y marketing, y se espera que al finalizar el curso el estudiante no solamente sea capaz de ejecutar archivos en R, sino que desarrolle la capacidad de entender que quiere obtener y que modelo debe utilizar para obtenerlo, sin importar la herramienta que esté utilizando.
 
-###Dirigido a
+### Dirigido a
 Profesionales interesados en el análisis de información cuantitativa. Analistas de datos, estadísticas, business intelligence, minería de datos, ciencia de datos, entre otros.
 
-###Requisitos
+### Requisitos
 Poseer laptop con al menos 2GB de RAM, 1.5 GHz, 2 GB de espacio vacío. Si su laptop no tiene estos requisitos, usted puede tomar el curso, pero el software se hará más lento. Además, debe tener privilegios administrativos para instalar y desinstalar programas. No es necesario tener experiencia en programación.
 
-###Contenidos:
+### Contenidos:
 
 ***0.	Instalación de RStudio y descarga de material de GitHub***
   •	Todos los participantes deberán asistir a una sesión de instalación
@@ -48,7 +48,7 @@ Tema                  | Clases      | Tareas
 
 
 
-###Detalles del curso
+### Detalles del curso
 El contenido ha sido clonado del curso de Business Analytics de la escuela de negocios [INSEADAnalytics](http://inseaddataanalytics.github.io/INSEADAnalytics/) con permiso del autor.
 
 Dicho curso fue diseñado para que estudiantes sin un conocimiento de programación o estadística aprendan a usar herramientas analíticas.
@@ -63,7 +63,7 @@ Los casos seleccionados son tres:
 3.	Segmentación de clientes de forma automatizada.
 
 
-###Que esperar de este curso:
+### Que esperar de este curso:
 
 ***•	Mucho código***. Se espera que el participante aprenda a utilizar el software y ensamblar fragmentos de código para realizar análisis de datos.
 
@@ -73,7 +73,7 @@ Los casos seleccionados son tres:
 
 ***•	Entender los procesos clave*** de análisis de datos en proyectos de analítica.
 
-###Que NO esperar de este curso:
+### Que ***NO*** esperar de este curso:
 
 ***•	No es una clase hablada solo con diapositivas***. Todas las clases usarán RStudio.
 
@@ -83,19 +83,19 @@ Los casos seleccionados son tres:
 
 ***•	No es una clase de BI***. Es una clase de business analytics como complemento a BI. Este curso no abordará manejo de bases de datos, integridad de la información y creación de visualizaciones.
 
-###Acerca de los Datos:
+### Acerca de los Datos:
 Los casos de estudio son casos reales que fueron experimentados por empresas en el pasado. Los datos, sin embargo, no son los datos originales, ya que estos son confidenciales, pero los datos presentados tienen el mismo espíritu de los datos originales.
 
-###Créditos:
+### Créditos:
 Eduardo Aguilar no es el autor de ninguno de los materiales utilizados, solamente ha adaptado una versión en español de lo que los autores realizaron, todo el crédito es de ellos.
 
-###Evaluaciones:
+### Evaluaciones:
 En esta etapa experimental se tendrá una o dos tareas, pero no serán evaluadas.
 
-###Profesor:
+### Profesor:
 Eduardo Arnoldo Aguilar Cañas.
 https://sv.linkedin.com/in/eduardoaguilar-sv
 earnoldo.aguilar en gmail
 
 
-#... en construcción
+# ... en construcción
