@@ -140,4 +140,3 @@ Estas sesiones abordarán el caso del aprendizaje no supervisado: la segmentaci�
 * En clase se estudiará ese mismo tutorial y se usará la [aplicación interactiva](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Analisis_de_Cluster_Interactivo.Rmd).
 
 # ... página en construcción
-</div>
