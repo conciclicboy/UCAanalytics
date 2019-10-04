@@ -84,13 +84,34 @@ Los casos seleccionados son tres:
 
 •	***No es un curso matemático***. No se explicarán los conceptos matemáticos de manera profunda, sino el funcionamiento de los algoritmos de forma intuitiva.
 
-•	***No es una clase de BI***. Es una clase de business analytics como complemento a BI. Este curso no abordará manejo de bases de datos, integridad de la información y creación de visualizaciones.
+•	***No es una clase de BI***. Es una clase de business analytics como complemento a BI. Este curso no abordará manejo de bases de datos, integridad de la información y creación de visualizaciones. Se cubrirán esos temas en otros módulos.
 
 ### Acerca de los Datos:
 Los casos de estudio son casos reales que fueron experimentados por empresas en el pasado. Los datos, sin embargo, no son los datos originales, ya que estos son confidenciales, pero los datos presentados tienen el mismo espíritu de los datos originales.
 
 ### Evaluaciones:
 En esta etapa experimental se tendrá una o dos tareas, pero no serán evaluadas.
+
+---
+
+## Sesiones
+
+### Sesión 0: Instalación
+Esta sesión consistirá en una pequeña introducción al curso y la instalación de los softwares requeridos: R, RStudio, Git (junto con la creación de su cuenta de github).
+Usted puede omitir esta sesión siguiendo las indicaciones del [tutorial de instalación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesion 0 instalacion/Tutorial Instalaci%C3%B3n.pdf) o los [videos de instalación](https://docs.google.com/document/d/1NCwyFpmBtBSUrRxWQ9xv5lD8VX_MUPode0hODerJl0Y/edit#heading=h.ln4ur33cg0v7).
+Explore las funcionalidades de R y trate de ejecutar los archivos por su cuenta.
+
+### Sesiones 1-2: Introducción a R
+Estas sesiones consistirán en una introducción a lectura, manipulación y escritura de datos en R.
+
+* [Introducción básica a R](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/Intro_basica.html): funcionalidades básicas, Lectura/ Escritura de Información, Manipulaciones de datos simples.
+* [Cálculos básicos en R](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/Conceptos-B%C3%A1sicos.html): operaciones con los tipos de datos básicos.
+* [Data Frames](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
+
+
+
+
+
 
 
 # ... página en construcción
