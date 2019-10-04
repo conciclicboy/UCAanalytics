@@ -71,7 +71,7 @@ Los casos seleccionados son tres:
 
 ### Que ***NO*** esperar de este curso:
 
-•	***No es una clase hablada** solo con diapositivas. Todas las clases usarán RStudio.
+•	***No es una clase hablada*** solo con diapositivas. Todas las clases usarán RStudio.
 
 •	***No es un curso de R***. Se dará una introducción básica al software para facilitar el desarrollo de las aplicaciones. No se construirá código desde cero, sino que modificarán pequeñas partes de los modelos.
 
