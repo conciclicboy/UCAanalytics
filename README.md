@@ -118,6 +118,8 @@ En estas sesiones se introducirá un caso de análisis de precios en casas del h
 ### Sesiones 5-6: Clasificación y predicción de cuentas por cobrar
 Estas sesiones abordarán un problema más específica que la regresión: la clasificación.
 
+* Se dará una breve introducción a lo que hacen la regresión logística y los árboles de decisión.
+
 * Usted deberá leer antes de clases el caso de [Tarjetas de Crédito](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Tarjetas%20de%20Cr%C3%A9dito.pdf) 
 
 * Opcionalmente deberá iniciar la lectura del [proceso de clasificación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Analisis_de_Clasificacion.html) antes de clase.
@@ -126,10 +128,16 @@ Estas sesiones abordarán un problema más específica que la regresión: la cla
 
 * Se darán dos tipos de soluciones, una utilizando regresión logística y otra con árboles de decisión.
 
-### Sesiones 7-8:
+### Sesiones 7-8: Análisis de Clusters y segmentación de mercado
+Estas sesiones abordarán el caso del aprendizaje no supervisado: la segmentación
 
+* Se dará una breve introducción a lo que hacen la clusterización jerárquica y KNN.
 
+* Usted deberá leer el [caso de los botes](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Botes%20(B).pdf) antes de la clase.
 
+* Opcionalmente deberá iniciar la lectura del [proceso de segmentación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Analisis_de_Cluster.html) antes de clase.
+
+* En clase se estudiará ese mismo tutorial y se usará la [aplicación interactiva](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Analisis_de_Cluster_Interactivo.Rmd).
 
 # ... página en construcción
 </div>
