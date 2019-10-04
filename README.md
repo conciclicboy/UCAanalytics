@@ -109,7 +109,24 @@ Estas sesiones consistirán en una introducción a lectura, manipulación y escr
 * [Data Frames](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
 
 
+### Sesiones 3-4: Regresión Lineal y predicción de precios
+En estas sesiones se introducirá un caso de análisis de precios en casas del housing dataset.
+* Se dará una breve introducción a los supuestos que hace la regresión lineal.
+* Se revisará la implementación de la regresión lineal en R y el proceso de diagnóstico/validación de la misma.
+* Si hay más tiempo se abordarán otros métodos como árbol de decisión.
 
+### Sesiones 5-6: Clasificación y predicción de cuentas por cobrar
+Estas sesiones abordarán un problema más específica que la regresión: la clasificación.
+
+* Usted deberá leer antes de clases el caso de [Tarjetas de Crédito](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Tarjetas%20de%20Cr%C3%A9dito.pdf) 
+
+* Opcionalmente deberá iniciar la lectura del [proceso de clasificación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Analisis_de_Clasificacion.html) antes de clase.
+
+* En clase se desarrollará el caso de las [tarjetas de crédito](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Default_Tarjeta_Credito_2.html)
+
+* Se darán dos tipos de soluciones, una utilizando regresión logística y otra con árboles de decisión.
+
+### Sesiones 7-8:
 
 
 
