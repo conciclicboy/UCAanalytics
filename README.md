@@ -56,7 +56,7 @@ En las primeras dos sesiones se practicará el uso del software y sus funcionali
 Los casos seleccionados son tres:
 1.	Predicción de precios de casas 
 2.	Predicción de clientes que entrarán en mora con su tarjeta de crédito.
-3.	Segmentación de clientes de forma automatizada.
+3.	[Caso de segmentación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Botes%20(B).pdf)  de clientes de forma automatizada
 
 
 ### Que esperar de este curso:
