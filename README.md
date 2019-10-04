@@ -68,23 +68,23 @@ Los casos seleccionados son tres:
 
 ### Que esperar de este curso:
 
-•	***Mucho código***. Se espera que el participante aprenda a utilizar el software y ensamblar fragmentos de código para realizar análisis de datos.
+*	***Mucho código***. Se espera que el participante aprenda a utilizar el software y ensamblar fragmentos de código para realizar análisis de datos.
 
-•	***Casos reales*** de problemáticas que si pueden ser solucionados con estas técnicas.
+*	***Casos reales*** de problemáticas que si pueden ser solucionados con estas técnicas.
 
-•	***Actualizarse***. Conocer las técnicas analíticas más comunes en el análisis de datos.
+*	***Actualizarse***. Conocer las técnicas analíticas más comunes en el análisis de datos.
 
-•	***Entender los procesos clave*** de análisis de datos en proyectos de analítica.
+*	***Entender los procesos clave*** de análisis de datos en proyectos de analítica.
 
 ### Que ***NO*** esperar de este curso:
 
-•	***No es una clase hablada*** solo con diapositivas. Todas las clases usarán RStudio.
+*	***No es una clase hablada*** solo con diapositivas. Todas las clases usarán RStudio.
 
-•	***No es un curso de R***. Se dará una introducción básica al software para facilitar el desarrollo de las aplicaciones. No se construirá código desde cero, sino que modificarán pequeñas partes de los modelos.
+*	***No es un curso de R***. Se dará una introducción básica al software para facilitar el desarrollo de las aplicaciones. No se construirá código desde cero, sino que modificarán pequeñas partes de los modelos.
 
-•	***No es un curso matemático***. No se explicarán los conceptos matemáticos de manera profunda, sino el funcionamiento de los algoritmos de forma intuitiva.
+*	***No es un curso matemático***. No se explicarán los conceptos matemáticos de manera profunda, sino el funcionamiento de los algoritmos de forma intuitiva.
 
-•	***No es una clase de BI***. Es una clase de business analytics como complemento a BI. Este curso no abordará manejo de bases de datos, integridad de la información y creación de visualizaciones. Se cubrirán esos temas en otros módulos.
+*	***No es una clase de BI***. Es una clase de business analytics como complemento a BI. Este curso no abordará manejo de bases de datos, integridad de la información y creación de visualizaciones. Se cubrirán esos temas en otros módulos.
 
 ### Acerca de los Datos:
 Los casos de estudio son casos reales que fueron experimentados por empresas en el pasado. Los datos, sin embargo, no son los datos originales, ya que estos son confidenciales, pero los datos presentados tienen el mismo espíritu de los datos originales.
