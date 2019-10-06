@@ -20,7 +20,7 @@ La Universidad Centroamericana José Simeón Cañas [UCA](http://www.uca.edu.sv/
 Profesionales interesados en el análisis de información cuantitativa. Analistas de datos, estadísticas, business intelligence, minería de datos, ciencia de datos, entre otros.
 
 ### Requisitos
-Poseer laptop con al menos 2GB de RAM, 1.5 GHz, 2 GB de espacio vacío. Si su laptop no tiene estos requisitos, usted puede tomar el curso, pero el software se hará más lento. Además, debe tener privilegios administrativos para instalar y desinstalar programas. No es necesario tener experiencia en programación.
+Poseer laptop con al menos 2GB de RAM, 1.5 GHz, 2 GB de espacio vacío. Si su laptop no tiene estos requisitos, usted puede tomar el curso, pero el software se hará más lento. Además, debe tener privilegios administrativos para instalar y desinstalar programas. **No es necesario tener experiencia en programación**.
 
 ### Contenidos:
 
