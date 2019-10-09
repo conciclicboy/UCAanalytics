@@ -58,14 +58,14 @@ El contenido ha sido clonado del curso de Business Analytics de la escuela de ne
 
 Dicho curso fue diseñado para que estudiantes sin un conocimiento de programación o estadística aprendan a usar herramientas analíticas.
 
-Todos los participantes deben tener instalado y funcionando el software en su computadora antes del inicio del tema 1. Para ello se tendrá una sesión de introducción e instalación del software, o puede instalar personalmente siguiendo las indicaciones del [tutorial de instalación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesion 0 instalacion/Tutorial Instalaci%C3%B3n.pdf), o puede seguir paso a paso los [videos de instalación](https://docs.google.com/document/d/1NCwyFpmBtBSUrRxWQ9xv5lD8VX_MUPode0hODerJl0Y/edit#heading=h.ln4ur33cg0v7).
+Todos los participantes deben tener instalado y funcionando el software en su computadora antes del inicio del tema 1. Para ello se tendrá una sesión de introducción e instalación del software, o puede instalar personalmente siguiendo las indicaciones del [tutorial de instalación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesion_0_instalacion/Tutorial.pdf), o puede seguir paso a paso los [videos de instalación](https://docs.google.com/document/d/1NCwyFpmBtBSUrRxWQ9xv5lD8VX_MUPode0hODerJl0Y/edit#heading=h.ln4ur33cg0v7).
 
 En las primeras dos sesiones se practicará el uso del software y sus funcionalidades básicas, en las siguientes 6 sesiones se desarrollarán aplicaciones de algoritmos de machine learning para solucionar problemas de negocios en marketing y finanzas. Se espera que los participantes sean capaces de modificar plantillas prediseñadas para ajustarlas a los problemas en estudio. 
 
 Los casos seleccionados son tres:
 1.	Predicción de precios de casas 
-2.	[Predicción de clientes que entrarán en mora](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Tarjetas%20de%20Cr%C3%A9dito.pdf) con su tarjeta de crédito.
-3.	[Caso de segmentación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Botes%20(B).pdf)  de clientes de forma automatizada
+2.	[Predicción de clientes que entrarán en mora](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_5_6_Clasificacion/Tarjetas_de_Credito.pdf) con su tarjeta de crédito.
+3.	[Caso de segmentación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_7_8_Segmentacion/Botes.pdf)  de clientes de forma automatizada
 
 
 ### Que esperar de este curso:
@@ -100,15 +100,15 @@ En esta etapa experimental se tendrá una o dos tareas, pero no serán evaluadas
 
 ### Sesión 0: Instalación
 Esta sesión consistirá en una pequeña introducción al curso y la instalación de los softwares requeridos: R, RStudio, Git (junto con la creación de su cuenta de github).
-Usted puede omitir esta sesión siguiendo las indicaciones del [tutorial de instalación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesion 0 instalacion/Tutorial Instalaci%C3%B3n.pdf) o los [videos de instalación](https://docs.google.com/document/d/1NCwyFpmBtBSUrRxWQ9xv5lD8VX_MUPode0hODerJl0Y/edit#heading=h.ln4ur33cg0v7).
+Usted puede omitir esta sesión siguiendo las indicaciones del [tutorial de instalación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesion_0_instalacion/Tutorial.pdf) o los [videos de instalación](https://docs.google.com/document/d/1NCwyFpmBtBSUrRxWQ9xv5lD8VX_MUPode0hODerJl0Y/edit#heading=h.ln4ur33cg0v7).
 Explore las funcionalidades de R y trate de ejecutar los archivos por su cuenta.
 
 ### Sesiones 1-2: Introducción a R
 Estas sesiones consistirán en una introducción a lectura, manipulación y escritura de datos en R.
 
-* [Introducción básica a R](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/Intro_basica.html): funcionalidades básicas, Lectura/ Escritura de Información, Manipulaciones de datos simples.
-* [Cálculos básicos en R](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/Conceptos-B%C3%A1sicos.html): operaciones con los tipos de datos básicos.
-* [Data Frames](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
+* [Introducción básica a R](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/Intro_basica.html): funcionalidades básicas, Lectura/ Escritura de Información, Manipulaciones de datos simples.
+* [Cálculos básicos en R](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/Conceptos_Basicos.html): operaciones con los tipos de datos básicos.
+* [Data Frames](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
 
 
 ### Sesiones 3-4: Regresión Lineal y predicción de precios
@@ -122,11 +122,11 @@ Estas sesiones abordarán un problema más específica que la regresión: la cla
 
 * Se dará una breve introducción a lo que hacen la regresión logística y los árboles de decisión.
 
-* Usted deberá leer antes de clases el caso de [Tarjetas de Crédito](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Tarjetas%20de%20Cr%C3%A9dito.pdf) 
+* Usted deberá leer antes de clases el caso de [Tarjetas de Crédito](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_5_6_Clasificacion/Tarjetas_de_Credito.pdf) 
 
-* Opcionalmente deberá iniciar la lectura del [proceso de clasificación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Analisis_de_Clasificacion.html) antes de clase.
+* Opcionalmente deberá iniciar la lectura del [proceso de clasificación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_5_6_Clasificacion/Analisis_de_Clasificacion.html) antes de clase.
 
-* En clase se desarrollará el caso de las [tarjetas de crédito](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Default_Tarjeta_Credito_2.html)
+* En clase se desarrollará el caso de las [tarjetas de crédito](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_5_6_Clasificacion/Default_Tarjeta_Credito_2.html)
 
 * Se darán dos tipos de soluciones, una utilizando regresión logística y otra con árboles de decisión.
 
@@ -135,10 +135,10 @@ Estas sesiones abordarán el caso del aprendizaje no supervisado: la segmentaci�
 
 * Se dará una breve introducción a lo que hacen la clusterización jerárquica y KNN.
 
-* Usted deberá leer el [caso de los botes](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Botes%20(B).pdf) antes de la clase.
+* Usted deberá leer el [caso de los botes](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_7_8_Segmentacion/Botes.pdf) antes de la clase.
 
-* Opcionalmente deberá iniciar la lectura del [proceso de segmentación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Analisis_de_Cluster.html) antes de clase.
+* Opcionalmente deberá iniciar la lectura del [proceso de segmentación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_7_8_Segmentacion/Analisis_de_Cluster.html) antes de clase.
 
-* En clase se estudiará ese mismo tutorial y se usará la [aplicación interactiva](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Analisis_de_Cluster_Interactivo.Rmd).
+* En clase se estudiará ese mismo tutorial y se usará la [aplicación interactiva](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_7_8_Segmentacion/Analisis_de_Cluster_Interactivo.Rmd).
 
 # ... página en construcción
