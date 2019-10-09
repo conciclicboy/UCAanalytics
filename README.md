@@ -143,7 +143,7 @@ Estas sesiones abordarán el caso del aprendizaje no supervisado: la segmentaci�
 * En clase se estudiará ese mismo tutorial y se usará la [aplicación interactiva](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_7_8_Segmentacion/Analisis_de_Cluster_Interactivo.Rmd).
 
 ### Sesion 8 (opcional): Text analytics y tweets de Nayib Bukele
-Se hará una sesión adicional donde se hará breve analítica de texto con los tweets del presidente. Sujeta a disponibilidad de tiempo.
+**Sujeta a disponibilidad de tiempo:** se hará una sesión adicional donde se hará breve analítica de texto con los tweets del presidente.
 
 * Introducción a la Api de twitter
 * Exploración de Datos
