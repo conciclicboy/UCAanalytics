@@ -1,8 +1,17 @@
 ## Analítica Aplicada a los Negocios
 
 El curso comprende una introducción a herramientas analíticas aplicadas a problemas de negocios. En la actualidad existen varias herramientas Business Analytics que pueden ayudar al análisis de la información, este curso será desarrollado con el software estadístico R. Se desarrollarán casos de estudio implementando algoritmos de machine learning en finanzas y marketing, y se espera que al finalizar el curso el estudiante no solamente sea capaz de ejecutar archivos en R, sino que desarrolle la capacidad de entender que quiere obtener y que modelo debe utilizar para obtenerlo, sin importar la herramienta que esté utilizando.
- Agradezco especialmente al profesor [Theodoros Evgeniou](https://faculty.insead.edu/theodoros-evgeniou/) por permitirme utilizar el material de su curso [Data Analytics for Business](http://inseaddataanalytics.github.io/INSEADAnalytics/) impartido en [INSEAD](https://www.insead.edu/home/), la mejor escuela de negocios del mundo; así como a mis profesores en [Georgia Tech](https://www.scheller.gatech.edu/index.html), cuyo material he reutilizado en la formulación de los casos de análisis de regresión.
-[Eduardo Aguilar](https://sv.linkedin.com/in/eduardoaguilar-sv) **no es el autor** de ninguno de los materiales contenidos en este repositorio, solamente ha adaptado una versión en español lo que los autores realizaron, todo el crédito es de ellos.
+
+***Sitio en construcción***: Los detalles de inscripción y fecha de inicio se darán más adelante en coordinación con la administración de la maestría en finanzas.
+
+### Profesor:
+[Eduardo Arnoldo Aguilar Cañas](https://sv.linkedin.com/in/eduardoaguilar-sv)
+<br>
+earnoldo.aguilar en gmail
+
+### Créditos:
+Agradezco especialmente al profesor [Theodoros Evgeniou](https://faculty.insead.edu/theodoros-evgeniou/) por permitirme utilizar el material de su curso [Data Analytics for Business](http://inseaddataanalytics.github.io/INSEADAnalytics/) impartido en [INSEAD](https://www.insead.edu/home/), la mejor escuela de negocios del mundo; así como a mis profesores en [Georgia Tech](https://www.scheller.gatech.edu/index.html), cuyo material he reutilizado en la formulación de los casos de análisis de regresión.
+Eduardo Aguilar **no es el autor** de ninguno de los materiales contenidos en este repositorio, solamente ha adaptado una versión en español lo que los autores realizaron, todo el crédito es de ellos.
 
 ### Objetivo
 La Universidad Centroamericana José Simeón Cañas [UCA](http://www.uca.edu.sv/) impartirá a partir de 2019 un curso de Analítica Aplicada como complemento al postgrado de Business Intelligence. La incorporación de Business Analytics tiene como objetivo proporcionar las herramientas de análisis necesarias para la optimización de decisiones y resultados basados en los procesos y recursos que posee la organización.
@@ -11,7 +20,7 @@ La Universidad Centroamericana José Simeón Cañas [UCA](http://www.uca.edu.sv/
 Profesionales interesados en el análisis de información cuantitativa. Analistas de datos, estadísticas, business intelligence, minería de datos, ciencia de datos, entre otros.
 
 ### Requisitos
-Poseer laptop con al menos 2GB de RAM, 1.5 GHz, 2 GB de espacio vacío. Si su laptop no tiene estos requisitos, usted puede tomar el curso, pero el software se hará más lento. Además, debe tener privilegios administrativos para instalar y desinstalar programas. No es necesario tener experiencia en programación.
+Poseer laptop con al menos 2GB de RAM, 1.5 GHz, 2 GB de espacio vacío. Si su laptop no tiene estos requisitos, usted puede tomar el curso, pero el software se hará más lento. Además, debe tener privilegios administrativos para instalar y desinstalar programas. **No es necesario tener experiencia en programación**.
 
 ### Contenidos:
 
@@ -55,44 +64,81 @@ En las primeras dos sesiones se practicará el uso del software y sus funcionali
 
 Los casos seleccionados son tres:
 1.	Predicción de precios de casas 
-2.	Predicción de clientes que entrarán en mora con su tarjeta de crédito.
-3.	[Caso de segmentación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Botes%20(B).pdf)  de clientes de forma automatizada
+2.	[Predicción de clientes que entrarán en mora](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Tarjetas%20de%20Cr%C3%A9dito.pdf) con su tarjeta de crédito.
+3.	[Caso de segmentación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Botes%20(B).pdf)  de clientes de forma automatizada
 
 
 ### Que esperar de este curso:
 
-•	***Mucho código***. Se espera que el participante aprenda a utilizar el software y ensamblar fragmentos de código para realizar análisis de datos.
+*	***Mucho código***. Se espera que el participante aprenda a utilizar el software y ensamblar fragmentos de código para realizar análisis de datos.
 
-•	***Casos reales*** de problemáticas que si pueden ser solucionados con estas técnicas.
+*	***Casos reales*** de problemáticas que si pueden ser solucionados con estas técnicas.
 
-•	***Actualizarse***. Conocer las técnicas analíticas más comunes en el análisis de datos.
+*	***Actualizarse***. Conocer las técnicas analíticas más comunes en el análisis de datos.
 
-•	***Entender los procesos clave*** de análisis de datos en proyectos de analítica.
+*	***Entender los procesos clave*** de análisis de datos en proyectos de analítica.
 
 ### Que ***NO*** esperar de este curso:
 
-•	***No es una clase hablada** solo con diapositivas. Todas las clases usarán RStudio.
+*	***No es una clase hablada*** solo con diapositivas. Todas las clases usarán RStudio.
 
-•	***No es un curso de R***. Se dará una introducción básica al software para facilitar el desarrollo de las aplicaciones. No se construirá código desde cero, sino que modificarán pequeñas partes de los modelos.
+*	***No es un curso de R***. Se dará una introducción básica al software para facilitar el desarrollo de las aplicaciones. No se construirá código desde cero, sino que modificarán pequeñas partes de los modelos.
 
-•	***No es un curso matemático***. No se explicarán los conceptos matemáticos de manera profunda, sino el funcionamiento de los algoritmos de forma intuitiva.
+*	***No es un curso matemático***. No se explicarán los conceptos matemáticos de manera profunda, sino el funcionamiento de los algoritmos de forma intuitiva.
 
-•	***No es una clase de BI***. Es una clase de business analytics como complemento a BI. Este curso no abordará manejo de bases de datos, integridad de la información y creación de visualizaciones.
+*	***No es una clase de BI***. Es una clase de business analytics como complemento a BI. Este curso no abordará manejo de bases de datos, integridad de la información y creación de visualizaciones. Se cubrirán esos temas en otros módulos.
 
 ### Acerca de los Datos:
 Los casos de estudio son casos reales que fueron experimentados por empresas en el pasado. Los datos, sin embargo, no son los datos originales, ya que estos son confidenciales, pero los datos presentados tienen el mismo espíritu de los datos originales.
 
-### Créditos:
-Eduardo Aguilar no es el autor de ninguno de los materiales utilizados, solamente ha adaptado una versión en español de lo que los autores realizaron, todo el crédito es de ellos.
-
 ### Evaluaciones:
 En esta etapa experimental se tendrá una o dos tareas, pero no serán evaluadas.
 
-### Profesor:
-[Eduardo Arnoldo Aguilar Cañas](https://sv.linkedin.com/in/eduardoaguilar-sv)
-<br>
-earnoldo.aguilar en gmail
+---
 
+## Sesiones
+
+### Sesión 0: Instalación
+Esta sesión consistirá en una pequeña introducción al curso y la instalación de los softwares requeridos: R, RStudio, Git (junto con la creación de su cuenta de github).
+Usted puede omitir esta sesión siguiendo las indicaciones del [tutorial de instalación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesion 0 instalacion/Tutorial Instalaci%C3%B3n.pdf) o los [videos de instalación](https://docs.google.com/document/d/1NCwyFpmBtBSUrRxWQ9xv5lD8VX_MUPode0hODerJl0Y/edit#heading=h.ln4ur33cg0v7).
+Explore las funcionalidades de R y trate de ejecutar los archivos por su cuenta.
+
+### Sesiones 1-2: Introducción a R
+Estas sesiones consistirán en una introducción a lectura, manipulación y escritura de datos en R.
+
+* [Introducción básica a R](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/Intro_basica.html): funcionalidades básicas, Lectura/ Escritura de Información, Manipulaciones de datos simples.
+* [Cálculos básicos en R](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/Conceptos-B%C3%A1sicos.html): operaciones con los tipos de datos básicos.
+* [Data Frames](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%201%202%20Introduccion%20R/DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
+
+
+### Sesiones 3-4: Regresión Lineal y predicción de precios
+En estas sesiones se introducirá un caso de análisis de precios en casas del housing dataset.
+* Se dará una breve introducción a los supuestos que hace la regresión lineal.
+* Se revisará la implementación de la regresión lineal en R y el proceso de diagnóstico/validación de la misma.
+* Si hay más tiempo se abordarán otros métodos como árbol de decisión.
+
+### Sesiones 5-6: Clasificación y predicción de cuentas por cobrar
+Estas sesiones abordarán un problema más específica que la regresión: la clasificación.
+
+* Se dará una breve introducción a lo que hacen la regresión logística y los árboles de decisión.
+
+* Usted deberá leer antes de clases el caso de [Tarjetas de Crédito](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Tarjetas%20de%20Cr%C3%A9dito.pdf) 
+
+* Opcionalmente deberá iniciar la lectura del [proceso de clasificación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Analisis_de_Clasificacion.html) antes de clase.
+
+* En clase se desarrollará el caso de las [tarjetas de crédito](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%205%206%20Clasificacion/Default_Tarjeta_Credito_2.html)
+
+* Se darán dos tipos de soluciones, una utilizando regresión logística y otra con árboles de decisión.
+
+### Sesiones 7-8: Análisis de Clusters y segmentación de mercado
+Estas sesiones abordarán el caso del aprendizaje no supervisado: la segmentación
+
+* Se dará una breve introducción a lo que hacen la clusterización jerárquica y KNN.
+
+* Usted deberá leer el [caso de los botes](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Botes%20(B).pdf) antes de la clase.
+
+* Opcionalmente deberá iniciar la lectura del [proceso de segmentación](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Analisis_de_Cluster.html) antes de clase.
+
+* En clase se estudiará ese mismo tutorial y se usará la [aplicación interactiva](https://github.com/conciclicboy/UCAanalytics/blob/master/Sesiones/Sesiones%207%208%20Segmentacion/Analisis_de_Cluster_Interactivo.Rmd).
 
 # ... página en construcción
-</div>
