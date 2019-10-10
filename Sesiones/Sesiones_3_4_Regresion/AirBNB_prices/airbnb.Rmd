@@ -1,6 +1,6 @@
 ---
-title: "Métodos de Clasificación"
-author: "T. Evgeniou (traducción por Eduardo Aguilar)"
+title: "Métodos de Regresión"
+author: "Eduardo Aguilar (inspirado en INSEADAnalytics)"
 output:
   html_document:
     css: default.css
@@ -352,7 +352,7 @@ print((paste("Modelo 4:", mae4)))
 ```
 
 
-## Modelo 5: Ensamblando modelos
+## Modelo 5: Ensamblando modelos 1 y 2 con los datos
 Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.
 
 ```{r, warning=FALSE, message=FALSE}
@@ -383,8 +383,11 @@ print((paste("Modelo 5:", mae5)))
 
 ```
 
-Usted puede siempre construir un modelo final que sea capaz de superar modelos anteriores
+## Conclusiones
+* Si se tienen modelos con resultados diferentes, es posible construir un modelo final que sea capaz de superar modelos anteriores simplemente ensamblando los resultados y aplicando XGboost.
 
+* Las propiedades de homocedasticidad y pvalues son importantes mientras se considere únicamente modelos lineales que asuman normalidad, para modelos de regresión que no sean lineales la métrica de comparación más apropiada sería la desviación absoluta media o la desviación cuadrática media.
 
+* Para mejorar los resultados debemos mejorar el análisis exploratorio, construir nuevas variables o mejorar los datos iniciales.
 
-
+> Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.
