@@ -1,0 +1,393 @@
+---
+title: "Métodos de Regresión"
+author: "Eduardo Aguilar (inspirado en INSEADAnalytics)"
+output:
+  html_document:
+    css: default.css
+    theme: paper
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  #pdf_document:
+    #includes:
+      #in_header: /AnalyticsStyles/default.sty
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## AirBnB Pricing Tool
+
+## El contexto de negocios
+AirBnB fue fundada en 2008 por Brian Cheski, Joe Gebbia y Nathan Blecharczyk como AirBed & Breakfast, un sitio de ventas online para servicios de hospedajes de corto tiempo que incluía personas comunes y profesionales dedicados a ese negocio. Con el paso de los años, el porcentaje de personas que se dedican profesionalmente a recibir huéspedes ha incrementado, y está comenzando a desplazar a las personas comunes que ponen sus propiedades en alquiler, amenazando la naturaleza y propuesta de valor de AirBnB que ofrecía servicios económicos y personalizados. En este contexto, el departamento de marketing desea iniciar una campaña para atraer más anfitriones privados. Para hacer esto, ellos solicitaron al departamento de analítica crear un modelo que ayudara a entender a anfitriones potenciales cuanto dinero podrían obtener por poner su propiedad a disposición de AirBnB.
+
+Como plan piloto, Amsterdam fue elegida como una ciudad modelo con el servicio debido a su regulación "amigable" con AirBnB y alto número de clientes de estancias cortas. La solución presentada, sin embargo, está diseñada para ser independiente de la ciudad y por lo tanto, un proceso replicable en otras ciudades.
+
+
+## Los datos
+La base de datos fue extraida del sitio http://tomslee.net/airbnb-data-collection-get-the-data, con la carpeta correspondiente a la ciudad de Amsterdam.
+Estos fueron recolectados de la página oficial de AirBnB por Tom Slee. La base contiene 18723 observaciones con 15 variables.
+
+
+Nombre                     | Descripción
+:--------------------------|:--------------------------------------------------------------------
+room_id	                   | ID de la habitación en alquiler
+survey_id                  | ID de la consulta
+host_id                    | ID del anfitrión
+room_type                  | Casa completa, habitación privada o habitación compartida
+city                       | Ciudad
+neighborhood               | Subregión de la ciudad en la que se hace la consulta (Bijlmer Centrum, Bijlmer Oost, Bos en Lommer, Buitenveldert / Zuidas, Centrum Oost, Centrum West, De Aker / Nieuw Sloten, De Baarsjes / Oud West, De Pijp / Rivierenbuurt, Gaasperdam / Driemond, Geuzenveld / Slotermeer, Ijburg / Eiland Zeeburg, Noord-West / Noord-Midden, Noord Oost, Noord West, Oostelijk Havengebied / Indische Buurt, Osdorp, Oud Noord, Oud Oost, Slotervaart, Watergraafsmeer, Westerpark, Westpoort)
+reviews                    | Número de revisiones que ha recibido. Como 70% de los huéspedes dan una revisión, este puede ser usado para estimar el número de visitas. Note que este estimado no será confiable para una lista lista pequeña, pero tomada en una ciudad puede ser una métrica muy útil.
+overall_satisfaction	     | Rating promedio que recibió la unidad de todos los reviews, en escala de 1 al 5. 
+accommodates               | Número de personas que pueden ser acomodadas
+bedrooms                   | Número de cuartos en la unidad
+minstay                    | Estadía mínima
+latitude                   | Ubicación geográfica
+longitude                  | Ubicación geográfica
+last_modified              | Fecha de consulta de los datos
+price                      | Precio de la unidad
+
+Leyendo los datos
+
+```{r}
+#obteniendo directorio
+getwd()
+  
+b<-read.csv("./data/tomslee_airbnb_amsterdam_1476_2017-07-22.csv")
+
+### Omitir este código
+#leyendo todos los archivos en ese directorio
+#archivos <- list.files(path="data")
+#for (file in archivos){
+#  a<-read.csv(paste0("./data/",file))
+  #b<-rbind(b,a)
+#}
+###
+
+
+#Voy a hacer una copia como una matriz solo para imprimirl
+#No es necesario hacer esto cuando se trabaja en R, esto solo es
+#Porque tenemos un archivo markdown y los data frames se imprimen feo
+a<-data.matrix(b)
+
+#Imprimiento las primeras 3 filas: t significa transponer, 
+#head(a,3) significa primeras 3 filas de a
+#round(a,2) significa redondear los valores a 2 decimales
+
+knitr::kable({
+  #df <- t(head(round(a,2), 5))  
+  df <- t(head(b, 2))
+  colnames(df) <- sprintf("%02d", 1:ncol(df))
+  df
+})
+
+
+```
+
+## Sacando estadísticas de las columnas
+Vamos a ver que hay dentro de cada variable para decidir si vamos a botar algunas.
+```{r}
+summary(b)
+```
+
+De acá es fácil determinar que algunas columnas no podremos utilizarlas para nuestro análisis, entonces simplemente vamos a deshacernos de ellas. No siempre es recomendado hacer esto, existen criterios de imputación de variables cuando se tienen datos faltantes.
+
+
+## Eliminando filas innecesarias
+Ya que hay columnas que están llenas de campos vacíos o extraños las vamos a eliminar para no tomarlas en el análisis
+
+```{r}
+#b$var1 <- NULL
+#b$var2 <- NULL
+#b$var3 <- NULL
+#b$var4 <- NULL
+b$country <- NULL
+b$borough <- NULL
+b$bathrooms <- NULL
+b$minstay <- NULL
+colnames(b)
+
+```
+
+
+## Explorando las variables
+
+### Distribución de precios
+Si usted quiere pronosticar precios, lo primero que debe tener es una idea de como están distribuidos los precios.
+
+```{r,message=FALSE,warning=FALSE}
+library(ggplot2)
+pl <- ggplot(b,aes(x=price))
+pl+geom_histogram(fill='blue',alpha=0.5)+theme_minimal()
+```
+
+El problema con el histograma anterior es que hay demasiados outliers o valores extremos. Así se vuelve muy difícil visualizar cualquier tipo de correlación, y además, como muchos de estos modelos tienen soluciones numéricas, la convergencia de los mismos se vuelve extraña. Lo que vamos a hacer es tomar los datos entre los percentiles 1 y 99 para la variable precio.
+
+```{r,message=FALSE,warning=FALSE}
+#filtrando data frame entre percentiles 1 y 99 de la variable precio
+b<- b [(b$price>=quantile(b$price,0.01)) & (b$price <= quantile(b$price,0.99)),]
+
+#Graficando nuevamente
+pl <- ggplot(b,aes(x=price))
+pl+geom_histogram(fill='blue',alpha=0.5)+theme_minimal()
+```
+
+Este gráfico se ve mucho mejor, se puede observar que la mayor parte de los precios se ubican entre $100 y $200.
+
+
+
+
+### Diagramas de dispersión
+Cuando se trata de un problema de regresión o pronóstico, lo más apropiado es hacer un diagrama de dispersión. para verificar si los datos se distribuyen linealmente con respecto a alguna variable o ver algún tipo de correlación visual. Puede parecer demasiado empírico, y en efecto, estas metodologías son de naturaleza empírica, así que manos a la obra. Dado que algunas variables son categóricas, primero procederemos a crear variables dummy.
+
+```{r, message=FALSE, warning=FALSE }
+#fig.height=4.5,
+#Para no hacernos la vida imposible podemos hacer muchos scatter plot
+#utilizando la función visualize de la librería radiant.data
+#library(ggplot2)
+#library(lubridate)
+library(radiant.data)
+visualize(dataset=b,
+          xvar=c("reviews","overall_satisfaction","accommodates","bedrooms",
+                 "latitude", "longitude"),
+          yvar="price",
+          type="scatter",
+          custom=FALSE
+)
+```
+
+### Diagrama de caja de los vecindarios
+Con los vecindarios dibujaremos individualmente el diagrama ya que son muchos. En este caso usaremos un boxplot porque es una visualización más para este tipo de variables categóricas.
+
+```{r}
+pl<-ggplot(data=b,aes(y=price,x=neighborhood))
+pl+geom_boxplot(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element_text(angle=90, hjust=1))
+```
+
+Pero debido a que son una variable categórica, debemos intentar incluir solo a los vecindarios que sean estadísticamente relevantes dentro de nuestra regresión. Nos vamos a deshacer de los vecindarios que tengan menos de x% de elementos
+
+```{r}
+# límite inferior de los vecindarios a considerar
+# Podemos agarrar 1%-2%-3%-4%-5% de elementos
+lim_inferior<-nrow(b)*0.04
+
+#conteo_vec
+pl<-ggplot(data=b,aes(x=neighborhood))
+pl+geom_bar(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element_text(angle=90, hjust=1)) +geom_hline(yintercept = lim_inferior)
+
+```
+
+### Conteo de variables categóricas
+Ahora que tenemos un límite inferior para los vecindarios podemos volver a reducir el número de datos, limitandonos solo a los vecindarios con más del x% de elementos
+
+```{r}
+# Todo lo que debe hacer es cambiar el límite inferior basado en los resultados
+# anteriores. En este caso le he puesto 200, usted puede cambiarlo, o no.
+c<- b[b$neighborhood %in%  names(table(b$neighborhood))[table(b$neighborhood) >= 700],]
+
+#Volvamos a graficar el diagrama de dispersión
+pl<-ggplot(data=c,aes(y=price,x=neighborhood))
+pl+geom_boxplot(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element_text(angle=90, hjust=1))
+```
+
+
+Ahora, después de ver estos diagramas, tiene un poco más de sentido incluir dichos vecindarios como potenciales variables de nuestro modelo, pues el precio medio depende de estos.
+
+## Separando datos
+Suponga que usted toma todos los datos y crea un modelo con una precisión casi perfecta que le permitiría predecir el precio de los alquileres de airbnb. ¿Tomaría usted la decisión de implementarlo inmediatamente?
+Por supuesto que es una decisión personal sin una respuesta correcta, pero en la práctica no se recomienda hacer eso. La razón es que todos los modelos deben ser validados estadísticamente para estar seguro que su funcionamiento sea consistente en el tiempo.
+Más adelante veremos a detalle esta técnica, pero en este momento, simplemente dividiremos los datos en dos grupos: uno con el 90% y otro con el 10%.
+
+Antes de hacer eso vamos a codificar las variables categóricas con One Hot encoding.
+Los modelos base de R como linear model (lm) pueden lidiar con variables categóricas fácilmente. Sin embargo, otro tipo de modelos no tiene esa funcionalidad, así que implementaremos esto desde antes:
+
+```{r}
+# One Hot Encoding
+vecindarios<-model.matrix(~neighborhood-1,head(b))
+tipos_cuarto<-model.matrix(~room_type-1,head(b))
+b <- cbind(b, vecindarios,tipos_cuarto)
+```
+
+
+Ahora podemos proceder a separar los datos:
+```{r}
+# Please ENTER the percentage of data used for estimation
+porcion_train = 0.9
+porcion_test = 0.1
+
+# Librería dplyr
+library(dplyr)
+
+# Creando índice con función "mutate"" de dplyr
+# Esto lo utilizaremos solo como referencia
+b <- mutate(b,id = row_number())
+
+# Creando datos de entrenamiento con función "sample_frac" de dplyr
+# La función toma una muestra aleatoria de tamaño "porcion_train" de "b"
+train_set <- sample_frac(b,porcion_train)
+
+# Creando datos de evaluación con función "anti_join" de dplyr
+# La función extraen los datos de "b" que no coinciden con "train_set"
+# usando como referencia la columna "id"
+test_set <- anti_join(b, train_set, by = 'id')
+```
+
+Al tener listos los datos, podemos pasar a crear nuestro modelo con los datos de entrenamiento (train_set).
+
+## Modelo
+Vamos a construir varios modelos y seleccionaremos el que funcione mejor.
+Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efecto esto así es, usted raramente encontrará el mejor modelo a la primera iteración. Tampoco encontraremos el mejor modelo en esta sesión, pero pretenedemos acercarnos a una solución subóptima que sea mejor que una solución aleatoria.
+
+
+### Modelo 1: Regresión Lineal
+
+```{r,message=FALSE, warning=FALSE }
+# Creando modelo
+model_1<- lm(formula = price ~ room_type + neighborhood + 
+             reviews +overall_satisfaction + accommodates +
+             bedrooms,data = train_set)
+
+
+# Sacando predicciones
+pred_train_1=predict(model_1,train_set)#entrenamiento
+pred_test_1=predict(model_1,test_set)#evaluación
+
+# Reportando modelo: usted solo necesita poner "summary(model)"
+# Eso le entrega los resultados del modelo pero se imprime en formato feo
+# Nosotros lo vamos a imprimir como una "xtable" en "knitr::kable"
+library(xtable)
+knitr::kable(xtable(summary(model_1)))
+
+```
+
+La mayoría de variables son signioficativas con p-values pequeños.
+
+### Modelo 2: Regresión log-lineal
+
+```{r}
+# Creando modelo
+model_2<-lm(formula = log(price) ~ room_type + neighborhood + 
+             reviews +overall_satisfaction + log(accommodates) +
+             bedrooms,data = train_set)
+
+# Sacando predicciones
+pred_train_2=exp(predict(model_2,train_set))
+pred_test_2=exp(predict(model_2,test_set))
+
+# Reportando modelo
+knitr::kable(xtable(summary(model_2)))
+```
+
+
+### Modelo 3: Arbol de regresión
+
+
+```{r,message=FALSE, warning=FALSE}
+library(rpart)
+model_3 <- rpart(price ~ room_type + neighborhood + 
+             reviews +overall_satisfaction + accommodates +
+             bedrooms,data = train_set, method="anova")
+
+# Sacando predicciones
+pred_train_3=predict(model_3,train_set)#entrenamiento
+pred_test_3=predict(model_3,test_set)#evaluación
+```
+
+### Modelo 4: XGBoost
+```{r,message=FALSE, warning=FALSE}
+library(xgboost)
+
+# XGBoost, a diferencia de lm, no convierte las variables categóricas que aparecen como
+# caracteres a variables binarias (0/1). Tendremos que usar la codificación
+
+# Primero vamos a definir las matrices de entrenamiento y evaluación
+X_train<- train_set[,c(colnames(vecindarios),colnames(tipos_cuarto),"reviews",
+                       "overall_satisfaction", "accommodates","bedrooms",
+                       "longitude", "latitude")]
+
+X_test<- test_set[,c(colnames(vecindarios),colnames(tipos_cuarto),"reviews",
+                       "overall_satisfaction", "accommodates","bedrooms",
+                     "longitude", "latitude")]
+
+# Luego definimos los vectores de la variable dependiente
+y_train<- train_set$price
+y_test<-test_set$price
+
+# Modelo
+model_4 <- xgboost(data = as.matrix(X_train), label = as.matrix(y_train), max.depth = 4, 
+                   eta = 0.3, nthread = 2, nrounds = 100, objective = "reg:linear",
+                   eval_metric="rmse",verbose = 0)
+
+# Predicciones
+pred_train_4<-predict(model_4,as.matrix(X_train))
+pred_test_4<-predict(model_4,as.matrix(X_test))
+
+```
+
+
+## Evaluando los modelos
+Luego de ajustar el/los modelo/s debemos evaluar el desempeño de los mismos. Para el caso de la regresión, la métrica a utilizar es llamada MAE (Mean Absolute Error) que en inglés significa Error Absoluto Medio.
+
+Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros factores para asegurar la significancia estadística del modelo como normalidad, homecedasticidad, etc. Sin embargo, a la hora de comparar un modelo lineal con uno no lineal, no se pueden utilizar todos estos factores ya que no son parte de los supuestos. Es por eso que nos enfocaremos solamente en la desviación absoluta media.
+
+```{r,message=FALSE, warning=FALSE}
+
+#Librería de métricas
+#install.packages("Metrics")
+library(Metrics)
+mae1<-mae(test_set$price,pred_test_1)
+mae2<-mae(test_set$price,pred_test_2)
+mae3<-mae(test_set$price,pred_test_3)
+mae4<-mae(test_set$price,pred_test_4)
+
+# Mostrando resultados
+print((paste("Modelo 1:", mae1)))
+print((paste("Modelo 2:", mae2)))
+print((paste("Modelo 3:", mae3)))
+print((paste("Modelo 4:", mae4)))
+
+```
+
+
+## Modelo 5: Ensamblando modelos 1 y 2 con los datos
+Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.
+
+```{r, warning=FALSE, message=FALSE}
+
+# Primero vamos a añadir a X_train y X_test los resultados del modelo lineal
+y_1<- as.matrix(pred_train_1)
+y_2<- as.matrix(pred_train_2)
+X_train_2<-cbind(X_train,y_1,y_2)
+
+y_1<- as.matrix(pred_test_1)
+y_2<- as.matrix(pred_test_2)
+X_test_2<-cbind(X_test, y_1,y_2)
+
+# Modelo
+model_5 <- xgboost(data = as.matrix(X_train_2), label = as.matrix(y_train), max.depth = 4, 
+                   eta = 0.3, nthread = 2, nrounds = 120, objective = "reg:linear",
+                   eval_metric="rmse", verbose = 0)
+
+# Predicciones
+pred_train_5<-predict(model_5,as.matrix(X_train_2))
+pred_test_5<-predict(model_5,as.matrix(X_test_2))
+
+# Error Medio
+mae5<-mae(test_set$price,pred_test_5)
+
+# Mostrando Resultados
+print((paste("Modelo 5:", mae5)))
+
+```
+
+## Conclusiones
+* Si se tienen modelos con resultados diferentes, es posible construir un modelo final que sea capaz de superar modelos anteriores simplemente ensamblando los resultados y aplicando XGboost.
+
+* Las propiedades de homocedasticidad y pvalues son importantes mientras se considere únicamente modelos lineales que asuman normalidad, para modelos de regresión que no sean lineales la métrica de comparación más apropiada sería la desviación absoluta media o la desviación cuadrática media.
+
+* Para mejorar los resultados debemos mejorar el análisis exploratorio, construir nuevas variables o mejorar los datos iniciales.
+
+> Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.
