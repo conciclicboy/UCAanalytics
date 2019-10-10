@@ -117,6 +117,7 @@ En estas sesiones se introducirá un caso de análisis de precios en casas del h
 * Se dará una breve introducción a los supuestos que hace la regresión lineal.
 * Se revisará la implementación de la regresión lineal en R y el proceso de diagnóstico/validación de la misma.
 * Si hay más tiempo se abordarán otros métodos como árbol de decisión.
+* Se desarrollará en clase el caso de [AirBnB](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AirBNB_prices/airbnb.html)
 
 ### Sesiones 5-6: Clasificación y predicción de cuentas por cobrar
 Estas sesiones abordarán un problema más específica que la regresión: la clasificación.
