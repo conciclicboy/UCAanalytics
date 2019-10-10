@@ -201,7 +201,18 @@ Suponga que usted toma todos los datos y crea un modelo con una precisión casi 
 Por supuesto que es una decisión personal sin una respuesta correcta, pero en la práctica no se recomienda hacer eso. La razón es que todos los modelos deben ser validados estadísticamente para estar seguro que su funcionamiento sea consistente en el tiempo.
 Más adelante veremos a detalle esta técnica, pero en este momento, simplemente dividiremos los datos en dos grupos: uno con el 90% y otro con el 10%.
 
+Antes de hacer eso vamos a codificar las variables categóricas con One Hot encoding.
+Los modelos base de R como linear model (lm) pueden lidiar con variables categóricas fácilmente. Sin embargo, otro tipo de modelos no tiene esa funcionalidad, así que implementaremos esto desde antes:
 
+```{r}
+# One Hot Encoding
+vecindarios<-model.matrix(~neighborhood-1,head(b))
+tipos_cuarto<-model.matrix(~room_type-1,head(b))
+b <- cbind(b, vecindarios,tipos_cuarto)
+```
+
+
+Ahora podemos proceder a separar los datos:
 ```{r}
 # Please ENTER the percentage of data used for estimation
 porcion_train = 0.9
@@ -222,11 +233,9 @@ train_set <- sample_frac(b,porcion_train)
 # La función extraen los datos de "b" que no coinciden con "train_set"
 # usando como referencia la columna "id"
 test_set <- anti_join(b, train_set, by = 'id')
-
 ```
 
-
-Ahora que tenemos listos los datos, podemos pasar a crear nuestro modelo con los datos de entrenamiento (train_set).
+Al tener listos los datos, podemos pasar a crear nuestro modelo con los datos de entrenamiento (train_set).
 
 ## Modelo
 Vamos a construir varios modelos y seleccionaremos el que funcione mejor.
@@ -236,22 +245,21 @@ Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efect
 ### Modelo 1: Regresión Lineal
 
 ```{r,message=FALSE, warning=FALSE }
-#,results='asis'
-#Creando modelo
-model_1<- lm(formula = scale(price) ~ room_type + neighborhood + 
+# Creando modelo
+model_1<- lm(formula = price ~ room_type + neighborhood + 
              reviews +overall_satisfaction + accommodates +
              bedrooms,data = train_set)
+
+
+# Sacando predicciones
+pred_train_1=predict(model_1,train_set)#entrenamiento
+pred_test_1=predict(model_1,test_set)#evaluación
 
 # Reportando modelo: usted solo necesita poner "summary(model)"
 # Eso le entrega los resultados del modelo pero se imprime en formato feo
 # Nosotros lo vamos a imprimir como una "xtable" en "knitr::kable"
 library(xtable)
-#knitr::kable(xtable(summary(model_1)))
-summary(model_1)
-#Librería de métricas
-#install.packages("Metrics")
-#library(Metrics)
-#mae(train_set$price,predict(model,train_set)
+knitr::kable(xtable(summary(model_1)))
 
 ```
 
@@ -260,52 +268,122 @@ La mayoría de variables son signioficativas con p-values pequeños.
 ### Modelo 2: Regresión log-lineal
 
 ```{r}
-#Creando modelo
-model_2<- lm(formula = log(price) ~ room_type + neighborhood + 
+# Creando modelo
+model_2<-lm(formula = log(price) ~ room_type + neighborhood + 
              reviews +overall_satisfaction + log(accommodates) +
              bedrooms,data = train_set)
 
-# Reportando modelo
-summary(model_2)
-#knitr::kable(xtable(summary(model_2)))
-```
-
-### Modelo 3: Regresión Log Lineal con interacciones
-
-```{r}
-#Creando modelo
-model_3<- lm(formula = log(price) ~ room_type + neighborhood + 
-             reviews +overall_satisfaction + log(accommodates)*bedrooms
-             +bedrooms,
-             data = train_set)
+# Sacando predicciones
+pred_train_2=exp(predict(model_2,train_set))
+pred_test_2=exp(predict(model_2,test_set))
 
 # Reportando modelo
-summary(model_3)
-#knitr::kable(xtable(summary(model_2)))
+knitr::kable(xtable(summary(model_2)))
 ```
 
 
-### Modelo 4: Arbol de regresión
+### Modelo 3: Arbol de regresión
 
 
+```{r,message=FALSE, warning=FALSE}
+library(rpart)
+model_3 <- rpart(price ~ room_type + neighborhood + 
+             reviews +overall_satisfaction + accommodates +
+             bedrooms,data = train_set, method="anova")
 
+# Sacando predicciones
+pred_train_3=predict(model_3,train_set)#entrenamiento
+pred_test_3=predict(model_3,test_set)#evaluación
+```
 
-### Correlaciones
-Usted podría también simplemente sacar las correlaciones entre variables para poder visualizar las variables que pueden ser relevantes. El valor agregado es que una matriz de correlaciones, al ser todos contra todos, puede ayudarle a determinar si existe multicolinealidad entre variables independientes. Si usted tiene variables que son muy correlacionadas, la regresión puede tener problemas de cálculo y obtener resultados extraños.
+### Modelo 4: XGBoost
+```{r,message=FALSE, warning=FALSE}
+library(xgboost)
 
+# XGBoost, a diferencia de lm, no convierte las variables categóricas que aparecen como
+# caracteres a variables binarias (0/1). Tendremos que usar la codificación
 
+# Primero vamos a definir las matrices de entrenamiento y evaluación
+X_train<- train_set[,c(colnames(vecindarios),colnames(tipos_cuarto),"reviews",
+                       "overall_satisfaction", "accommodates","bedrooms",
+                       "longitude", "latitude")]
 
-```{r}
-#Recordemos que podemos hacer una regresión lineal contra factores, y R automáticamente codificará los factores con one hot encoder (1,0,0,0...)
-#as.factor(b$neighborhood)
-#model<-lm(formula = price~neighborhood,data = b)
-#summary(model)
+X_test<- test_set[,c(colnames(vecindarios),colnames(tipos_cuarto),"reviews",
+                       "overall_satisfaction", "accommodates","bedrooms",
+                     "longitude", "latitude")]
+
+# Luego definimos los vectores de la variable dependiente
+y_train<- train_set$price
+y_test<-test_set$price
+
+# Modelo
+model_4 <- xgboost(data = as.matrix(X_train), label = as.matrix(y_train), max.depth = 4, 
+                   eta = 0.3, nthread = 2, nrounds = 100, objective = "reg:linear",
+                   eval_metric="rmse")
+
+# Predicciones
+pred_train_4<-predict(model_4,as.matrix(X_train))
+pred_test_4<-predict(model_4,as.matrix(X_test))
+
 ```
 
 
+## Evaluando los modelos
+Luego de ajustar el/los modelo/s debemos evaluar el desempeño de los mismos. Para el caso de la regresión, la métrica a utilizar es llamada MAE (Mean Absolute Error) que en inglés significa Error Absoluto Medio.
+
+Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros factores para asegurar la significancia estadística del modelo como normalidad, homecedasticidad, etc. Sin embargo, a la hora de comparar un modelo lineal con uno no lineal, no se pueden utilizar todos estos factores ya que no son parte de los supuestos. Es por eso que nos enfocaremos solamente en la desviación absoluta media.
+
+```{r,message=FALSE, warning=FALSE}
+
+#Librería de métricas
+#install.packages("Metrics")
+library(Metrics)
+mae1<-mae(test_set$price,pred_test_1)
+mae2<-mae(test_set$price,pred_test_2)
+mae3<-mae(test_set$price,pred_test_3)
+mae4<-mae(test_set$price,pred_test_4)
+
+# Mostrando resultados
+print((paste("Modelo 1:", mae1)))
+print((paste("Modelo 2:", mae2)))
+print((paste("Modelo 3:", mae3)))
+print((paste("Modelo 4:", mae4)))
+
+```
 
 
+## Modelo 5: Ensamblando modelos
+Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.
 
+```{r, warning=FALSE, message=FALSE}
+
+# Primero vamos a añadir a X_train y X_test los resultados del modelo lineal
+y_1<- as.matrix(pred_train_1)
+y_2<- as.matrix(pred_train_2)
+X_train_2<-cbind(X_train,y_1,y_2)
+
+y_1<- as.matrix(pred_test_1)
+y_2<- as.matrix(pred_test_2)
+X_test_2<-cbind(X_test, y_1,y_2)
+
+# Modelo
+model_5 <- xgboost(data = as.matrix(X_train_2), label = as.matrix(y_train), max.depth = 4, 
+                   eta = 0.5, nthread = 2, nrounds = 100, objective = "reg:linear",
+                   eval_metric="rmse")
+
+# Predicciones
+pred_train_5<-predict(model_5,as.matrix(X_train_2))
+pred_test_5<-predict(model_5,as.matrix(X_test_2))
+
+# Error Medio
+mae5<-mae(test_set$price,pred_test_5)
+
+# Mostrando Resultados
+print((paste("Modelo 5:", mae5)))
+
+```
+
+Usted puede siempre construir un modelo final que sea capaz de superar modelos anteriores
 
 
 
