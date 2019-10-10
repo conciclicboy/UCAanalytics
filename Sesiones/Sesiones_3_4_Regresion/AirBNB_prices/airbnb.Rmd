@@ -319,7 +319,7 @@ y_test<-test_set$price
 # Modelo
 model_4 <- xgboost(data = as.matrix(X_train), label = as.matrix(y_train), max.depth = 4, 
                    eta = 0.3, nthread = 2, nrounds = 100, objective = "reg:linear",
-                   eval_metric="rmse")
+                   eval_metric="rmse",verbose = 0)
 
 # Predicciones
 pred_train_4<-predict(model_4,as.matrix(X_train))
@@ -368,8 +368,8 @@ X_test_2<-cbind(X_test, y_1,y_2)
 
 # Modelo
 model_5 <- xgboost(data = as.matrix(X_train_2), label = as.matrix(y_train), max.depth = 4, 
-                   eta = 0.5, nthread = 2, nrounds = 100, objective = "reg:linear",
-                   eval_metric="rmse")
+                   eta = 0.3, nthread = 2, nrounds = 120, objective = "reg:linear",
+                   eval_metric="rmse", verbose = 0)
 
 # Predicciones
 pred_train_5<-predict(model_5,as.matrix(X_train_2))
