@@ -1695,35 +1695,250 @@ div.tocify {
 </table>
 <p>Leyendo los datos</p>
 <pre class="r"><code>#obteniendo directorio
-getwd()</code></pre>
-<pre><code>## [1] &quot;C:/Users/eduardo_canas/Documents/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AutoVentas&quot;</code></pre>
-<pre class="r"><code>#b&lt;-read.csv(&quot;./data/tomslee_airbnb_amsterdam_1476_2017-07-22.csv&quot;)
-
-### Omitir este código
-#leyendo todos los archivos en ese directorio
-#archivos &lt;- list.files(path=&quot;data&quot;)
-#for (file in archivos){
-#  a&lt;-read.csv(paste0(&quot;./data/&quot;,file))
-  #b&lt;-rbind(b,a)
-#}
-###
+#getwd()
+  
+b&lt;-read.csv(&quot;./data/autos_ventas.csv&quot;,sep = &quot;;&quot;)
 
 
-#Voy a hacer una copia como una matriz solo para imprimirl
-#No es necesario hacer esto cuando se trabaja en R, esto solo es
-#Porque tenemos un archivo markdown y los data frames se imprimen feo
-#a&lt;-data.matrix(b)
+#Imprimiento las primeras 5 filas
 
-#Imprimiento las primeras 3 filas: t significa transponer, 
-#head(a,3) significa primeras 3 filas de a
-#round(a,2) significa redondear los valores a 2 decimales
-
-#knitr::kable({
+knitr::kable({
   #df &lt;- t(head(round(a,2), 5))  
-#  df &lt;- t(head(b, 2))
-#  colnames(df) &lt;- sprintf(&quot;%02d&quot;, 1:ncol(df))
-#  df
-#})</code></pre>
+  df &lt;- t(head(b, 5))
+  colnames(df) &lt;- sprintf(&quot;%02d&quot;, 1:ncol(df))
+  df
+})</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">01</th>
+<th align="left">02</th>
+<th align="left">03</th>
+<th align="left">04</th>
+<th align="left">05</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ï..Date</td>
+<td align="left">31/3/1994</td>
+<td align="left">30/4/1994</td>
+<td align="left">31/5/1994</td>
+<td align="left">30/6/1994</td>
+<td align="left">31/7/1994</td>
+</tr>
+<tr class="even">
+<td>Car</td>
+<td align="left">876487</td>
+<td align="left">787201</td>
+<td align="left">816102</td>
+<td align="left">870757</td>
+<td align="left">713421</td>
+</tr>
+<tr class="odd">
+<td>Truck</td>
+<td align="left">572605</td>
+<td align="left">525248</td>
+<td align="left">542678</td>
+<td align="left">577002</td>
+<td align="left">478797</td>
+</tr>
+<tr class="even">
+<td>Total</td>
+<td align="left">1444671</td>
+<td align="left">1312449</td>
+<td align="left">1358780</td>
+<td align="left">1447759</td>
+<td align="left">1192218</td>
+</tr>
+<tr class="odd">
+<td>Time</td>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">3</td>
+<td align="left">4</td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td>Year</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td>Q1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+</tr>
+<tr class="even">
+<td>Q2</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+</tr>
+<tr class="odd">
+<td>Q3</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td>Inventories..000s.</td>
+<td align="left">1381.0</td>
+<td align="left">1343.4</td>
+<td align="left">1383.6</td>
+<td align="left">1416.0</td>
+<td align="left">1454.6</td>
+</tr>
+<tr class="odd">
+<td>CPI.New.Cars.NSA.YoY</td>
+<td align="left">3.361345</td>
+<td align="left">3.279939</td>
+<td align="left">3.351104</td>
+<td align="left">3.664122</td>
+<td align="left">3.743316</td>
+</tr>
+<tr class="even">
+<td>CPI.Used.Cars.NSA.YoY</td>
+<td align="left">5.529226</td>
+<td align="left">5.128205</td>
+<td align="left">4.866920</td>
+<td align="left">4.914371</td>
+<td align="left">4.775900</td>
+</tr>
+<tr class="odd">
+<td>Gas.Prices</td>
+<td align="left">1.012</td>
+<td align="left">1.037</td>
+<td align="left">1.050</td>
+<td align="left">1.095</td>
+<td align="left">1.114</td>
+</tr>
+<tr class="even">
+<td>Cons..Conf..Autos</td>
+<td align="left">5.8</td>
+<td align="left">7.1</td>
+<td align="left">6.6</td>
+<td align="left">5.0</td>
+<td align="left">8.5</td>
+</tr>
+<tr class="odd">
+<td>Miles.Driven</td>
+<td align="left">196190</td>
+<td align="left">195407</td>
+<td align="left">206594</td>
+<td align="left">207280</td>
+<td align="left">214778</td>
+</tr>
+<tr class="even">
+<td>Bank.Auto.Interest.Rate</td>
+<td align="left">7.54</td>
+<td align="left">7.54</td>
+<td align="left">7.76</td>
+<td align="left">7.76</td>
+<td align="left">7.76</td>
+</tr>
+<tr class="odd">
+<td>US.Population..in.mill..</td>
+<td align="left">262.4853</td>
+<td align="left">262.7577</td>
+<td align="left">263.0117</td>
+<td align="left">263.2929</td>
+<td align="left">263.5779</td>
+</tr>
+<tr class="even">
+<td>Unempl..Rate</td>
+<td align="left">6.57</td>
+<td align="left">6.57</td>
+<td align="left">6.57</td>
+<td align="left">6.20</td>
+<td align="left">6.20</td>
+</tr>
+<tr class="odd">
+<td>Disposible.Income.Capita.Real</td>
+<td align="left">26403</td>
+<td align="left">26384</td>
+<td align="left">26676</td>
+<td align="left">26597</td>
+<td align="left">26591</td>
+</tr>
+<tr class="even">
+<td>Saving…Capita</td>
+<td align="left">1636.986</td>
+<td align="left">1530.272</td>
+<td align="left">1893.996</td>
+<td align="left">1675.611</td>
+<td align="left">1701.824</td>
+</tr>
+<tr class="odd">
+<td>Household.Debt…Capita</td>
+<td align="left">22017.46</td>
+<td align="left">22001.62</td>
+<td align="left">22245.12</td>
+<td align="left">22205.84</td>
+<td align="left">22200.83</td>
+</tr>
+<tr class="even">
+<td>US.House.Price.Inflation.NSA</td>
+<td align="left">3.259811</td>
+<td align="left">3.259811</td>
+<td align="left">3.259811</td>
+<td align="left">2.911299</td>
+<td align="left">2.911299</td>
+</tr>
+<tr class="odd">
+<td>Consumer.Confidence</td>
+<td align="left">86.73</td>
+<td align="left">92.07</td>
+<td align="left">88.91</td>
+<td align="left">92.52</td>
+<td align="left">91.30</td>
+</tr>
+<tr class="even">
+<td>Annualized.RealGDP…Capita</td>
+<td align="left">37138.08</td>
+<td align="left">37099.57</td>
+<td align="left">37063.75</td>
+<td align="left">37530.07</td>
+<td align="left">37489.49</td>
+</tr>
+<tr class="odd">
+<td>Fed.Funds.Rate</td>
+<td align="left">3.34</td>
+<td align="left">3.56</td>
+<td align="left">4.01</td>
+<td align="left">4.25</td>
+<td align="left">4.26</td>
+</tr>
+<tr class="even">
+<td>US.Urban.CPI.Change.NSA</td>
+<td align="left">2.5</td>
+<td align="left">2.4</td>
+<td align="left">2.3</td>
+<td align="left">2.5</td>
+<td align="left">2.8</td>
+</tr>
+<tr class="odd">
+<td>Nonfarm.Mfg.Payrolls.NSA</td>
+<td align="left">16799</td>
+<td align="left">16855</td>
+<td align="left">16932</td>
+<td align="left">17103</td>
+<td align="left">16991</td>
+</tr>
+</tbody>
+</table>
+<p>Existen 5 variables extras que fueron creadas: Time, Year, Q1, Q2, Q3. En breve explicaremos porque se diseñaron estas variables.</p>
 </div>
 <div id="sacando-estadísticas-de-las-columnas" class="section level2">
 <h2>Sacando estadísticas de las columnas</h2>

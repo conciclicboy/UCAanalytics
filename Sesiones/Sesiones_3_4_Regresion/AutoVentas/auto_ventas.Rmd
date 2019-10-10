@@ -74,38 +74,25 @@ Leyendo los datos
 
 ```{r}
 #obteniendo directorio
-getwd()
+#getwd()
   
-#b<-read.csv("./data/tomslee_airbnb_amsterdam_1476_2017-07-22.csv")
-
-### Omitir este código
-#leyendo todos los archivos en ese directorio
-#archivos <- list.files(path="data")
-#for (file in archivos){
-#  a<-read.csv(paste0("./data/",file))
-  #b<-rbind(b,a)
-#}
-###
+b<-read.csv("./data/autos_ventas.csv",sep = ";")
 
 
-#Voy a hacer una copia como una matriz solo para imprimirl
-#No es necesario hacer esto cuando se trabaja en R, esto solo es
-#Porque tenemos un archivo markdown y los data frames se imprimen feo
-#a<-data.matrix(b)
+#Imprimiento las primeras 5 filas
 
-#Imprimiento las primeras 3 filas: t significa transponer, 
-#head(a,3) significa primeras 3 filas de a
-#round(a,2) significa redondear los valores a 2 decimales
-
-#knitr::kable({
+knitr::kable({
   #df <- t(head(round(a,2), 5))  
-#  df <- t(head(b, 2))
-#  colnames(df) <- sprintf("%02d", 1:ncol(df))
-#  df
-#})
-
+  df <- t(head(b, 5))
+  colnames(df) <- sprintf("%02d", 1:ncol(df))
+  df
+})
 
 ```
+
+Existen 5 variables extras que fueron creadas: Time, Year, Q1, Q2, Q3. En breve explicaremos porque se diseñaron estas variables.
+
+
 
 ## Sacando estadísticas de las columnas
 Vamos a ver que hay dentro de cada variable para decidir si vamos a botar algunas.
