@@ -1919,6 +1919,12 @@ pl+geom_boxplot(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element
 <div id="separando-datos" class="section level2">
 <h2>Separando datos</h2>
 <p>Suponga que usted toma todos los datos y crea un modelo con una precisión casi perfecta que le permitiría predecir el precio de los alquileres de airbnb. ¿Tomaría usted la decisión de implementarlo inmediatamente? Por supuesto que es una decisión personal sin una respuesta correcta, pero en la práctica no se recomienda hacer eso. La razón es que todos los modelos deben ser validados estadísticamente para estar seguro que su funcionamiento sea consistente en el tiempo. Más adelante veremos a detalle esta técnica, pero en este momento, simplemente dividiremos los datos en dos grupos: uno con el 90% y otro con el 10%.</p>
+<p>Antes de hacer eso vamos a codificar las variables categóricas con One Hot encoding. Los modelos base de R como linear model (lm) pueden lidiar con variables categóricas fácilmente. Sin embargo, otro tipo de modelos no tiene esa funcionalidad, así que implementaremos esto desde antes:</p>
+<pre class="r"><code># One Hot Encoding
+vecindarios&lt;-model.matrix(~neighborhood-1,head(b))
+tipos_cuarto&lt;-model.matrix(~room_type-1,head(b))
+b &lt;- cbind(b, vecindarios,tipos_cuarto)</code></pre>
+<p>Ahora podemos proceder a separar los datos:</p>
 <pre class="r"><code># Please ENTER the percentage of data used for estimation
 porcion_train = 0.9
 porcion_test = 0.1
@@ -1938,18 +1944,22 @@ train_set &lt;- sample_frac(b,porcion_train)
 # La función extraen los datos de &quot;b&quot; que no coinciden con &quot;train_set&quot;
 # usando como referencia la columna &quot;id&quot;
 test_set &lt;- anti_join(b, train_set, by = 'id')</code></pre>
-<p>Ahora que tenemos listos los datos, podemos pasar a crear nuestro modelo con los datos de entrenamiento (train_set).</p>
+<p>Al tener listos los datos, podemos pasar a crear nuestro modelo con los datos de entrenamiento (train_set).</p>
 </div>
 <div id="modelo" class="section level2">
 <h2>Modelo</h2>
 <p>Vamos a construir varios modelos y seleccionaremos el que funcione mejor. Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efecto esto así es, usted raramente encontrará el mejor modelo a la primera iteración. Tampoco encontraremos el mejor modelo en esta sesión, pero pretenedemos acercarnos a una solución subóptima que sea mejor que una solución aleatoria.</p>
 <div id="modelo-1-regresión-lineal" class="section level3">
 <h3>Modelo 1: Regresión Lineal</h3>
-<pre class="r"><code>#,results='asis'
-#Creando modelo
+<pre class="r"><code># Creando modelo
 model_1&lt;- lm(formula = price ~ room_type + neighborhood + 
              reviews +overall_satisfaction + accommodates +
              bedrooms,data = train_set)
+
+
+# Sacando predicciones
+pred_train_1=predict(model_1,train_set)#entrenamiento
+pred_test_1=predict(model_1,test_set)#evaluación
 
 # Reportando modelo: usted solo necesita poner &quot;summary(model)&quot;
 # Eso le entrega los resultados del modelo pero se imprime en formato feo
@@ -1969,205 +1979,205 @@ knitr::kable(xtable(summary(model_1)))</code></pre>
 <tbody>
 <tr class="odd">
 <td>(Intercept)</td>
-<td align="right">27.9771492</td>
-<td align="right">6.4733801</td>
-<td align="right">4.3218765</td>
-<td align="right">0.0000156</td>
+<td align="right">28.7676466</td>
+<td align="right">6.3861102</td>
+<td align="right">4.5047213</td>
+<td align="right">0.0000067</td>
 </tr>
 <tr class="even">
 <td>room_typePrivate room</td>
-<td align="right">-32.9103300</td>
-<td align="right">1.2394235</td>
-<td align="right">-26.5529332</td>
+<td align="right">-33.0398848</td>
+<td align="right">1.2291219</td>
+<td align="right">-26.8808849</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>room_typeShared room</td>
-<td align="right">-42.0422463</td>
-<td align="right">8.1499689</td>
-<td align="right">-5.1585775</td>
-<td align="right">0.0000003</td>
+<td align="right">-44.7387889</td>
+<td align="right">8.1407118</td>
+<td align="right">-5.4956851</td>
+<td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodBijlmer Oost</td>
-<td align="right">-4.8143845</td>
-<td align="right">8.7924973</td>
-<td align="right">-0.5475560</td>
-<td align="right">0.5840042</td>
+<td align="right">-7.5428292</td>
+<td align="right">8.7516472</td>
+<td align="right">-0.8618754</td>
+<td align="right">0.3887686</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodBos en Lommer</td>
-<td align="right">19.9902961</td>
-<td align="right">6.5889226</td>
-<td align="right">3.0339248</td>
-<td align="right">0.0024177</td>
+<td align="right">18.5345634</td>
+<td align="right">6.5062362</td>
+<td align="right">2.8487381</td>
+<td align="right">0.0043947</td>
 </tr>
 <tr class="even">
 <td>neighborhoodBuitenveldert / Zuidas</td>
-<td align="right">21.8741380</td>
-<td align="right">7.3040141</td>
-<td align="right">2.9948105</td>
-<td align="right">0.0027502</td>
+<td align="right">23.2460577</td>
+<td align="right">7.2694718</td>
+<td align="right">3.1977643</td>
+<td align="right">0.0013876</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodCentrum Oost</td>
-<td align="right">78.1633798</td>
-<td align="right">6.4663171</td>
-<td align="right">12.0877740</td>
+<td align="right">78.2412608</td>
+<td align="right">6.3806562</td>
+<td align="right">12.2622592</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodCentrum West</td>
-<td align="right">87.9578496</td>
-<td align="right">6.4303392</td>
-<td align="right">13.6785707</td>
+<td align="right">86.3798847</td>
+<td align="right">6.3454741</td>
+<td align="right">13.6128339</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodDe Aker / Nieuw Sloten</td>
-<td align="right">23.2701281</td>
-<td align="right">8.4265614</td>
-<td align="right">2.7615212</td>
-<td align="right">0.0057596</td>
+<td align="right">25.4325037</td>
+<td align="right">8.2506877</td>
+<td align="right">3.0824708</td>
+<td align="right">0.0020563</td>
 </tr>
 <tr class="even">
 <td>neighborhoodDe Baarsjes / Oud West</td>
-<td align="right">44.7648006</td>
-<td align="right">6.3925126</td>
-<td align="right">7.0026926</td>
+<td align="right">44.5590182</td>
+<td align="right">6.3063215</td>
+<td align="right">7.0657702</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodDe Pijp / Rivierenbuurt</td>
-<td align="right">51.5875239</td>
-<td align="right">6.4261680</td>
-<td align="right">8.0277272</td>
+<td align="right">51.0909412</td>
+<td align="right">6.3397577</td>
+<td align="right">8.0588160</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodGaasperdam / Driemond</td>
-<td align="right">17.3689343</td>
-<td align="right">10.9909977</td>
-<td align="right">1.5802873</td>
-<td align="right">0.1140602</td>
+<td align="right">15.3650964</td>
+<td align="right">11.1305550</td>
+<td align="right">1.3804430</td>
+<td align="right">0.1674690</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodGeuzenveld / Slotermeer</td>
-<td align="right">11.0155464</td>
-<td align="right">7.6674335</td>
-<td align="right">1.4366667</td>
-<td align="right">0.1508316</td>
+<td align="right">10.5515251</td>
+<td align="right">7.6490966</td>
+<td align="right">1.3794472</td>
+<td align="right">0.1677756</td>
 </tr>
 <tr class="even">
 <td>neighborhoodIjburg / Eiland Zeeburg</td>
-<td align="right">21.0500161</td>
-<td align="right">7.0245892</td>
-<td align="right">2.9966188</td>
-<td align="right">0.0027340</td>
+<td align="right">20.7565572</td>
+<td align="right">6.9536253</td>
+<td align="right">2.9849979</td>
+<td align="right">0.0028400</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodNoord-West / Noord-Midden</td>
-<td align="right">52.5898268</td>
-<td align="right">6.5051206</td>
-<td align="right">8.0843739</td>
+<td align="right">51.4013237</td>
+<td align="right">6.4249331</td>
+<td align="right">8.0002894</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodNoord Oost</td>
-<td align="right">1.2697020</td>
-<td align="right">7.4813383</td>
-<td align="right">0.1697159</td>
-<td align="right">0.8652357</td>
+<td align="right">2.6282115</td>
+<td align="right">7.4168033</td>
+<td align="right">0.3543591</td>
+<td align="right">0.7230743</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodNoord West</td>
-<td align="right">-1.7109119</td>
-<td align="right">7.3929182</td>
-<td align="right">-0.2314258</td>
-<td align="right">0.8169869</td>
+<td align="right">0.6894063</td>
+<td align="right">7.3115335</td>
+<td align="right">0.0942902</td>
+<td align="right">0.9248797</td>
 </tr>
 <tr class="even">
 <td>neighborhoodOostelijk Havengebied / Indische Buurt</td>
-<td align="right">27.5102503</td>
-<td align="right">6.6077012</td>
-<td align="right">4.1633617</td>
-<td align="right">0.0000315</td>
+<td align="right">27.5752621</td>
+<td align="right">6.5263759</td>
+<td align="right">4.2252029</td>
+<td align="right">0.0000240</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodOsdorp</td>
-<td align="right">18.2641493</td>
-<td align="right">7.8985116</td>
-<td align="right">2.3123533</td>
-<td align="right">0.0207704</td>
+<td align="right">16.4600296</td>
+<td align="right">7.8472835</td>
+<td align="right">2.0975449</td>
+<td align="right">0.0359605</td>
 </tr>
 <tr class="even">
 <td>neighborhoodOud Noord</td>
-<td align="right">17.4112741</td>
-<td align="right">6.8643554</td>
-<td align="right">2.5364762</td>
-<td align="right">0.0112066</td>
+<td align="right">16.0354428</td>
+<td align="right">6.7768280</td>
+<td align="right">2.3662166</td>
+<td align="right">0.0179824</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodOud Oost</td>
-<td align="right">36.8174118</td>
-<td align="right">6.5416875</td>
-<td align="right">5.6281215</td>
+<td align="right">36.6806329</td>
+<td align="right">6.4551607</td>
+<td align="right">5.6823733</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodSlotervaart</td>
-<td align="right">17.2173004</td>
-<td align="right">7.0671911</td>
-<td align="right">2.4362296</td>
-<td align="right">0.0148517</td>
+<td align="right">18.2125380</td>
+<td align="right">7.0005345</td>
+<td align="right">2.6015925</td>
+<td align="right">0.0092875</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodWatergraafsmeer</td>
-<td align="right">25.3459952</td>
-<td align="right">6.8387025</td>
-<td align="right">3.7062579</td>
-<td align="right">0.0002110</td>
+<td align="right">24.9050110</td>
+<td align="right">6.7408985</td>
+<td align="right">3.6946130</td>
+<td align="right">0.0002209</td>
 </tr>
 <tr class="even">
 <td>neighborhoodWesterpark</td>
-<td align="right">46.7260127</td>
-<td align="right">6.5041522</td>
-<td align="right">7.1840282</td>
+<td align="right">46.1599910</td>
+<td align="right">6.4189602</td>
+<td align="right">7.1911944</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodWestpoort</td>
-<td align="right">26.9676396</td>
-<td align="right">17.4346681</td>
-<td align="right">1.5467825</td>
-<td align="right">0.1219348</td>
+<td align="right">20.9556794</td>
+<td align="right">15.7949814</td>
+<td align="right">1.3267302</td>
+<td align="right">0.1846163</td>
 </tr>
 <tr class="even">
 <td>reviews</td>
-<td align="right">-0.0567531</td>
-<td align="right">0.0143226</td>
-<td align="right">-3.9624727</td>
-<td align="right">0.0000745</td>
+<td align="right">-0.0661995</td>
+<td align="right">0.0145784</td>
+<td align="right">-4.5409420</td>
+<td align="right">0.0000056</td>
 </tr>
 <tr class="odd">
 <td>overall_satisfaction</td>
-<td align="right">0.0737737</td>
-<td align="right">0.2098942</td>
-<td align="right">0.3514804</td>
-<td align="right">0.7252324</td>
+<td align="right">0.1910197</td>
+<td align="right">0.2096899</td>
+<td align="right">0.9109624</td>
+<td align="right">0.3623285</td>
 </tr>
 <tr class="even">
 <td>accommodates</td>
-<td align="right">21.6643889</td>
-<td align="right">0.5086679</td>
-<td align="right">42.5904410</td>
+<td align="right">21.7699489</td>
+<td align="right">0.5049561</td>
+<td align="right">43.1125553</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>bedrooms</td>
-<td align="right">22.1393899</td>
-<td align="right">0.7437492</td>
-<td align="right">29.7672801</td>
+<td align="right">21.3637331</td>
+<td align="right">0.7383281</td>
+<td align="right">28.9352849</td>
 <td align="right">0.0000000</td>
 </tr>
 </tbody>
@@ -2180,6 +2190,10 @@ knitr::kable(xtable(summary(model_1)))</code></pre>
 model_2&lt;-lm(formula = log(price) ~ room_type + neighborhood + 
              reviews +overall_satisfaction + log(accommodates) +
              bedrooms,data = train_set)
+
+# Sacando predicciones
+pred_train_2=exp(predict(model_2,train_set))
+pred_test_2=exp(predict(model_2,test_set))
 
 # Reportando modelo
 knitr::kable(xtable(summary(model_2)))</code></pre>
@@ -2196,205 +2210,205 @@ knitr::kable(xtable(summary(model_2)))</code></pre>
 <tbody>
 <tr class="odd">
 <td>(Intercept)</td>
-<td align="right">4.1510641</td>
-<td align="right">0.0349733</td>
-<td align="right">118.6924375</td>
+<td align="right">4.1560057</td>
+<td align="right">0.0346540</td>
+<td align="right">119.928736</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>room_typePrivate room</td>
-<td align="right">-0.2705348</td>
-<td align="right">0.0067387</td>
-<td align="right">-40.1466311</td>
+<td align="right">-0.2721787</td>
+<td align="right">0.0067123</td>
+<td align="right">-40.549406</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>room_typeShared room</td>
-<td align="right">-0.3587717</td>
-<td align="right">0.0439041</td>
-<td align="right">-8.1717117</td>
+<td align="right">-0.3605787</td>
+<td align="right">0.0440200</td>
+<td align="right">-8.191250</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodBijlmer Oost</td>
-<td align="right">-0.0376419</td>
-<td align="right">0.0473510</td>
-<td align="right">-0.7949532</td>
-<td align="right">0.4266521</td>
+<td align="right">-0.0480448</td>
+<td align="right">0.0473303</td>
+<td align="right">-1.015097</td>
+<td align="right">0.3100746</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodBos en Lommer</td>
-<td align="right">0.1870966</td>
-<td align="right">0.0354817</td>
-<td align="right">5.2730453</td>
-<td align="right">0.0000001</td>
+<td align="right">0.1752591</td>
+<td align="right">0.0351849</td>
+<td align="right">4.981093</td>
+<td align="right">0.0000006</td>
 </tr>
 <tr class="even">
 <td>neighborhoodBuitenveldert / Zuidas</td>
-<td align="right">0.2104355</td>
-<td align="right">0.0393365</td>
-<td align="right">5.3496255</td>
-<td align="right">0.0000001</td>
+<td align="right">0.2167440</td>
+<td align="right">0.0393157</td>
+<td align="right">5.512912</td>
+<td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodCentrum Oost</td>
-<td align="right">0.5407558</td>
-<td align="right">0.0348226</td>
-<td align="right">15.5288730</td>
+<td align="right">0.5372873</td>
+<td align="right">0.0345065</td>
+<td align="right">15.570601</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodCentrum West</td>
-<td align="right">0.5943075</td>
-<td align="right">0.0346295</td>
-<td align="right">17.1618907</td>
+<td align="right">0.5831794</td>
+<td align="right">0.0343171</td>
+<td align="right">16.993831</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodDe Aker / Nieuw Sloten</td>
-<td align="right">0.1926539</td>
-<td align="right">0.0453809</td>
-<td align="right">4.2452615</td>
-<td align="right">0.0000220</td>
+<td align="right">0.1975282</td>
+<td align="right">0.0446221</td>
+<td align="right">4.426694</td>
+<td align="right">0.0000096</td>
 </tr>
 <tr class="even">
 <td>neighborhoodDe Baarsjes / Oud West</td>
-<td align="right">0.3499397</td>
-<td align="right">0.0344241</td>
-<td align="right">10.1655518</td>
+<td align="right">0.3463232</td>
+<td align="right">0.0341036</td>
+<td align="right">10.155035</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodDe Pijp / Rivierenbuurt</td>
-<td align="right">0.3939035</td>
-<td align="right">0.0346059</td>
-<td align="right">11.3825665</td>
+<td align="right">0.3869398</td>
+<td align="right">0.0342849</td>
+<td align="right">11.286023</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodGaasperdam / Driemond</td>
-<td align="right">0.1892834</td>
-<td align="right">0.0591921</td>
-<td align="right">3.1977835</td>
-<td align="right">0.0013875</td>
+<td align="right">0.1741766</td>
+<td align="right">0.0601972</td>
+<td align="right">2.893432</td>
+<td align="right">0.0038156</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodGeuzenveld / Slotermeer</td>
-<td align="right">0.0891246</td>
-<td align="right">0.0412916</td>
-<td align="right">2.1584195</td>
-<td align="right">0.0309096</td>
+<td align="right">0.0914956</td>
+<td align="right">0.0413670</td>
+<td align="right">2.211803</td>
+<td align="right">0.0269939</td>
 </tr>
 <tr class="even">
 <td>neighborhoodIjburg / Eiland Zeeburg</td>
-<td align="right">0.2201926</td>
-<td align="right">0.0378313</td>
-<td align="right">5.8203814</td>
+<td align="right">0.2186806</td>
+<td align="right">0.0376072</td>
+<td align="right">5.814854</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodNoord-West / Noord-Midden</td>
-<td align="right">0.3865080</td>
-<td align="right">0.0350306</td>
-<td align="right">11.0334315</td>
+<td align="right">0.3786180</td>
+<td align="right">0.0347457</td>
+<td align="right">10.896842</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodNoord Oost</td>
-<td align="right">0.0919665</td>
-<td align="right">0.0402899</td>
-<td align="right">2.2826206</td>
-<td align="right">0.0224654</td>
+<td align="right">0.0921087</td>
+<td align="right">0.0401109</td>
+<td align="right">2.296348</td>
+<td align="right">0.0216684</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodNoord West</td>
-<td align="right">0.0726502</td>
-<td align="right">0.0398124</td>
-<td align="right">1.8248129</td>
-<td align="right">0.0680473</td>
+<td align="right">0.0841140</td>
+<td align="right">0.0395413</td>
+<td align="right">2.127245</td>
+<td align="right">0.0334145</td>
 </tr>
 <tr class="even">
 <td>neighborhoodOostelijk Havengebied / Indische Buurt</td>
-<td align="right">0.2401320</td>
-<td align="right">0.0355834</td>
-<td align="right">6.7484276</td>
+<td align="right">0.2391476</td>
+<td align="right">0.0352947</td>
+<td align="right">6.775742</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodOsdorp</td>
-<td align="right">0.1362514</td>
-<td align="right">0.0425372</td>
-<td align="right">3.2031119</td>
-<td align="right">0.0013621</td>
+<td align="right">0.1246193</td>
+<td align="right">0.0424406</td>
+<td align="right">2.936326</td>
+<td align="right">0.0033258</td>
 </tr>
 <tr class="even">
 <td>neighborhoodOud Noord</td>
-<td align="right">0.1860192</td>
-<td align="right">0.0369684</td>
-<td align="right">5.0318412</td>
-<td align="right">0.0000005</td>
+<td align="right">0.1791444</td>
+<td align="right">0.0366512</td>
+<td align="right">4.887816</td>
+<td align="right">0.0000010</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodOud Oost</td>
-<td align="right">0.3098787</td>
-<td align="right">0.0352270</td>
-<td align="right">8.7966166</td>
+<td align="right">0.3062633</td>
+<td align="right">0.0349083</td>
+<td align="right">8.773360</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodSlotervaart</td>
-<td align="right">0.1570892</td>
-<td align="right">0.0380584</td>
-<td align="right">4.1275812</td>
-<td align="right">0.0000368</td>
+<td align="right">0.1625868</td>
+<td align="right">0.0378591</td>
+<td align="right">4.294524</td>
+<td align="right">0.0000176</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodWatergraafsmeer</td>
-<td align="right">0.2297026</td>
-<td align="right">0.0368289</td>
-<td align="right">6.2370229</td>
+<td align="right">0.2241598</td>
+<td align="right">0.0364559</td>
+<td align="right">6.148786</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>neighborhoodWesterpark</td>
-<td align="right">0.3587712</td>
-<td align="right">0.0350252</td>
-<td align="right">10.2432443</td>
+<td align="right">0.3528185</td>
+<td align="right">0.0347128</td>
+<td align="right">10.163931</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>neighborhoodWestpoort</td>
-<td align="right">0.2362331</td>
-<td align="right">0.0938940</td>
-<td align="right">2.5159541</td>
-<td align="right">0.0118805</td>
+<td align="right">0.1878921</td>
+<td align="right">0.0854232</td>
+<td align="right">2.199543</td>
+<td align="right">0.0278531</td>
 </tr>
 <tr class="even">
 <td>reviews</td>
-<td align="right">-0.0003374</td>
-<td align="right">0.0000772</td>
-<td align="right">-4.3731387</td>
-<td align="right">0.0000123</td>
+<td align="right">-0.0004115</td>
+<td align="right">0.0000789</td>
+<td align="right">-5.217881</td>
+<td align="right">0.0000002</td>
 </tr>
 <tr class="odd">
 <td>overall_satisfaction</td>
-<td align="right">0.0013161</td>
-<td align="right">0.0011304</td>
-<td align="right">1.1642933</td>
-<td align="right">0.2443220</td>
+<td align="right">0.0020805</td>
+<td align="right">0.0011341</td>
+<td align="right">1.834589</td>
+<td align="right">0.0665845</td>
 </tr>
 <tr class="even">
 <td>log(accommodates)</td>
-<td align="right">0.3858397</td>
-<td align="right">0.0085922</td>
-<td align="right">44.9056888</td>
+<td align="right">0.3884533</td>
+<td align="right">0.0086087</td>
+<td align="right">45.123085</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>bedrooms</td>
-<td align="right">0.1110691</td>
-<td align="right">0.0038981</td>
-<td align="right">28.4931846</td>
+<td align="right">0.1076945</td>
+<td align="right">0.0038894</td>
+<td align="right">27.688905</td>
 <td align="right">0.0000000</td>
 </tr>
 </tbody>
@@ -2407,14 +2421,137 @@ model_3 &lt;- rpart(price ~ room_type + neighborhood +
              reviews +overall_satisfaction + accommodates +
              bedrooms,data = train_set, method=&quot;anova&quot;)
 
-#summary(model_4)
-#plotcp(model_4)
-
-#predict(model_4,test_set)</code></pre>
+# Sacando predicciones
+pred_train_3=predict(model_3,train_set)#entrenamiento
+pred_test_3=predict(model_3,test_set)#evaluación</code></pre>
 </div>
-<div id="modelo-5-ensamblando-modelo-1-con-un-árbol" class="section level3">
-<h3>Modelo 5: Ensamblando modelo 1 con un árbol</h3>
-<p>Una técnica común en machine learning es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.</p>
+<div id="modelo-4-xgboost" class="section level3">
+<h3>Modelo 4: XGBoost</h3>
+<pre class="r"><code>library(xgboost)
+
+# XGBoost, a diferencia de lm, no convierte las variables categóricas que aparecen como
+# caracteres a variables binarias (0/1). Tendremos que usar la codificación
+
+# Primero vamos a definir las matrices de entrenamiento y evaluación
+X_train&lt;- train_set[,c(colnames(vecindarios),colnames(tipos_cuarto),&quot;reviews&quot;,
+                       &quot;overall_satisfaction&quot;, &quot;accommodates&quot;,&quot;bedrooms&quot;,
+                       &quot;longitude&quot;, &quot;latitude&quot;)]
+
+X_test&lt;- test_set[,c(colnames(vecindarios),colnames(tipos_cuarto),&quot;reviews&quot;,
+                       &quot;overall_satisfaction&quot;, &quot;accommodates&quot;,&quot;bedrooms&quot;,
+                     &quot;longitude&quot;, &quot;latitude&quot;)]
+
+# Luego definimos los vectores de la variable dependiente
+y_train&lt;- train_set$price
+y_test&lt;-test_set$price
+
+# Modelo
+model_4 &lt;- xgboost(data = as.matrix(X_train), label = as.matrix(y_train), max.depth = 4, 
+                   eta = 0.3, nthread = 2, nrounds = 100, objective = &quot;reg:linear&quot;,
+                   eval_metric=&quot;rmse&quot;)</code></pre>
+<pre><code>## [1]  train-rmse:131.954193 
+## [2]  train-rmse:101.637291 
+## [3]  train-rmse:82.415817 
+## [4]  train-rmse:70.889359 
+## [5]  train-rmse:64.229828 
+## [6]  train-rmse:60.434841 
+## [7]  train-rmse:58.281601 
+## [8]  train-rmse:57.014061 
+## [9]  train-rmse:56.143475 
+## [10] train-rmse:55.608700 
+## [11] train-rmse:55.173035 
+## [12] train-rmse:54.893555 
+## [13] train-rmse:54.636726 
+## [14] train-rmse:54.446327 
+## [15] train-rmse:54.318256 
+## [16] train-rmse:54.114655 
+## [17] train-rmse:53.891735 
+## [18] train-rmse:53.792667 
+## [19] train-rmse:53.640900 
+## [20] train-rmse:53.457455 
+## [21] train-rmse:53.387615 
+## [22] train-rmse:53.294956 
+## [23] train-rmse:53.254910 
+## [24] train-rmse:53.165218 
+## [25] train-rmse:53.056454 
+## [26] train-rmse:53.028572 
+## [27] train-rmse:52.983681 
+## [28] train-rmse:52.920143 
+## [29] train-rmse:52.894375 
+## [30] train-rmse:52.780979 
+## [31] train-rmse:52.738033 
+## [32] train-rmse:52.726776 
+## [33] train-rmse:52.689697 
+## [34] train-rmse:52.659248 
+## [35] train-rmse:52.622204 
+## [36] train-rmse:52.509422 
+## [37] train-rmse:52.472862 
+## [38] train-rmse:52.408752 
+## [39] train-rmse:52.362125 
+## [40] train-rmse:52.289661 
+## [41] train-rmse:52.245327 
+## [42] train-rmse:52.205677 
+## [43] train-rmse:52.193600 
+## [44] train-rmse:52.152649 
+## [45] train-rmse:52.115005 
+## [46] train-rmse:52.103527 
+## [47] train-rmse:52.022705 
+## [48] train-rmse:51.970745 
+## [49] train-rmse:51.961697 
+## [50] train-rmse:51.902168 
+## [51] train-rmse:51.890892 
+## [52] train-rmse:51.831497 
+## [53] train-rmse:51.766178 
+## [54] train-rmse:51.686607 
+## [55] train-rmse:51.663685 
+## [56] train-rmse:51.635052 
+## [57] train-rmse:51.630932 
+## [58] train-rmse:51.621689 
+## [59] train-rmse:51.547565 
+## [60] train-rmse:51.511417 
+## [61] train-rmse:51.452694 
+## [62] train-rmse:51.400898 
+## [63] train-rmse:51.372913 
+## [64] train-rmse:51.344749 
+## [65] train-rmse:51.320049 
+## [66] train-rmse:51.301563 
+## [67] train-rmse:51.259754 
+## [68] train-rmse:51.207699 
+## [69] train-rmse:51.191135 
+## [70] train-rmse:51.148605 
+## [71] train-rmse:51.103161 
+## [72] train-rmse:51.056618 
+## [73] train-rmse:51.032875 
+## [74] train-rmse:51.004513 
+## [75] train-rmse:50.981480 
+## [76] train-rmse:50.976418 
+## [77] train-rmse:50.948055 
+## [78] train-rmse:50.884682 
+## [79] train-rmse:50.819569 
+## [80] train-rmse:50.755096 
+## [81] train-rmse:50.682190 
+## [82] train-rmse:50.643379 
+## [83] train-rmse:50.639328 
+## [84] train-rmse:50.597248 
+## [85] train-rmse:50.554691 
+## [86] train-rmse:50.516537 
+## [87] train-rmse:50.467911 
+## [88] train-rmse:50.435013 
+## [89] train-rmse:50.431282 
+## [90] train-rmse:50.423847 
+## [91] train-rmse:50.381886 
+## [92] train-rmse:50.349831 
+## [93] train-rmse:50.344349 
+## [94] train-rmse:50.339886 
+## [95] train-rmse:50.285236 
+## [96] train-rmse:50.214699 
+## [97] train-rmse:50.138271 
+## [98] train-rmse:50.081768 
+## [99] train-rmse:50.036533 
+## [100]    train-rmse:50.029278</code></pre>
+<pre class="r"><code># Predicciones
+pred_train_4&lt;-predict(model_4,as.matrix(X_train))
+pred_test_4&lt;-predict(model_4,as.matrix(X_test))</code></pre>
 </div>
 </div>
 <div id="evaluando-los-modelos" class="section level2">
@@ -2424,17 +2561,147 @@ model_3 &lt;- rpart(price ~ room_type + neighborhood +
 <pre class="r"><code>#Librería de métricas
 #install.packages(&quot;Metrics&quot;)
 library(Metrics)
-mae1&lt;-mae(test_set$price,predict(model_1,test_set))
-mae2&lt;-mae(test_set$price,exp(predict(model_2,test_set)))
-mae3&lt;-mae(test_set$price,predict(model_3,test_set))</code></pre>
-<p>En este momento podemos seleccionar el modelo que mejor se adapte</p>
-<div id="correlaciones" class="section level3">
-<h3>Correlaciones</h3>
-<p>Usted podría también simplemente sacar las correlaciones entre variables para poder visualizar las variables que pueden ser relevantes. El valor agregado es que una matriz de correlaciones, al ser todos contra todos, puede ayudarle a determinar si existe multicolinealidad entre variables independientes. Si usted tiene variables que son muy correlacionadas, la regresión puede tener problemas de cálculo y obtener resultados extraños.</p>
-<pre class="r"><code>#Recordemos que podemos hacer una regresión lineal contra factores, y R automáticamente codificará los factores con one hot encoder (1,0,0,0...)
-#as.factor(b$neighborhood)
-#model&lt;-lm(formula = price~neighborhood,data = b)
-#summary(model)</code></pre>
+mae1&lt;-mae(test_set$price,pred_test_1)
+mae2&lt;-mae(test_set$price,pred_test_2)
+mae3&lt;-mae(test_set$price,pred_test_3)
+mae4&lt;-mae(test_set$price,pred_test_4)
+
+# Mostrando resultados
+print((paste(&quot;Modelo 1:&quot;, mae1)))</code></pre>
+<pre><code>## [1] &quot;Modelo 1: 40.3103714982051&quot;</code></pre>
+<pre class="r"><code>print((paste(&quot;Modelo 2:&quot;, mae2)))</code></pre>
+<pre><code>## [1] &quot;Modelo 2: 39.3636915199293&quot;</code></pre>
+<pre class="r"><code>print((paste(&quot;Modelo 3:&quot;, mae3)))</code></pre>
+<pre><code>## [1] &quot;Modelo 3: 42.5702671943785&quot;</code></pre>
+<pre class="r"><code>print((paste(&quot;Modelo 4:&quot;, mae4)))</code></pre>
+<pre><code>## [1] &quot;Modelo 4: 40.4234362311985&quot;</code></pre>
+<div id="modelo-5-ensamblando-modelos" class="section level3">
+<h3>Modelo 5: Ensamblando modelos</h3>
+<p>Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.</p>
+<pre class="r"><code># Primero vamos a añadir a X_train y X_test los resultados del modelo lineal
+y_1&lt;- as.matrix(pred_train_1)
+y_2&lt;- as.matrix(pred_train_2)
+X_train_2&lt;-cbind(X_train,y_1,y_2)
+
+y_1&lt;- as.matrix(pred_test_1)
+y_2&lt;- as.matrix(pred_test_2)
+X_test_2&lt;-cbind(X_test, y_1,y_2)
+
+# Modelo
+model_5 &lt;- xgboost(data = as.matrix(X_train_2), label = as.matrix(y_train), max.depth = 4, 
+                   eta = 0.5, nthread = 2, nrounds = 100, objective = &quot;reg:linear&quot;,
+                   eval_metric=&quot;rmse&quot;)</code></pre>
+<pre><code>## [1]  train-rmse:101.134201 
+## [2]  train-rmse:69.221931 
+## [3]  train-rmse:58.241383 
+## [4]  train-rmse:54.822876 
+## [5]  train-rmse:53.657875 
+## [6]  train-rmse:53.168888 
+## [7]  train-rmse:52.790173 
+## [8]  train-rmse:52.463688 
+## [9]  train-rmse:52.375614 
+## [10] train-rmse:52.164684 
+## [11] train-rmse:52.028316 
+## [12] train-rmse:51.852234 
+## [13] train-rmse:51.668159 
+## [14] train-rmse:51.566090 
+## [15] train-rmse:51.409237 
+## [16] train-rmse:51.342945 
+## [17] train-rmse:51.182598 
+## [18] train-rmse:51.161713 
+## [19] train-rmse:51.077324 
+## [20] train-rmse:50.901821 
+## [21] train-rmse:50.850430 
+## [22] train-rmse:50.791840 
+## [23] train-rmse:50.705875 
+## [24] train-rmse:50.658562 
+## [25] train-rmse:50.510506 
+## [26] train-rmse:50.395817 
+## [27] train-rmse:50.321926 
+## [28] train-rmse:50.176968 
+## [29] train-rmse:50.101700 
+## [30] train-rmse:50.001972 
+## [31] train-rmse:49.886036 
+## [32] train-rmse:49.819878 
+## [33] train-rmse:49.755993 
+## [34] train-rmse:49.666275 
+## [35] train-rmse:49.641796 
+## [36] train-rmse:49.546890 
+## [37] train-rmse:49.428017 
+## [38] train-rmse:49.367413 
+## [39] train-rmse:49.330963 
+## [40] train-rmse:49.307011 
+## [41] train-rmse:49.254044 
+## [42] train-rmse:49.155010 
+## [43] train-rmse:49.032204 
+## [44] train-rmse:48.916756 
+## [45] train-rmse:48.780975 
+## [46] train-rmse:48.666698 
+## [47] train-rmse:48.572906 
+## [48] train-rmse:48.508492 
+## [49] train-rmse:48.477463 
+## [50] train-rmse:48.417614 
+## [51] train-rmse:48.328354 
+## [52] train-rmse:48.274490 
+## [53] train-rmse:48.254978 
+## [54] train-rmse:48.156540 
+## [55] train-rmse:48.090923 
+## [56] train-rmse:48.011600 
+## [57] train-rmse:47.968380 
+## [58] train-rmse:47.954765 
+## [59] train-rmse:47.861404 
+## [60] train-rmse:47.766983 
+## [61] train-rmse:47.676029 
+## [62] train-rmse:47.600311 
+## [63] train-rmse:47.585274 
+## [64] train-rmse:47.532047 
+## [65] train-rmse:47.448868 
+## [66] train-rmse:47.345139 
+## [67] train-rmse:47.245613 
+## [68] train-rmse:47.095062 
+## [69] train-rmse:47.005692 
+## [70] train-rmse:46.830540 
+## [71] train-rmse:46.789948 
+## [72] train-rmse:46.749424 
+## [73] train-rmse:46.712612 
+## [74] train-rmse:46.635014 
+## [75] train-rmse:46.586746 
+## [76] train-rmse:46.528103 
+## [77] train-rmse:46.415684 
+## [78] train-rmse:46.333855 
+## [79] train-rmse:46.279232 
+## [80] train-rmse:46.246056 
+## [81] train-rmse:46.186901 
+## [82] train-rmse:46.107960 
+## [83] train-rmse:46.039597 
+## [84] train-rmse:45.959122 
+## [85] train-rmse:45.903831 
+## [86] train-rmse:45.860664 
+## [87] train-rmse:45.782200 
+## [88] train-rmse:45.709873 
+## [89] train-rmse:45.676590 
+## [90] train-rmse:45.566814 
+## [91] train-rmse:45.482136 
+## [92] train-rmse:45.431332 
+## [93] train-rmse:45.399647 
+## [94] train-rmse:45.372765 
+## [95] train-rmse:45.262840 
+## [96] train-rmse:45.195396 
+## [97] train-rmse:45.119991 
+## [98] train-rmse:45.088131 
+## [99] train-rmse:45.083096 
+## [100]    train-rmse:45.032230</code></pre>
+<pre class="r"><code># Predicciones
+pred_train_5&lt;-predict(model_5,as.matrix(X_train_2))
+pred_test_5&lt;-predict(model_5,as.matrix(X_test_2))
+
+# Error Medio
+mae5&lt;-mae(test_set$price,pred_test_5)
+
+# Mostrando Resultados
+print((paste(&quot;Modelo 5:&quot;, mae5)))</code></pre>
+<pre><code>## [1] &quot;Modelo 5: 38.8645690150883&quot;</code></pre>
+<p>Usted puede siempre construir un modelo final que sea capaz de superar</p>
 </div>
 </div>
 
