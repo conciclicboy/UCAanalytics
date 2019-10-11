@@ -120,32 +120,32 @@ Basado en la gráfica anterior podemos inferir que hay temporadas a lo largo del
 
 ### Diagramas de dispersión
 Tenemos 18 variables independientes de naturaleza  macroeconómica o de la industria automotriz, de las cuales debemos entender cuales tienen relaciones aproximadamente lineales respecto al número de autos o camiones vendidos.
-Haremos esto en porciones porque el programa se tardará mucho
+
+#### Autos
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
-
+# Haremos esto en porciones porque el programa va tronar si hacemos todos los 
 library(radiant.data)
 visualize(dataset=b,
-          xvar=c("Inventories..000s.","CPI.New.Cars.NSA.YoY","CPI.Used.Cars.NSA.YoY",
-                 "Gas.Prices", "Cons..Conf..Autos", "Miles.Driven"),
+          xvar=c("Inventories", "CPI_New_Cars", "CPI_Used_Cars",
+                 "Gas_Prices", "Cons_Conf_Autos", "Miles_Driven"),
           yvar="Car",
           type="scatter",
           custom=FALSE
 )
 
 visualize(dataset=b,
-          xvar=c("Bank.Auto.Interest.Rate","US.Population..in.mill..", "Unempl..Rate",
-                 "Disposible.Income.Capita.Real","Saving...Capita", "Household.Debt...Capita"),
+          xvar=c("Bank_Auto_Interest_Rate", "US_Population_millions", "Unemployment",
+                 "Disposible_Income_Capita_Real", "Saving_Capital", "Household_Debt_Capital"),
           yvar="Car",
           type="scatter",
           custom=FALSE
 )
 
 
-
 visualize(dataset=b,
-          xvar=c("US.House.Price.Inflation.NSA","Consumer.Confidence","Annualized.RealGDP...Capita",
-                 "Fed.Funds.Rate","US.Urban.CPI.Change.NSA", "Nonfarm.Mfg.Payrolls.NSA"),
+          xvar=c("US_House_Price_Inflation", "Consumer_Confidence", "RealGDP",
+                 "Fed_Funds_Rate", "US_Urban_CPI_Change", "Nonfarm_Payrolls"),
           yvar="Car",
           type="scatter",
           custom=FALSE
@@ -153,6 +153,44 @@ visualize(dataset=b,
 
 
 ```
+
+
+
+#### Camiones
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+# Haremos esto en porciones porque el programa va tronar si hacemos todos los 
+library(radiant.data)
+visualize(dataset=b,
+          xvar=c("Inventories", "CPI_New_Cars", "CPI_Used_Cars",
+                 "Gas_Prices", "Cons_Conf_Autos", "Miles_Driven"),
+          yvar="Truck",
+          type="scatter",
+          custom=FALSE
+)
+
+visualize(dataset=b,
+          xvar=c("Bank_Auto_Interest_Rate", "US_Population_millions", "Unemployment",
+                 "Disposible_Income_Capita_Real", "Saving_Capital", "Household_Debt_Capital"),
+          yvar="Truck",
+          type="scatter",
+          custom=FALSE
+)
+
+
+visualize(dataset=b,
+          xvar=c("US_House_Price_Inflation", "Consumer_Confidence", "RealGDP",
+                 "Fed_Funds_Rate", "US_Urban_CPI_Change", "Nonfarm_Payrolls"),
+          yvar="Truck",
+          type="scatter",
+          custom=FALSE
+)
+
+
+
+```
+
+
 
 ### Diagrama de caja de los vecindarios
 Con los vecindarios dibujaremos individualmente el diagrama ya que son muchos. En este caso usaremos un boxplot porque es una visualización más para este tipo de variables categóricas.

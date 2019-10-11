@@ -52,7 +52,7 @@ price                      | Precio de la unidad
 
 Leyendo los datos
 
-```{r}
+```{r, echo=FALSE}
 #obteniendo directorio
 getwd()
   
@@ -89,7 +89,7 @@ knitr::kable({
 
 ## Sacando estadísticas de las columnas
 Vamos a ver que hay dentro de cada variable para decidir si vamos a botar algunas.
-```{r}
+```{r, echo=FALSE}
 summary(b)
 ```
 
@@ -99,7 +99,7 @@ De acá es fácil determinar que algunas columnas no podremos utilizarlas para n
 ## Eliminando filas innecesarias
 Ya que hay columnas que están llenas de campos vacíos o extraños las vamos a eliminar para no tomarlas en el análisis
 
-```{r}
+```{r, echo=FALSE}
 #b$var1 <- NULL
 #b$var2 <- NULL
 #b$var3 <- NULL
@@ -118,7 +118,7 @@ colnames(b)
 ### Distribución de precios
 Si usted quiere pronosticar precios, lo primero que debe tener es una idea de como están distribuidos los precios.
 
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE, echo=FALSE}
 library(ggplot2)
 pl <- ggplot(b,aes(x=price))
 pl+geom_histogram(fill='blue',alpha=0.5)+theme_minimal()
@@ -126,7 +126,7 @@ pl+geom_histogram(fill='blue',alpha=0.5)+theme_minimal()
 
 El problema con el histograma anterior es que hay demasiados outliers o valores extremos. Así se vuelve muy difícil visualizar cualquier tipo de correlación, y además, como muchos de estos modelos tienen soluciones numéricas, la convergencia de los mismos se vuelve extraña. Lo que vamos a hacer es tomar los datos entre los percentiles 1 y 99 para la variable precio.
 
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE, echo=FALSE}
 #filtrando data frame entre percentiles 1 y 99 de la variable precio
 b<- b [(b$price>=quantile(b$price,0.01)) & (b$price <= quantile(b$price,0.99)),]
 
@@ -143,7 +143,7 @@ Este gráfico se ve mucho mejor, se puede observar que la mayor parte de los pre
 ### Diagramas de dispersión
 Cuando se trata de un problema de regresión o pronóstico, lo más apropiado es hacer un diagrama de dispersión. para verificar si los datos se distribuyen linealmente con respecto a alguna variable o ver algún tipo de correlación visual. Puede parecer demasiado empírico, y en efecto, estas metodologías son de naturaleza empírica, así que manos a la obra. Dado que algunas variables son categóricas, primero procederemos a crear variables dummy.
 
-```{r, message=FALSE, warning=FALSE }
+```{r, message=FALSE, warning=FALSE, echo=FALSE }
 #fig.height=4.5,
 #Para no hacernos la vida imposible podemos hacer muchos scatter plot
 #utilizando la función visualize de la librería radiant.data
@@ -162,14 +162,14 @@ visualize(dataset=b,
 ### Diagrama de caja de los vecindarios
 Con los vecindarios dibujaremos individualmente el diagrama ya que son muchos. En este caso usaremos un boxplot porque es una visualización más para este tipo de variables categóricas.
 
-```{r}
+```{r, echo=FALSE}
 pl<-ggplot(data=b,aes(y=price,x=neighborhood))
 pl+geom_boxplot(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element_text(angle=90, hjust=1))
 ```
 
 Pero debido a que son una variable categórica, debemos intentar incluir solo a los vecindarios que sean estadísticamente relevantes dentro de nuestra regresión. Nos vamos a deshacer de los vecindarios que tengan menos de x% de elementos
 
-```{r}
+```{r, echo=FALSE}
 # límite inferior de los vecindarios a considerar
 # Podemos agarrar 1%-2%-3%-4%-5% de elementos
 lim_inferior<-nrow(b)*0.04
@@ -183,7 +183,7 @@ pl+geom_bar(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element_tex
 ### Conteo de variables categóricas
 Ahora que tenemos un límite inferior para los vecindarios podemos volver a reducir el número de datos, limitandonos solo a los vecindarios con más del x% de elementos
 
-```{r}
+```{r, echo=FALSE}
 # Todo lo que debe hacer es cambiar el límite inferior basado en los resultados
 # anteriores. En este caso le he puesto 200, usted puede cambiarlo, o no.
 c<- b[b$neighborhood %in%  names(table(b$neighborhood))[table(b$neighborhood) >= 700],]
@@ -204,7 +204,7 @@ Más adelante veremos a detalle esta técnica, pero en este momento, simplemente
 Antes de hacer eso vamos a codificar las variables categóricas con One Hot encoding.
 Los modelos base de R como linear model (lm) pueden lidiar con variables categóricas fácilmente. Sin embargo, otro tipo de modelos no tiene esa funcionalidad, así que implementaremos esto desde antes:
 
-```{r}
+```{r, echo=FALSE}
 # One Hot Encoding
 vecindarios<-model.matrix(~neighborhood-1,head(b))
 tipos_cuarto<-model.matrix(~room_type-1,head(b))
@@ -213,7 +213,7 @@ b <- cbind(b, vecindarios,tipos_cuarto)
 
 
 Ahora podemos proceder a separar los datos:
-```{r}
+```{r, echo=FALSE}
 # Please ENTER the percentage of data used for estimation
 porcion_train = 0.9
 porcion_test = 0.1
@@ -243,8 +243,9 @@ Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efect
 
 
 ### Modelo 1: Regresión Lineal
+Tomaremos como variables independientes room_type, neighborhood, reviews, overall_satisfaction, accommodates, bedrooms y haremos una regresión lineal respecto al precio. Los resultados son:
 
-```{r,message=FALSE, warning=FALSE }
+```{r,message=FALSE, warning=FALSE, echo=FALSE }
 # Creando modelo
 model_1<- lm(formula = price ~ room_type + neighborhood + 
              reviews +overall_satisfaction + accommodates +
@@ -267,7 +268,10 @@ La mayoría de variables son signioficativas con p-values pequeños.
 
 ### Modelo 2: Regresión log-lineal
 
-```{r}
+Tomaremos como variables independientes room_type, neighborhood, reviews, overall_satisfaction, log(accommodates), bedrooms y haremos una regresión lineal respecto a log(precio). Luego, al hacer la predicción, recuperaremos el precio original haciendo exp(predicción) ya que está en escala logarítmica.
+Los resultados son:
+
+```{r, echo=FALSE}
 # Creando modelo
 model_2<-lm(formula = log(price) ~ room_type + neighborhood + 
              reviews +overall_satisfaction + log(accommodates) +
@@ -283,9 +287,9 @@ knitr::kable(xtable(summary(model_2)))
 
 
 ### Modelo 3: Arbol de regresión
+En este caso estaríamos usando las mismas variables predictivas que en le modelo 1 pero con un árbol de regresión. Un árbol de regresión, al no ser un modelo paramétrico basado en supuestos probabilísticos, no debe ser evaluado de la misma forma, así que presentaremos los resultados después.
 
-
-```{r,message=FALSE, warning=FALSE}
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 library(rpart)
 model_3 <- rpart(price ~ room_type + neighborhood + 
              reviews +overall_satisfaction + accommodates +
@@ -297,7 +301,10 @@ pred_test_3=predict(model_3,test_set)#evaluación
 ```
 
 ### Modelo 4: XGBoost
-```{r,message=FALSE, warning=FALSE}
+
+XGBoost es el nombre del paquete que efectua el algoritmo de Gradient Boosting Decision Tree, el cual es un árbol que se va desarrollando por etapas, y en cada etapa mejora usando como insumo el error de la etapa anterior. Como XGBoost es otro método basado en árboles, por lo tanto no hace ningún supuesto probabilístico, y tampoco es necesario evaluar el ajuste de la misma forma que con la regresión lineal. Estos son los resultados que obtuvo en cada iteración:
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 library(xgboost)
 
 # XGBoost, a diferencia de lm, no convierte las variables categóricas que aparecen como
@@ -318,8 +325,8 @@ y_test<-test_set$price
 
 # Modelo
 model_4 <- xgboost(data = as.matrix(X_train), label = as.matrix(y_train), max.depth = 4, 
-                   eta = 0.3, nthread = 2, nrounds = 100, objective = "reg:linear",
-                   eval_metric="rmse",verbose = 0)
+                   eta = 0.3, nthread = 2, nrounds = 50, objective = "reg:linear",
+                   eval_metric="rmse",verbose = 1)
 
 # Predicciones
 pred_train_4<-predict(model_4,as.matrix(X_train))
@@ -333,7 +340,7 @@ Luego de ajustar el/los modelo/s debemos evaluar el desempeño de los mismos. Pa
 
 Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros factores para asegurar la significancia estadística del modelo como normalidad, homecedasticidad, etc. Sin embargo, a la hora de comparar un modelo lineal con uno no lineal, no se pueden utilizar todos estos factores ya que no son parte de los supuestos. Es por eso que nos enfocaremos solamente en la desviación absoluta media.
 
-```{r,message=FALSE, warning=FALSE}
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 
 #Librería de métricas
 #install.packages("Metrics")
@@ -353,9 +360,10 @@ print((paste("Modelo 4:", mae4)))
 
 
 ## Modelo 5: Ensamblando modelos 1 y 2 con los datos
-Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.
+Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior. Podemos construir una nueva base de datos que contenga las predicciones del modelo 1, las predicciones del modelo 2, así como las variables independientes originales: room_type, neighborhood, reviews, overall_satisfaction, accommodates, bedrooms. El resultado final de este modelo usualmente es superior a los modelos anteriores:
 
-```{r, warning=FALSE, message=FALSE}
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 
 # Primero vamos a añadir a X_train y X_test los resultados del modelo lineal
 y_1<- as.matrix(pred_train_1)
@@ -368,7 +376,7 @@ X_test_2<-cbind(X_test, y_1,y_2)
 
 # Modelo
 model_5 <- xgboost(data = as.matrix(X_train_2), label = as.matrix(y_train), max.depth = 4, 
-                   eta = 0.3, nthread = 2, nrounds = 120, objective = "reg:linear",
+                   eta = 0.3, nthread = 2, nrounds = 70, objective = "reg:linear",
                    eval_metric="rmse", verbose = 0)
 
 # Predicciones
