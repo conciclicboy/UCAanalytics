@@ -68,8 +68,6 @@ Non Farm Payrolls    | Salarios sin Agricultura  | [Buró Estadísticas Laborale
 
 
 
-
-
 Leyendo los datos
 
 ```{r}
@@ -92,43 +90,25 @@ knitr::kable({
 
 Existen 5 variables extras que fueron creadas: Time, Year, Q1, Q2, Q3. En breve explicaremos porque se diseñaron estas variables.
 
+### Tendencias a través del tiempo
+En las series temporales, como su nombre lo dice, el tiempo es un factor importante, ya que este puede determinar el status de una variable. En los precios de las acciones, por ejemplo, se pueden observar períodos en los que el precio de la acción cotiza a la baja; mientras que en las ventas minoristas es natural ver temporadas en que se vende mucho o vende poco (pre y post navidad).
 
-
-## Sacando estadísticas de las columnas
-Vamos a ver que hay dentro de cada variable para decidir si vamos a botar algunas.
-```{r}
-#summary(b)
-```
-
-De acá es fácil determinar que algunas columnas no podremos utilizarlas para nuestro análisis, entonces simplemente vamos a deshacernos de ellas. No siempre es recomendado hacer esto, existen criterios de imputación de variables cuando se tienen datos faltantes.
-
-
-## Eliminando filas innecesarias
-Ya que hay columnas que están llenas de campos vacíos o extraños las vamos a eliminar para no tomarlas en el análisis
-
-```{r}
-#b$var1 <- NULL
-#b$var2 <- NULL
-#b$var3 <- NULL
-#b$var4 <- NULL
-#b$country <- NULL
-#b$borough <- NULL
-#b$bathrooms <- NULL
-#b$minstay <- NULL
-#colnames(b)
-
-```
-
-
-## Explorando las variables
-
-### Distribución de precios
-Si usted quiere pronosticar precios, lo primero que debe tener es una idea de como están distribuidos los precios.
+Entonces, lo primero que se hará es visualizar la tendencia de precios a lo largo del tiempo.
 
 ```{r,message=FALSE,warning=FALSE}
 library(ggplot2)
-#pl <- ggplot(b,aes(x=price))
-#pl+geom_histogram(fill='blue',alpha=0.5)+theme_minimal()
+
+# Renombrando columna Date 
+colnames(b)[1]<-"Date"
+
+# Transformando en fecha
+b$Date<- as.Date(b$Date,"%d/%m/%Y")
+
+#Graficando
+pl <- ggplot(b,aes(x=Date))
+
+pl+ geom_line(aes(y=Car),size=0.5,color="blue")+geom_line(aes(y=Truck),size=0.5,color="darkred")+theme_minimal()
+
 ```
 
 El problema con el histograma anterior es que hay demasiados outliers o valores extremos. Así se vuelve muy difícil visualizar cualquier tipo de correlación, y además, como muchos de estos modelos tienen soluciones numéricas, la convergencia de los mismos se vuelve extraña. Lo que vamos a hacer es tomar los datos entre los percentiles 1 y 99 para la variable precio.
@@ -136,10 +116,10 @@ El problema con el histograma anterior es que hay demasiados outliers o valores 
 ```{r,message=FALSE,warning=FALSE}
 #filtrando data frame entre percentiles 1 y 99 de la variable precio
 #b<- b [(b$price>=quantile(b$price,0.01)) & (b$price <= quantile(b$price,0.99)),]
+library(ggplot2)
+#Graficando
 
-#Graficando nuevamente
-#pl <- ggplot(b,aes(x=price))
-#pl+geom_histogram(fill='blue',alpha=0.5)+theme_minimal()
+#  geom_histogram(fill='blue',alpha=0.5)+theme_minimal()
 ```
 
 Este gráfico se ve mucho mejor, se puede observar que la mayor parte de los precios se ubican entre $100 y $200.
@@ -344,7 +324,7 @@ Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros f
 
 #Librería de métricas
 #install.packages("Metrics")
-library(Metrics)
+#library(Metrics)
 #mae1<-mae(test_set$price,pred_test_1)
 #mae2<-mae(test_set$price,pred_test_2)
 #mae3<-mae(test_set$price,pred_test_3)
