@@ -107,7 +107,7 @@ b$Date<- as.Date(b$Date,"%d/%m/%Y")
 #Graficando
 pl <- ggplot(b,aes(x=Date))
 
-pl+ geom_line(aes(y=Car),size=0.5,color="blue")+geom_line(aes(y=Truck),size=0.5,color="darkred")+theme_minimal()
+pl+ geom_line(aes(y=Car),color="blue")+geom_line(aes(y=Truck),color="darkred")+theme_minimal()#+scale_color_brewer(palette="Paired")
 
 ```
 
