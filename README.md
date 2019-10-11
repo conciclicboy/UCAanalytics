@@ -117,8 +117,8 @@ En estas sesiones se introducirá la herramienta de pronóstico más común de t
 
 
 un caso de análisis de precios en casas del housing dataset.
-* Se dará una breve introducción a los tipos de regresión: modelos lineales y modelos basados en árboles.
-* Se revisará la implementación en R y el proceso de diagnóstico/validación de la misma.
+* Introducción: modelos lineales y modelos basados en árboles.
+* Implementación en R y proceso de diagnóstico/validación.
 * Se desarrollará en clase el caso de [Ventas de Autos en USA](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AutoVentas/auto_ventas.html)
 * Se desarrollará en clase el caso de [AirBnB](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AirBNB_prices/airbnb.html)
 
