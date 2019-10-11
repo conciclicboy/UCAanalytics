@@ -3,12 +3,12 @@
 El curso comprende una introducción a herramientas analíticas aplicadas a problemas de negocios. En la actualidad existen varias herramientas Business Analytics que pueden ayudar al análisis de la información, este curso será desarrollado con el software estadístico R. Se desarrollarán casos de estudio implementando algoritmos de machine learning en finanzas y marketing, y se espera que al finalizar el curso el estudiante no solamente sea capaz de ejecutar archivos en R, sino que desarrolle la capacidad de entender que quiere obtener y que modelo debe utilizar para obtenerlo, sin importar la herramienta que esté utilizando.
 
 ## Sitio en construcción:
-### Los detalles de inscripción y fecha de inicio se darán más adelante en coordinación con la administración de la maestría en finanzas
+### Los detalles de inscripción y fecha de inicio se darán en el mes de octubre previa coordinación con la administración de la maestría en finanzas de la UCA
 
 ### Profesor:
 [Eduardo Arnoldo Aguilar Cañas](https://sv.linkedin.com/in/eduardoaguilar-sv)
 <br>
-earnoldo.aguilar en gmail
+Contacto: earnoldo.aguilar en gmail
 
 ### Créditos:
 Agradezco especialmente al profesor [Theodoros Evgeniou](https://faculty.insead.edu/theodoros-evgeniou/) por permitirme utilizar el material de su curso [Data Analytics for Business](http://inseaddataanalytics.github.io/INSEADAnalytics/) impartido en [INSEAD](https://www.insead.edu/home/), la mejor escuela de negocios del mundo; así como a mis profesores en [Georgia Tech](https://www.scheller.gatech.edu/index.html), cuyo material he reutilizado en la formulación de los casos de análisis de regresión.
@@ -112,11 +112,14 @@ Estas sesiones consistirán en una introducción a lectura, manipulación y escr
 * [Data Frames](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
 
 
-### Sesiones 3-4: Regresión Lineal y predicción de precios
-En estas sesiones se introducirá un caso de análisis de precios en casas del housing dataset.
-* Se dará una breve introducción a los supuestos que hace la regresión lineal.
-* Se revisará la implementación de la regresión lineal en R y el proceso de diagnóstico/validación de la misma.
-* Si hay más tiempo se abordarán otros métodos como árbol de decisión.
+### Sesiones 3-4: Regresión y pronósticos (... en construcción)
+En estas sesiones se introducirá la herramienta de pronóstico más común de toda la matemática aplicada: la regresión.
+
+
+un caso de análisis de precios en casas del housing dataset.
+* Se dará una breve introducción a los tipos de regresión: modelos lineales y modelos basados en árboles.
+* Se revisará la implementación en R y el proceso de diagnóstico/validación de la misma.
+* Se desarrollará en clase el caso de [Ventas de Autos en USA](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AutoVentas/auto_ventas.html)
 * Se desarrollará en clase el caso de [AirBnB](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AirBNB_prices/airbnb.html)
 
 ### Sesiones 5-6: Clasificación y predicción de cuentas por cobrar
@@ -149,5 +152,3 @@ Estas sesiones abordarán el caso del aprendizaje no supervisado: la segmentaci�
 * Introducción a la Api de twitter
 * Exploración de Datos
 * NLP (Natural Language Processing)
-
-# ... página en construcción
