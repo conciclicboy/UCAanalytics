@@ -115,8 +115,6 @@ Estas sesiones consistirán en una introducción a lectura, manipulación y escr
 ### Sesiones 3-4: Regresión y pronósticos (... en construcción)
 En estas sesiones se introducirá la herramienta de pronóstico más común de toda la matemática aplicada: la regresión.
 
-
-un caso de análisis de precios en casas del housing dataset.
 * Introducción: modelos lineales y modelos basados en árboles.
 * Implementación en R y proceso de diagnóstico/validación.
 * Se desarrollará en clase el caso de [Ventas de Autos en USA](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AutoVentas/auto_ventas.html)
