@@ -88,6 +88,10 @@ knitr::kable({
 
 ```
 
+
+Sobre los datos habrá que mencionar, que los valores de las variables dependientes Car, Truck y Total ha sido desplazada hacia atrás por 1 período, es decir, los valores correspondientes a enero son en realidad los valores que fueron obtenidos en el mes de febrero, más adelante se explicará la razón de esto.
+
+
 Existen 5 variables extras que fueron creadas: Time, Year, Q1, Q2, Q3. En breve explicaremos porque se diseñaron estas variables.
 
 
@@ -117,8 +121,26 @@ pl+ geom_line(aes(y=Car),color="blue")+geom_line(aes(y=Truck),color="darkred")+t
 
 Basado en la gráfica anterior podemos inferir que hay temporadas a lo largo del tiempo. En nuestro caso, como tenemos datos distribuidos trimestralmente, suena lógico pensar un efecto temporal cada trimestre. Es por ello que se incluyeron las variables categóricas Q1, Q2, Q3, etc. En nuestro caso dicha variable ya venía incluida en la base, eso sale más fácil hacerlo desde excel, pero tampoco es difícil calcularla directamente en R.
 
+Ahora bien, de acuerdo a la gráfica anterior no parece haber ninguna anormalidad en la distribución de autos vendidos, sin embargo nunca está demás crear un histograma para ver si en efecto no hay valores extremos que pudieran arruinar el ajuste del modelo.
+
+
+```{r,message=FALSE,warning=FALSE, echo=FALSE}
+
+#Graficando Carros
+pl<-ggplot(b,aes(x=Car))
+pl+geom_histogram(bins=20,fill='blue',alpha=0.4,color="blue")+theme_minimal()
+
+#Graficando Camiones
+pl<-ggplot(b,aes(x=Truck))
+pl+geom_histogram(bins=20,fill='blue',alpha=0.4,color="blue")+theme_minimal()
+
+```
+
+En efecto, no parece haber nada anormal con los datos. Si usted tuviera un dato anormalmente grande/pequeño, no debería incluirlo en el análisis (o incluirlo pero no con su valor original) porque los métodos probabilísticos como la regresión lineal no son lo suficientemente robustos para asumir este tipo de cambios bruscos sin verse afectados en su eficiencia.
+
 
 ### Diagramas de dispersión
+
 Tenemos 18 variables independientes de naturaleza  macroeconómica o de la industria automotriz, de las cuales debemos entender cuales tienen relaciones aproximadamente lineales respecto al número de autos o camiones vendidos.
 
 #### Autos
@@ -154,6 +176,8 @@ visualize(dataset=b,
 
 ```
 
+Bien, de los gráficos anteriores podemos inferir que variables tienen correlaciones aproximadamente lineales con nuestros datos. Este proceso de exploración puede también ser efectuado sacando las correlaciones entre variables (esto último lo puede hacer en excel o en R, pero si son demasiados datos excel tronará).
+Las variables que parecen relevantes son: Inventarios, CPI autos usados, Población, Desempleo, Capital Disponible (Disposible Income), Deuda de Hogares (Household Debt), Confianza del consumidor, PIB (GDP), Fed Funds Rate, Non Farm Payrolls.
 
 
 #### Camiones
@@ -190,47 +214,16 @@ visualize(dataset=b,
 
 ```
 
-
-
-### Diagrama de caja de los vecindarios
-Con los vecindarios dibujaremos individualmente el diagrama ya que son muchos. En este caso usaremos un boxplot porque es una visualización más para este tipo de variables categóricas.
-
-```{r}
-#pl<-ggplot(data=b,aes(y=price,x=neighborhood))
-#pl+geom_boxplot(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element_text(angle=90, hjust=1))
-```
-
-Pero debido a que son una variable categórica, debemos intentar incluir solo a los vecindarios que sean estadísticamente relevantes dentro de nuestra regresión. Nos vamos a deshacer de los vecindarios que tengan menos de x% de elementos
-
-```{r}
-# límite inferior de los vecindarios a considerar
-# Podemos agarrar 1%-2%-3%-4%-5% de elementos
-#lim_inferior<-nrow(b)*0.04
-
-#conteo_vec
-#pl<-ggplot(data=b,aes(x=neighborhood))
-#pl+geom_bar(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element_text(angle=90, hjust=1)) +geom_hline(yintercept = lim_inferior)
-
-```
-
-### Conteo de variables categóricas
-Ahora que tenemos un límite inferior para los vecindarios podemos volver a reducir el número de datos, limitandonos solo a los vecindarios con más del x% de elementos
-
-```{r}
-# Todo lo que debe hacer es cambiar el límite inferior basado en los resultados
-# anteriores. En este caso le he puesto 200, usted puede cambiarlo, o no.
-#c<- b[b$neighborhood %in%  names(table(b$neighborhood))[table(b$neighborhood) >= 700],]
-
-#Volvamos a graficar el diagrama de dispersión
-#pl<-ggplot(data=c,aes(y=price,x=neighborhood))
-#pl+geom_boxplot(fill='blue',alpha=0.5)+theme_minimal()+theme(axis.text.x=element_text(angle=90, hjust=1))
-```
-
-
-Ahora, después de ver estos diagramas, tiene un poco más de sentido incluir dichos vecindarios como potenciales variables de nuestro modelo, pues el precio medio depende de estos.
+En el caso de los camiones, las variables relevantes serían: CPI Carros Nuevos, Millas Manejadas (Miles Driven), Desempleo, Precios de Hogares, PIB (GDP).
 
 ## Separando datos
-Suponga que usted toma todos los datos y crea un modelo con una precisión casi perfecta que le permitiría predecir el precio de los alquileres de airbnb. ¿Tomaría usted la decisión de implementarlo inmediatamente?
+Los pronósticos en series de tiempo tienen una diferencia fundamental respecto a las series no temporales, y sí, como su nombre lo dice esa diferencia es el tiempo. Suponga que usted trabaja para una gestora de fondos de inversión, tiene 1,000 días de historia de los precios de las acciones y otros factores financieros, toma una muestra aleatoria de 800 días para construir un modelo e intenta predecir los restantes 200 días. ¿Cuál es el problema conm este enfoque?
+
+Cómo habrá notado, el problema con este tipo de muestras aleatorias es que estaría utilizando información futura para predecir precios del pasado
+
+
+
+toma todos los datos y crea un modelo con una precisión casi perfecta que le permitiría predecir el precio de los alquileres de airbnb. ¿Tomaría usted la decisión de implementarlo inmediatamente?
 Por supuesto que es una decisión personal sin una respuesta correcta, pero en la práctica no se recomienda hacer eso. La razón es que todos los modelos deben ser validados estadísticamente para estar seguro que su funcionamiento sea consistente en el tiempo.
 Más adelante veremos a detalle esta técnica, pero en este momento, simplemente dividiremos los datos en dos grupos: uno con el 90% y otro con el 10%.
 
