@@ -68,9 +68,9 @@ Non Farm Payrolls    | Salarios sin Agricultura  | [Buró Estadísticas Laborale
 
 
 
-Leyendo los datos
+Leyendo los datos:
 
-```{r}
+```{r, echo=FALSE}
 #obteniendo directorio
 #getwd()
   
@@ -90,12 +90,15 @@ knitr::kable({
 
 Existen 5 variables extras que fueron creadas: Time, Year, Q1, Q2, Q3. En breve explicaremos porque se diseñaron estas variables.
 
+
+## Exploración de Datos
+
 ### Tendencias a través del tiempo
 En las series temporales, como su nombre lo dice, el tiempo es un factor importante, ya que este puede determinar el status de una variable. En los precios de las acciones, por ejemplo, se pueden observar períodos en los que el precio de la acción cotiza a la baja; mientras que en las ventas minoristas es natural ver temporadas en que se vende mucho o vende poco (pre y post navidad).
 
 Entonces, lo primero que se hará es visualizar la tendencia de precios a lo largo del tiempo.
 
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE, echo=FALSE}
 library(ggplot2)
 
 # Renombrando columna Date 
@@ -107,43 +110,48 @@ b$Date<- as.Date(b$Date,"%d/%m/%Y")
 #Graficando
 pl <- ggplot(b,aes(x=Date))
 
-pl+ geom_line(aes(y=Car),color="blue")+geom_line(aes(y=Truck),color="darkred")+theme_minimal()#+scale_color_brewer(palette="Paired")
+pl+ geom_line(aes(y=Car),color="blue")+geom_line(aes(y=Truck),color="darkred")+theme_minimal()+theme(axis.text.x=element_text(angle=90, hjust=1))#+scale_color_brewer(palette="Paired")
 
 ```
 
-El problema con el histograma anterior es que hay demasiados outliers o valores extremos. Así se vuelve muy difícil visualizar cualquier tipo de correlación, y además, como muchos de estos modelos tienen soluciones numéricas, la convergencia de los mismos se vuelve extraña. Lo que vamos a hacer es tomar los datos entre los percentiles 1 y 99 para la variable precio.
 
-```{r,message=FALSE,warning=FALSE}
-#filtrando data frame entre percentiles 1 y 99 de la variable precio
-#b<- b [(b$price>=quantile(b$price,0.01)) & (b$price <= quantile(b$price,0.99)),]
-library(ggplot2)
-#Graficando
-
-#  geom_histogram(fill='blue',alpha=0.5)+theme_minimal()
-```
-
-Este gráfico se ve mucho mejor, se puede observar que la mayor parte de los precios se ubican entre $100 y $200.
-
-
+Basado en la gráfica anterior podemos inferir que hay temporadas a lo largo del tiempo. En nuestro caso, como tenemos datos distribuidos trimestralmente, suena lógico pensar un efecto temporal cada trimestre. Es por ello que se incluyeron las variables categóricas Q1, Q2, Q3, etc. En nuestro caso dicha variable ya venía incluida en la base, eso sale más fácil hacerlo desde excel, pero tampoco es difícil calcularla directamente en R.
 
 
 ### Diagramas de dispersión
-Cuando se trata de un problema de regresión o pronóstico, lo más apropiado es hacer un diagrama de dispersión. para verificar si los datos se distribuyen linealmente con respecto a alguna variable o ver algún tipo de correlación visual. Puede parecer demasiado empírico, y en efecto, estas metodologías son de naturaleza empírica, así que manos a la obra. Dado que algunas variables son categóricas, primero procederemos a crear variables dummy.
+Tenemos 18 variables independientes de naturaleza  macroeconómica o de la industria automotriz, de las cuales debemos entender cuales tienen relaciones aproximadamente lineales respecto al número de autos o camiones vendidos.
+Haremos esto en porciones porque el programa se tardará mucho
 
-```{r, message=FALSE, warning=FALSE }
-#fig.height=4.5,
-#Para no hacernos la vida imposible podemos hacer muchos scatter plot
-#utilizando la función visualize de la librería radiant.data
-#library(ggplot2)
-#library(lubridate)
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+
 library(radiant.data)
-#visualize(dataset=b,
-#          xvar=c("reviews","overall_satisfaction","accommodates","bedrooms",
-#                 "latitude", "longitude"),
-#          yvar="price",
-#          type="scatter",
-#          custom=FALSE
-#)
+visualize(dataset=b,
+          xvar=c("Inventories..000s.","CPI.New.Cars.NSA.YoY","CPI.Used.Cars.NSA.YoY",
+                 "Gas.Prices", "Cons..Conf..Autos", "Miles.Driven"),
+          yvar="Car",
+          type="scatter",
+          custom=FALSE
+)
+
+visualize(dataset=b,
+          xvar=c("Bank.Auto.Interest.Rate","US.Population..in.mill..", "Unempl..Rate",
+                 "Disposible.Income.Capita.Real","Saving...Capita", "Household.Debt...Capita"),
+          yvar="Car",
+          type="scatter",
+          custom=FALSE
+)
+
+
+
+visualize(dataset=b,
+          xvar=c("US.House.Price.Inflation.NSA","Consumer.Confidence","Annualized.RealGDP...Capita",
+                 "Fed.Funds.Rate","US.Urban.CPI.Change.NSA", "Nonfarm.Mfg.Payrolls.NSA"),
+          yvar="Car",
+          type="scatter",
+          custom=FALSE
+)
+
+
 ```
 
 ### Diagrama de caja de los vecindarios
