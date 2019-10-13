@@ -73,7 +73,11 @@ Leyendo los datos:
 ```{r, echo=FALSE}
 #obteniendo directorio
 #getwd()
-  
+
+# "b es el nombre de la variable que contiene los datos
+# usted puede asignar cualquier nombre disponible como "datos" o "datos_autos"
+# yo le puse "b" por simplicidad
+
 b<-read.csv("./data/autos_ventas.csv",sep = ";")
 
 
@@ -184,7 +188,7 @@ Las variables que parecen relevantes son: Inventarios, CPI autos usados, Poblaci
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 # Haremos esto en porciones porque el programa va tronar si hacemos todos los 
-library(radiant.data)
+
 visualize(dataset=b,
           xvar=c("Inventories", "CPI_New_Cars", "CPI_Used_Cars",
                  "Gas_Prices", "Cons_Conf_Autos", "Miles_Driven"),
@@ -215,53 +219,34 @@ visualize(dataset=b,
 ```
 
 En el caso de los camiones, las variables relevantes serían: CPI Carros Nuevos, Millas Manejadas (Miles Driven), Desempleo, Precios de Hogares, PIB (GDP).
+Entonces, a partir de esos gráficos que ve que las variables explicativas difieren entre los dos tipos de vehículos, así que se vuelve sensato diseñar diferentes modelos.
 
 ## Separando datos
-Los pronósticos en series de tiempo tienen una diferencia fundamental respecto a las series no temporales, y sí, como su nombre lo dice esa diferencia es el tiempo. Suponga que usted trabaja para una gestora de fondos de inversión, tiene 1,000 días de historia de los precios de las acciones y otros factores financieros, toma una muestra aleatoria de 800 días para construir un modelo e intenta predecir los restantes 200 días. ¿Cuál es el problema conm este enfoque?
+Los pronósticos en series de tiempo tienen una diferencia fundamental respecto a las series no temporales, y sí, como su nombre lo dice esa diferencia es el tiempo. Suponga que usted trabaja para una gestora de fondos de inversión, tiene 1,000 días de historia de los precios de las acciones y otros factores financieros, toma una muestra aleatoria de 800 días para construir un modelo e intenta predecir los restantes 200 días. ¿Cuál es el problema con este enfoque?
 
-Cómo habrá notado, el problema con este tipo de muestras aleatorias es que estaría utilizando información futura para predecir precios del pasado
+Cómo habrá notado, el problema con este tipo de muestras aleatorias es que estaría utilizando información futura para predecir precios del pasado, entonces es posible que el modelo funcionara bien en el entrenamiento y validación, pero no tendría resultados consistentes en la práctica. Para que los resultados teóricos y reales sean similares usted debe intentar representar la realidad lo mejor posible, es decir, entrenando con datos pasados y evaluando con datos futuros. Esto se logra eligiendo una fecha que divida dos ventanas de tiempo, la de entrenamiento y la de validación.
+
+La siguiente imagen muestra como se haría la validación en varias capas, pero por simplicidad nosotros solo tomaremos la última capa para evaluar el desempeño.
 
 
+![**Validacion en 4 capas**](k_fold.png)
 
-toma todos los datos y crea un modelo con una precisión casi perfecta que le permitiría predecir el precio de los alquileres de airbnb. ¿Tomaría usted la decisión de implementarlo inmediatamente?
-Por supuesto que es una decisión personal sin una respuesta correcta, pero en la práctica no se recomienda hacer eso. La razón es que todos los modelos deben ser validados estadísticamente para estar seguro que su funcionamiento sea consistente en el tiempo.
-Más adelante veremos a detalle esta técnica, pero en este momento, simplemente dividiremos los datos en dos grupos: uno con el 90% y otro con el 10%.
+Dicho de otro modo, nosotros entrenaremos con datos pasados a una fecha límite, y evaluaremos resultados con datos futuros a la misma fecha:
 
-Antes de hacer eso vamos a codificar las variables categóricas con One Hot encoding.
-Los modelos base de R como linear model (lm) pueden lidiar con variables categóricas fácilmente. Sin embargo, otro tipo de modelos no tiene esa funcionalidad, así que implementaremos esto desde antes:
+![**Validacion en serie de tiempo**](forward_chain.png)
 
-```{r}
-# One Hot Encoding
-#vecindarios<-model.matrix(~neighborhood-1,head(b))
-#tipos_cuarto<-model.matrix(~room_type-1,head(b))
-#b <- cbind(b, vecindarios,tipos_cuarto)
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+# Dividiendo datos en conjunto de entrenamiento y validación
+# Como nuestros datos ya están ordenados por fecha es fácil hacerlo:
+# usted puede simplemente tomar las primeras 274 filas y las ultimas 11
+# yo utilice el año para ilustrar como se haría si no estuviera ordenado
+
+train_set<-b[year(b$Date)<2017,]
+test_set<-b[year(b$Date)>=2017,]
 ```
 
-
-Ahora podemos proceder a separar los datos:
-```{r}
-# Please ENTER the percentage of data used for estimation
-porcion_train = 0.9
-porcion_test = 0.1
-
-# Librería dplyr
-library(dplyr)
-
-# Creando índice con función "mutate"" de dplyr
-# Esto lo utilizaremos solo como referencia
-#b <- mutate(b,id = row_number())
-
-# Creando datos de entrenamiento con función "sample_frac" de dplyr
-# La función toma una muestra aleatoria de tamaño "porcion_train" de "b"
-#train_set <- sample_frac(b,porcion_train)
-
-# Creando datos de evaluación con función "anti_join" de dplyr
-# La función extraen los datos de "b" que no coinciden con "train_set"
-# usando como referencia la columna "id"
-#test_set <- anti_join(b, train_set, by = 'id')
-```
-
-Al tener listos los datos, podemos pasar a crear nuestro modelo con los datos de entrenamiento (train_set).
 
 ## Modelo
 Vamos a construir varios modelos y seleccionaremos el que funcione mejor.
@@ -270,7 +255,7 @@ Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efect
 
 ### Modelo 1: Regresión Lineal
 
-```{r,message=FALSE, warning=FALSE }
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 # Creando modelo
 #model_1<- lm(formula = price ~ room_type + neighborhood + 
 #             reviews +overall_satisfaction + accommodates +
@@ -287,13 +272,33 @@ Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efect
 #library(xtable)
 #knitr::kable(xtable(summary(model_1)))
 
+# Librería de regresiones 
+library(olsrr)
+library(xtable)
+
+# Modelo
+model_1<- lm(b$Car ~ b$Time + b$Year+ b$Q1+ b$Q2+ b$Q3+
+             b$CPI_Used_Cars+ b$Gas_Prices+ b$Miles_Driven+
+             b$US_Population_millions+ b$Unemployment+
+             b$Disposible_Income_Capita_Real+ b$Saving_Capital+
+             b$Household_Debt_Capital+ b$RealGDP+ b$Fed_Funds_Rate+
+             b$US_Urban_CPI_Change+ b$Nonfarm_Payrolls,
+           data=b)
+
+
+# Imprimiendo resultado
+knitr::kable(xtable(summary(model_1)))
+
 ```
 
-La mayoría de variables son signioficativas con p-values pequeños.
+Claramente este modelo tiene ciertos problemas de incluir variables que no son significativas, por lo cual debemos reducir el número de variables.
 
-### Modelo 2: Regresión log-lineal
 
-```{r}
+La mayoría de variables son significativas con p-values pequeños.
+
+### Modelo 2: Eliminación en Reversa
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 # Creando modelo
 #model_2<-lm(formula = log(price) ~ room_type + neighborhood + 
 #             reviews +overall_satisfaction + log(accommodates) +
@@ -305,13 +310,22 @@ La mayoría de variables son signioficativas con p-values pequeños.
 
 # Reportando modelo
 #knitr::kable(xtable(summary(model_2)))
+
+# stepwise backward regression
+ols_step_backward_aic(model_1)
+
+#ols_step_forward_p(model_1)
+
+#ols_step_both_aic()
+
+
 ```
 
 
 ### Modelo 3: Arbol de regresión
 
 
-```{r,message=FALSE, warning=FALSE}
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 library(rpart)
 #model_3 <- rpart(price ~ room_type + neighborhood + 
 #             reviews +overall_satisfaction + accommodates +
@@ -323,7 +337,7 @@ library(rpart)
 ```
 
 ### Modelo 4: XGBoost
-```{r,message=FALSE, warning=FALSE}
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 library(xgboost)
 
 # XGBoost, a diferencia de lm, no convierte las variables categóricas que aparecen como
@@ -359,7 +373,7 @@ Luego de ajustar el/los modelo/s debemos evaluar el desempeño de los mismos. Pa
 
 Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros factores para asegurar la significancia estadística del modelo como normalidad, homecedasticidad, etc. Sin embargo, a la hora de comparar un modelo lineal con uno no lineal, no se pueden utilizar todos estos factores ya que no son parte de los supuestos. Es por eso que nos enfocaremos solamente en la desviación absoluta media.
 
-```{r,message=FALSE, warning=FALSE}
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 
 #Librería de métricas
 #install.packages("Metrics")
@@ -381,7 +395,7 @@ Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros f
 ## Modelo 5: Ensamblando modelos 1 y 2 con los datos
 Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 
 # Primero vamos a añadir a X_train y X_test los resultados del modelo lineal
 #y_1<- as.matrix(pred_train_1)
