@@ -694,6 +694,7 @@ div.tocify {
 <p>Vamos a construir varios modelos y seleccionaremos el que funcione mejor. Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efecto esto así es, usted raramente encontrará el mejor modelo a la primera iteración. Tampoco encontraremos el mejor modelo en esta sesión, pero pretenedemos acercarnos a una solución subóptima que sea mejor que una solución aleatoria.</p>
 <div id="modelo-1-regresion-lineal" class="section level3">
 <h3>Modelo 1: Regresión Lineal</h3>
+<p>Comencemos por incluir todas las variables posibles para ver cuales son los resultados del modelo:</p>
 <table>
 <thead>
 <tr class="header">
@@ -833,11 +834,11 @@ div.tocify {
 </tr>
 </tbody>
 </table>
-<p>Claramente este modelo tiene ciertos problemas de incluir variables que no son significativas, por lo cual debemos reducir el número de variables.</p>
-<p>La mayoría de variables son significativas con p-values pequeños.</p>
+<p>Aunque la mayoría de valores p son cercanos a cero, el modelo incluye algunas variables que no son estadísticamente significativas, por lo cual se debe reducir el número de variables.</p>
 </div>
 <div id="modelo-2-eliminacion-en-reversa" class="section level3">
 <h3>Modelo 2: Eliminación en Reversa</h3>
+<p>Una técnica muy conocida para eliminar variables es utilizando Stepwise Backward Regression, que comienza con el modelo completo y elimina sucesivamente variables que no son significativas. Estos son los resultados al correrlo.</p>
 <pre><code>## Backward Elimination Method 
 ## ---------------------------
 ## 
@@ -988,8 +989,38 @@ div.tocify {
 </tbody>
 </table>
 </div>
-<div id="modelo-3-arbol-de-regresion" class="section level3">
-<h3>Modelo 3: Arbol de regresión</h3>
+<div id="modelo-3-reduciendo-variables-aun-mas" class="section level3">
+<h3>Modelo 3: Reduciendo variables aún más</h3>
+<p>Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Si utilizamos el modelo completo con esas variables y luego hacemos eliminación sucesiva de variables (backward) obtenemos lo siguiente:</p>
+<pre><code>## Backward Elimination Method 
+## ---------------------------
+## 
+## Candidate Terms: 
+## 
+## 1 . b$Time 
+## 2 . b$Year 
+## 3 . b$Q1 
+## 4 . b$Q2 
+## 5 . b$Q3 
+## 6 . b$Inventories 
+## 7 . b$CPI_Used_Cars 
+## 8 . b$US_Population_millions 
+## 9 . b$Unemployment 
+## 10 . b$Disposible_Income_Capita_Real 
+## 11 . b$Household_Debt_Capital 
+## 12 . b$Consumer_Confidence 
+## 13 . b$RealGDP 
+## 14 . b$Fed_Funds_Rate 
+## 15 . b$Nonfarm_Payrolls 
+## 
+## 
+## Variables Removed: 
+## 
+## - b$Consumer_Confidence 
+## - b$Inventories 
+## - b$RealGDP 
+## 
+## No more variables to be removed.</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -1003,142 +1034,108 @@ div.tocify {
 <tbody>
 <tr class="odd">
 <td>(Intercept)</td>
-<td align="right">-2.887981e+06</td>
-<td align="right">3.466135e+06</td>
-<td align="right">-0.8331995</td>
-<td align="right">0.4054714</td>
+<td align="right">-4.644374e+06</td>
+<td align="right">2.629668e+06</td>
+<td align="right">-1.766145</td>
+<td align="right">0.0784933</td>
 </tr>
 <tr class="even">
 <td>b$Time</td>
-<td align="right">2.343164e+04</td>
-<td align="right">5.726121e+03</td>
-<td align="right">4.0920618</td>
-<td align="right">0.0000566</td>
+<td align="right">2.240002e+04</td>
+<td align="right">5.528036e+03</td>
+<td align="right">4.052077</td>
+<td align="right">0.0000663</td>
 </tr>
 <tr class="odd">
 <td>b$Year</td>
-<td align="right">-3.585113e+05</td>
-<td align="right">6.409840e+04</td>
-<td align="right">-5.5931397</td>
-<td align="right">0.0000001</td>
+<td align="right">-3.689527e+05</td>
+<td align="right">6.288918e+04</td>
+<td align="right">-5.866712</td>
+<td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>b$Q1</td>
-<td align="right">2.796179e+05</td>
-<td align="right">4.865829e+04</td>
-<td align="right">5.7465629</td>
+<td align="right">2.857217e+05</td>
+<td align="right">4.807138e+04</td>
+<td align="right">5.943695</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
 <td>b$Q2</td>
-<td align="right">2.925642e+05</td>
-<td align="right">3.416276e+04</td>
-<td align="right">8.5638333</td>
+<td align="right">2.970983e+05</td>
+<td align="right">3.372406e+04</td>
+<td align="right">8.809684</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
 <td>b$Q3</td>
-<td align="right">1.616674e+05</td>
-<td align="right">2.015940e+04</td>
-<td align="right">8.0194549</td>
+<td align="right">1.647757e+05</td>
+<td align="right">1.982901e+04</td>
+<td align="right">8.309828</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
-<td>b$Inventories</td>
-<td align="right">2.227099e+01</td>
-<td align="right">4.342366e+01</td>
-<td align="right">0.5128769</td>
-<td align="right">0.6084583</td>
-</tr>
-<tr class="even">
 <td>b$CPI_Used_Cars</td>
-<td align="right">1.269689e+03</td>
-<td align="right">1.060023e+03</td>
-<td align="right">1.1977934</td>
-<td align="right">0.2320518</td>
+<td align="right">1.479085e+03</td>
+<td align="right">9.614297e+02</td>
+<td align="right">1.538423</td>
+<td align="right">0.1251078</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>b$US_Population_millions</td>
-<td align="right">1.888888e+04</td>
-<td align="right">1.712689e+04</td>
-<td align="right">1.1028787</td>
-<td align="right">0.2710655</td>
+<td align="right">2.863735e+04</td>
+<td align="right">1.257593e+04</td>
+<td align="right">2.277156</td>
+<td align="right">0.0235535</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>b$Unemployment</td>
-<td align="right">-4.162119e+04</td>
-<td align="right">2.098542e+04</td>
-<td align="right">-1.9833382</td>
-<td align="right">0.0483464</td>
+<td align="right">-5.622153e+04</td>
+<td align="right">1.423779e+04</td>
+<td align="right">-3.948754</td>
+<td align="right">0.0001001</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>b$Disposible_Income_Capita_Real</td>
-<td align="right">1.648847e+01</td>
-<td align="right">1.386440e+01</td>
-<td align="right">1.1892665</td>
-<td align="right">0.2353835</td>
+<td align="right">1.973771e+01</td>
+<td align="right">1.268760e+01</td>
+<td align="right">1.555669</td>
+<td align="right">0.1209495</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>b$Household_Debt_Capital</td>
-<td align="right">-2.045842e+01</td>
-<td align="right">4.718481e+00</td>
-<td align="right">-4.3358055</td>
-<td align="right">0.0000205</td>
-</tr>
-<tr class="odd">
-<td>b$Consumer_Confidence</td>
-<td align="right">-6.257518e+01</td>
-<td align="right">4.755092e+02</td>
-<td align="right">-0.1315961</td>
-<td align="right">0.8954021</td>
+<td align="right">-2.122723e+01</td>
+<td align="right">4.423137e+00</td>
+<td align="right">-4.799134</td>
+<td align="right">0.0000026</td>
 </tr>
 <tr class="even">
-<td>b$RealGDP</td>
-<td align="right">1.361017e+01</td>
-<td align="right">1.593865e+01</td>
-<td align="right">0.8539097</td>
-<td align="right">0.3939148</td>
-</tr>
-<tr class="odd">
 <td>b$Fed_Funds_Rate</td>
-<td align="right">1.907663e+04</td>
-<td align="right">7.747036e+03</td>
-<td align="right">2.4624419</td>
-<td align="right">0.0144266</td>
+<td align="right">1.974841e+04</td>
+<td align="right">7.053329e+03</td>
+<td align="right">2.799871</td>
+<td align="right">0.0054786</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>b$Nonfarm_Payrolls</td>
-<td align="right">-9.636456e+01</td>
-<td align="right">3.673865e+01</td>
-<td align="right">-2.6229748</td>
-<td align="right">0.0092139</td>
+<td align="right">-1.110683e+02</td>
+<td align="right">3.236680e+01</td>
+<td align="right">-3.431551</td>
+<td align="right">0.0006935</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="modelo-4-xgboost" class="section level3">
-<h3>Modelo 4: XGBoost</h3>
+<div id="modelo-4-en-desarrollo" class="section level3">
+<h3>Modelo 4: En desarrollo</h3>
 </div>
 </div>
 <div id="evaluando-los-modelos" class="section level2">
 <h2>Evaluando los modelos</h2>
-<p>Luego de ajustar el/los modelo/s debemos evaluar el desempeño de los mismos. Para el caso de la regresión, la métrica a utilizar es llamada MAE (Mean Absolute Error) que en inglés significa Error Absoluto Medio.</p>
-<p>Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros factores para asegurar la significancia estadística del modelo como normalidad, homecedasticidad, etc. Sin embargo, a la hora de comparar un modelo lineal con uno no lineal, no se pueden utilizar todos estos factores ya que no son parte de los supuestos. Es por eso que nos enfocaremos solamente en la desviación absoluta media.</p>
 </div>
-<div id="modelo-5-ensamblando-modelos-1-y-2-con-los-datos" class="section level2">
-<h2>Modelo 5: Ensamblando modelos 1 y 2 con los datos</h2>
-<p>Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.</p>
-</div>
-<div id="conclusiones" class="section level2">
-<h2>Conclusiones</h2>
-<ul>
-<li><p>Si se tienen modelos con resultados diferentes, es posible construir un modelo final que sea capaz de superar modelos anteriores simplemente ensamblando los resultados y aplicando XGboost.</p></li>
-<li><p>Las propiedades de homocedasticidad y pvalues son importantes mientras se considere únicamente modelos lineales que asuman normalidad, para modelos de regresión que no sean lineales la métrica de comparación más apropiada sería la desviación absoluta media o la desviación cuadrática media.</p></li>
-<li><p>Para mejorar los resultados debemos mejorar el análisis exploratorio, construir nuevas variables o mejorar los datos iniciales.</p></li>
-</ul>
-<blockquote>
-<p>Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.</p>
-</blockquote>
+<div id="conclusiones-en-desarrollo" class="section level2">
+<h2>Conclusiones (… en desarrollo)</h2>
+<p>*Blah Blah Blah &gt; Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.</p>
 </div>
 
 

@@ -254,6 +254,7 @@ Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efect
 
 
 ### Modelo 1: Regresión Lineal
+Comencemos por incluir todas las variables posibles para ver cuales son los resultados del modelo:
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 # Creando modelo
@@ -300,12 +301,12 @@ knitr::kable(xtable(summary(model_1)))
 
 ```
 
-Claramente este modelo tiene ciertos problemas de incluir variables que no son significativas, por lo cual debemos reducir el número de variables.
+Aunque la mayoría de valores p son cercanos a cero, el modelo incluye algunas variables que no son estadísticamente significativas, por lo cual se debe reducir el número de variables.
 
-
-La mayoría de variables son significativas con p-values pequeños.
 
 ### Modelo 2: Eliminación en Reversa
+
+Una técnica muy conocida para eliminar variables es utilizando Stepwise Backward Regression, que comienza con el modelo completo y elimina sucesivamente variables que no son significativas. Estos son los resultados al correrlo.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -330,8 +331,8 @@ knitr::kable(xtable(summary(model_2)))
 ```
 
 
-### Modelo 3: Arbol de regresión
-
+### Modelo 3: Reduciendo variables aún más
+Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Si utilizamos el modelo completo con esas variables y luego hacemos eliminación sucesiva de variables (backward) obtenemos lo siguiente:
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 # Modelo
@@ -342,6 +343,9 @@ model_3<- lm(b$Car ~ b$Time + b$Year+ b$Q1+ b$Q2+ b$Q3+
                b$RealGDP+ b$Fed_Funds_Rate+ b$Nonfarm_Payrolls,
            data=b)
 
+# Eliminando variables
+temporal<-ols_step_backward_aic(model_3)
+model_3<-temporal$model
 
 # Sacando predicciones
 pred_train_3=predict(model_3,train_set)
@@ -355,9 +359,9 @@ mae_train3<-mae(train_set$Car,pred_train_3)
 knitr::kable(xtable(summary(model_3)))
 ```
 
-### Modelo 4: XGBoost
+### Modelo 4: En desarrollo
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
-library(xgboost)
+#library(xgboost)
 
 # XGBoost, a diferencia de lm, no convierte las variables categóricas que aparecen como
 # caracteres a variables binarias (0/1). Tendremos que usar la codificación
@@ -388,9 +392,7 @@ library(xgboost)
 
 
 ## Evaluando los modelos
-Luego de ajustar el/los modelo/s debemos evaluar el desempeño de los mismos. Para el caso de la regresión, la métrica a utilizar es llamada MAE (Mean Absolute Error) que en inglés significa Error Absoluto Medio.
 
-Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros factores para asegurar la significancia estadística del modelo como normalidad, homecedasticidad, etc. Sin embargo, a la hora de comparar un modelo lineal con uno no lineal, no se pueden utilizar todos estos factores ya que no son parte de los supuestos. Es por eso que nos enfocaremos solamente en la desviación absoluta media.
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 
@@ -410,43 +412,6 @@ Ciertamente para el caso de la regresión lineal se deben evaluar muchos otros f
 
 ```
 
-
-## Modelo 5: Ensamblando modelos 1 y 2 con los datos
-Una técnica común en ciencia de datos es ensamblar modelos. La idea es seleccionar el resultado de modelos diferentes y construir en base a ellos un modelo que tenga un desempeño superior.
-
-```{r, warning=FALSE, message=FALSE, echo=FALSE}
-
-# Primero vamos a añadir a X_train y X_test los resultados del modelo lineal
-#y_1<- as.matrix(pred_train_1)
-#y_2<- as.matrix(pred_train_2)
-#X_train_2<-cbind(X_train,y_1,y_2)
-
-#y_1<- as.matrix(pred_test_1)
-#y_2<- as.matrix(pred_test_2)
-#X_test_2<-cbind(X_test, y_1,y_2)
-
-# Modelo
-#model_5 <- xgboost(data = as.matrix(X_train_2), label = as.matrix(y_train), max.depth = 4, 
-#                   eta = 0.3, nthread = 2, nrounds = 120, objective = "reg:linear",
-#                   eval_metric="rmse", verbose = 0)
-
-# Predicciones
-#pred_train_5<-predict(model_5,as.matrix(X_train_2))
-#pred_test_5<-predict(model_5,as.matrix(X_test_2))
-
-# Error Medio
-#mae5<-mae(test_set$price,pred_test_5)
-
-# Mostrando Resultados
-#print((paste("Modelo 5:", mae5)))
-
-```
-
-## Conclusiones
-* Si se tienen modelos con resultados diferentes, es posible construir un modelo final que sea capaz de superar modelos anteriores simplemente ensamblando los resultados y aplicando XGboost.
-
-* Las propiedades de homocedasticidad y pvalues son importantes mientras se considere únicamente modelos lineales que asuman normalidad, para modelos de regresión que no sean lineales la métrica de comparación más apropiada sería la desviación absoluta media o la desviación cuadrática media.
-
-* Para mejorar los resultados debemos mejorar el análisis exploratorio, construir nuevas variables o mejorar los datos iniciales.
-
+## Conclusiones (... en desarrollo)
+*Blah Blah Blah
 > Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.
