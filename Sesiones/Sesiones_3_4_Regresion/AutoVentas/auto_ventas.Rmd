@@ -272,9 +272,10 @@ Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efect
 #library(xtable)
 #knitr::kable(xtable(summary(model_1)))
 
-# Librería de regresiones 
+# Librerías de utilidad 
 library(olsrr)
 library(xtable)
+library(Metrics)
 
 # Modelo
 model_1<- lm(b$Car ~ b$Time + b$Year+ b$Q1+ b$Q2+ b$Q3+
@@ -285,6 +286,14 @@ model_1<- lm(b$Car ~ b$Time + b$Year+ b$Q1+ b$Q2+ b$Q3+
              b$US_Urban_CPI_Change+ b$Nonfarm_Payrolls,
            data=b)
 
+
+# Sacando predicciones
+pred_train_1=predict(model_1,train_set)
+pred_test_1=predict(model_1,test_set)
+
+#Mean Absolute Error
+mae1<-mae(test_set$Car,pred_test_1)
+mae_train1<-mae(train_set$Car,pred_train_1)
 
 # Imprimiendo resultado
 knitr::kable(xtable(summary(model_1)))
@@ -299,25 +308,24 @@ La mayoría de variables son significativas con p-values pequeños.
 ### Modelo 2: Eliminación en Reversa
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-# Creando modelo
-#model_2<-lm(formula = log(price) ~ room_type + neighborhood + 
-#             reviews +overall_satisfaction + log(accommodates) +
-#             bedrooms,data = train_set)
 
-# Sacando predicciones
-#pred_train_2=exp(predict(model_2,train_set))
-#pred_test_2=exp(predict(model_2,test_set))
-
-# Reportando modelo
-#knitr::kable(xtable(summary(model_2)))
-
-# stepwise backward regression
-ols_step_backward_aic(model_1)
+# Creando modelo: stepwise backward regression
+temporal<-ols_step_backward_aic(model_1)
+model_2<-temporal$model
 
 #ols_step_forward_p(model_1)
-
 #ols_step_both_aic()
 
+# Sacando predicciones
+pred_train_2=predict(model_2,train_set)
+pred_test_2=predict(model_2,test_set)
+
+#Mean Absolute Error
+mae_train2<-mae(train_set$Car,pred_train_2)
+mae2<-mae(test_set$Car,pred_test_2)
+
+# Imprimiendo resultado
+knitr::kable(xtable(summary(model_2)))
 
 ```
 
@@ -326,14 +334,25 @@ ols_step_backward_aic(model_1)
 
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
-library(rpart)
-#model_3 <- rpart(price ~ room_type + neighborhood + 
-#             reviews +overall_satisfaction + accommodates +
-#             bedrooms,data = train_set, method="anova")
+# Modelo
+model_3<- lm(b$Car ~ b$Time + b$Year+ b$Q1+ b$Q2+ b$Q3+
+               b$Inventories+b$CPI_Used_Cars+ b$US_Population_millions+
+               b$Unemployment+ b$Disposible_Income_Capita_Real+
+               b$Household_Debt_Capital+ b$Consumer_Confidence+ 
+               b$RealGDP+ b$Fed_Funds_Rate+ b$Nonfarm_Payrolls,
+           data=b)
+
 
 # Sacando predicciones
-#pred_train_3=predict(model_3,train_set)#entrenamiento
-#pred_test_3=predict(model_3,test_set)#evaluación
+pred_train_3=predict(model_3,train_set)
+pred_test_3=predict(model_3,test_set)
+
+#Mean Absolute Error
+mae3<-mae(test_set$Car,pred_test_3)
+mae_train3<-mae(train_set$Car,pred_train_3)
+
+# Imprimiendo resultado
+knitr::kable(xtable(summary(model_3)))
 ```
 
 ### Modelo 4: XGBoost

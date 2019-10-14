@@ -869,20 +869,252 @@ div.tocify {
 ## - b$RealGDP 
 ## 
 ## No more variables to be removed.</code></pre>
-<pre><code>## 
-## 
-##                                    Backward Elimination Summary                                   
-## ------------------------------------------------------------------------------------------------
-## Variable                      AIC             RSS              Sum Sq        R-Sq      Adj. R-Sq 
-## ------------------------------------------------------------------------------------------------
-## Full Model                  6985.011    643436084721.191    3.030662e+12    0.82487      0.81372 
-## b$US_Population_millions    6983.011    643436090343.249    3.030662e+12    0.82487      0.81442 
-## b$Fed_Funds_Rate            6981.014    643442399377.581    3.030656e+12    0.82487      0.81511 
-## b$RealGDP                   6980.998    647937501366.822     3.02616e+12    0.82365      0.81450 
-## ------------------------------------------------------------------------------------------------</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">Estimate</th>
+<th align="right">Std. Error</th>
+<th align="right">t value</th>
+<th align="right">Pr(&gt;|t|)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>(Intercept)</td>
+<td align="right">1.212056e+06</td>
+<td align="right">3.062634e+05</td>
+<td align="right">3.957560</td>
+<td align="right">0.0000969</td>
+</tr>
+<tr class="even">
+<td>b$Time</td>
+<td align="right">2.571493e+04</td>
+<td align="right">3.575264e+03</td>
+<td align="right">7.192455</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td>b$Year</td>
+<td align="right">-3.539392e+05</td>
+<td align="right">4.286445e+04</td>
+<td align="right">-8.257174</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td>b$Q1</td>
+<td align="right">3.181096e+05</td>
+<td align="right">3.328342e+04</td>
+<td align="right">9.557599</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td>b$Q2</td>
+<td align="right">2.217861e+05</td>
+<td align="right">2.317632e+04</td>
+<td align="right">9.569514</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td>b$Q3</td>
+<td align="right">9.499404e+04</td>
+<td align="right">1.398077e+04</td>
+<td align="right">6.794620</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td>b$CPI_Used_Cars</td>
+<td align="right">2.847495e+03</td>
+<td align="right">6.606323e+02</td>
+<td align="right">4.310257</td>
+<td align="right">0.0000229</td>
+</tr>
+<tr class="even">
+<td>b$Gas_Prices</td>
+<td align="right">1.296972e+05</td>
+<td align="right">9.744467e+03</td>
+<td align="right">13.309825</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td>b$Miles_Driven</td>
+<td align="right">3.268465e+00</td>
+<td align="right">2.870984e-01</td>
+<td align="right">11.384475</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td>b$Unemployment</td>
+<td align="right">-5.676827e+04</td>
+<td align="right">6.621541e+03</td>
+<td align="right">-8.573272</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td>b$Disposible_Income_Capita_Real</td>
+<td align="right">3.486226e+01</td>
+<td align="right">7.920813e+00</td>
+<td align="right">4.401349</td>
+<td align="right">0.0000155</td>
+</tr>
+<tr class="even">
+<td>b$Saving_Capital</td>
+<td align="right">-1.823167e+01</td>
+<td align="right">1.037066e+01</td>
+<td align="right">-1.758006</td>
+<td align="right">0.0798796</td>
+</tr>
+<tr class="odd">
+<td>b$Household_Debt_Capital</td>
+<td align="right">-2.209572e+01</td>
+<td align="right">1.895373e+00</td>
+<td align="right">-11.657718</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td>b$US_Urban_CPI_Change</td>
+<td align="right">-2.947647e+04</td>
+<td align="right">4.370354e+03</td>
+<td align="right">-6.744641</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td>b$Nonfarm_Payrolls</td>
+<td align="right">-6.856560e+01</td>
+<td align="right">1.233450e+01</td>
+<td align="right">-5.558846</td>
+<td align="right">0.0000001</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="modelo-3-arbol-de-regresion" class="section level3">
 <h3>Modelo 3: Arbol de regresión</h3>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">Estimate</th>
+<th align="right">Std. Error</th>
+<th align="right">t value</th>
+<th align="right">Pr(&gt;|t|)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>(Intercept)</td>
+<td align="right">-2.887981e+06</td>
+<td align="right">3.466135e+06</td>
+<td align="right">-0.8331995</td>
+<td align="right">0.4054714</td>
+</tr>
+<tr class="even">
+<td>b$Time</td>
+<td align="right">2.343164e+04</td>
+<td align="right">5.726121e+03</td>
+<td align="right">4.0920618</td>
+<td align="right">0.0000566</td>
+</tr>
+<tr class="odd">
+<td>b$Year</td>
+<td align="right">-3.585113e+05</td>
+<td align="right">6.409840e+04</td>
+<td align="right">-5.5931397</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="even">
+<td>b$Q1</td>
+<td align="right">2.796179e+05</td>
+<td align="right">4.865829e+04</td>
+<td align="right">5.7465629</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td>b$Q2</td>
+<td align="right">2.925642e+05</td>
+<td align="right">3.416276e+04</td>
+<td align="right">8.5638333</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td>b$Q3</td>
+<td align="right">1.616674e+05</td>
+<td align="right">2.015940e+04</td>
+<td align="right">8.0194549</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td>b$Inventories</td>
+<td align="right">2.227099e+01</td>
+<td align="right">4.342366e+01</td>
+<td align="right">0.5128769</td>
+<td align="right">0.6084583</td>
+</tr>
+<tr class="even">
+<td>b$CPI_Used_Cars</td>
+<td align="right">1.269689e+03</td>
+<td align="right">1.060023e+03</td>
+<td align="right">1.1977934</td>
+<td align="right">0.2320518</td>
+</tr>
+<tr class="odd">
+<td>b$US_Population_millions</td>
+<td align="right">1.888888e+04</td>
+<td align="right">1.712689e+04</td>
+<td align="right">1.1028787</td>
+<td align="right">0.2710655</td>
+</tr>
+<tr class="even">
+<td>b$Unemployment</td>
+<td align="right">-4.162119e+04</td>
+<td align="right">2.098542e+04</td>
+<td align="right">-1.9833382</td>
+<td align="right">0.0483464</td>
+</tr>
+<tr class="odd">
+<td>b$Disposible_Income_Capita_Real</td>
+<td align="right">1.648847e+01</td>
+<td align="right">1.386440e+01</td>
+<td align="right">1.1892665</td>
+<td align="right">0.2353835</td>
+</tr>
+<tr class="even">
+<td>b$Household_Debt_Capital</td>
+<td align="right">-2.045842e+01</td>
+<td align="right">4.718481e+00</td>
+<td align="right">-4.3358055</td>
+<td align="right">0.0000205</td>
+</tr>
+<tr class="odd">
+<td>b$Consumer_Confidence</td>
+<td align="right">-6.257518e+01</td>
+<td align="right">4.755092e+02</td>
+<td align="right">-0.1315961</td>
+<td align="right">0.8954021</td>
+</tr>
+<tr class="even">
+<td>b$RealGDP</td>
+<td align="right">1.361017e+01</td>
+<td align="right">1.593865e+01</td>
+<td align="right">0.8539097</td>
+<td align="right">0.3939148</td>
+</tr>
+<tr class="odd">
+<td>b$Fed_Funds_Rate</td>
+<td align="right">1.907663e+04</td>
+<td align="right">7.747036e+03</td>
+<td align="right">2.4624419</td>
+<td align="right">0.0144266</td>
+</tr>
+<tr class="even">
+<td>b$Nonfarm_Payrolls</td>
+<td align="right">-9.636456e+01</td>
+<td align="right">3.673865e+01</td>
+<td align="right">-2.6229748</td>
+<td align="right">0.0092139</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="modelo-4-xgboost" class="section level3">
 <h3>Modelo 4: XGBoost</h3>
