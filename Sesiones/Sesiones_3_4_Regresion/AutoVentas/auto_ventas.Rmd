@@ -235,6 +235,7 @@ Dicho de otro modo, nosotros entrenaremos con datos pasados a una fecha límite,
 
 ![**Validacion en serie de tiempo**](forward_chain.png)
 
+Nosotros estamos interesados en predecir un año a futuro, así que nuestros datos de entrenamiento serán de 1994 hasta 2016, mientras que nuestros datos de evaluación serán solo de 2017.
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -242,9 +243,9 @@ Dicho de otro modo, nosotros entrenaremos con datos pasados a una fecha límite,
 # Como nuestros datos ya están ordenados por fecha es fácil hacerlo:
 # usted puede simplemente tomar las primeras 274 filas y las ultimas 11
 # yo utilice el año para ilustrar como se haría si no estuviera ordenado
-
-train_set<-b[year(b$Date)<2017,]
-test_set<-b[year(b$Date)>=2017,]
+library(lubridate)
+train_set<-b[year(b$Date)< 2017,]
+test_set<-b[year(b$Date) >= 2017,]
 ```
 
 
@@ -276,57 +277,80 @@ Comencemos por incluir todas las variables posibles para ver cuales son los resu
 # Librerías de utilidad 
 library(olsrr)
 library(xtable)
-library(Metrics)
 
 # Modelo
-model_1<- lm(b$Car ~ b$Time + b$Year+ b$Q1+ b$Q2+ b$Q3+
-             b$CPI_Used_Cars+ b$Gas_Prices+ b$Miles_Driven+
-             b$US_Population_millions+ b$Unemployment+
-             b$Disposible_Income_Capita_Real+ b$Saving_Capital+
-             b$Household_Debt_Capital+ b$RealGDP+ b$Fed_Funds_Rate+
-             b$US_Urban_CPI_Change+ b$Nonfarm_Payrolls,
-           data=b)
-
-
-# Sacando predicciones
-pred_train_1=predict(model_1,train_set)
-pred_test_1=predict(model_1,test_set)
-
-#Mean Absolute Error
-mae1<-mae(test_set$Car,pred_test_1)
-mae_train1<-mae(train_set$Car,pred_train_1)
+model_1<- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
+             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
+             US_Population_millions+ Unemployment+
+             Disposible_Income_Capita_Real+ Saving_Capital+
+             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
+             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+           data=train_set)
 
 # Imprimiendo resultado
 knitr::kable(xtable(summary(model_1)))
 
 ```
 
-Aunque la mayoría de valores p son cercanos a cero, el modelo incluye algunas variables que no son estadísticamente significativas, por lo cual se debe reducir el número de variables.
+Aunque la mayoría de valores p son cercanos a cero, el modelo incluye algunas variables que no son estadísticamente significativas, lo cual es indicio que debemos reducir el número de variables. Veamos ahora cual es el Mean Square Error en los conjuntos de entrenamiento y validación:
 
+```{r, echo=FALSE,warning=FALSE, message=FALSE }
+library(Metrics)
 
-### Modelo 2: Eliminación en Reversa
+train_set<-b[year(b$Date)< 2017,]
+test_set<-b[year(b$Date) >= 2017,]
+
+# Sacando predicciones
+pred_train_1<-predict(model_1,train_set)
+pred_test_1<-predict(model_1,test_set)
+
+#Mean Absolute Error
+mae1<-mae(test_set$Car,pred_test_1)
+mae_train1<-mae(train_set$Car,pred_train_1)
+
+print(paste("Train Error: ",mae_train1))
+print(paste("Test Error: ",mae1))
+```
+
+Que la diferencia sea tan grande indica que el modelo está terriblemente sobreajustado a los datos de entrenamiento. Debemos entonces reducir este sobreajuste, para lo cual crearemos más modelos. Hay dos formas de reducirlo: limitando el número de variables; y en series de tiempo, limitando la ventana de entrenamiento.
+
+### Modelo 2: Limitando el número de variables
+
 
 Una técnica muy conocida para eliminar variables es utilizando Stepwise Backward Regression, que comienza con el modelo completo y elimina sucesivamente variables que no son significativas. Estos son los resultados al correrlo.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
+# Modelo
+model_2<- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
+             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
+             US_Population_millions+ Unemployment+
+             Disposible_Income_Capita_Real+ Saving_Capital+
+             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
+             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+           data=train_set)
+
 # Creando modelo: stepwise backward regression
-temporal<-ols_step_backward_aic(model_1)
+temporal<-ols_step_forward_p(model_1)
 model_2<-temporal$model
 
 #ols_step_forward_p(model_1)
 #ols_step_both_aic()
 
+# Imprimiendo resultado
+#knitr::kable(xtable(summary(model_2)))
+
+
 # Sacando predicciones
-pred_train_2=predict(model_2,train_set)
-pred_test_2=predict(model_2,test_set)
+pred_train_2<-predict(model_2,train_set)
+pred_test_2<-predict(model_2,test_set)
 
 #Mean Absolute Error
-mae_train2<-mae(train_set$Car,pred_train_2)
 mae2<-mae(test_set$Car,pred_test_2)
+mae_train2<-mae(train_set$Car,pred_train_2)
 
-# Imprimiendo resultado
-knitr::kable(xtable(summary(model_2)))
+print(paste("Train Error: ",mae_train2))
+print(paste("Test Error: ",mae2))
 
 ```
 
@@ -336,16 +360,19 @@ Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un 
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 # Modelo
-model_3<- lm(b$Car ~ b$Time + b$Year+ b$Q1+ b$Q2+ b$Q3+
-               b$Inventories+b$CPI_Used_Cars+ b$US_Population_millions+
-               b$Unemployment+ b$Disposible_Income_Capita_Real+
-               b$Household_Debt_Capital+ b$Consumer_Confidence+ 
-               b$RealGDP+ b$Fed_Funds_Rate+ b$Nonfarm_Payrolls,
-           data=b)
+
+model_3<- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
+               Inventories+CPI_Used_Cars+ US_Population_millions+
+               Unemployment+ Disposible_Income_Capita_Real+
+               Household_Debt_Capital+ Consumer_Confidence+ 
+               RealGDP+ Fed_Funds_Rate+ Nonfarm_Payrolls,
+           data=train_set)
+
+
 
 # Eliminando variables
-temporal<-ols_step_backward_aic(model_3)
-model_3<-temporal$model
+#temporal<-ols_step_backward_aic(model_3)
+#model_3<-temporal$model
 
 # Sacando predicciones
 pred_train_3=predict(model_3,train_set)
@@ -355,8 +382,12 @@ pred_test_3=predict(model_3,test_set)
 mae3<-mae(test_set$Car,pred_test_3)
 mae_train3<-mae(train_set$Car,pred_train_3)
 
+#Reportando errores
+print(paste("Train Error: ",mae_train3))
+print(paste("Test Error: ",mae3))
+
 # Imprimiendo resultado
-knitr::kable(xtable(summary(model_3)))
+#knitr::kable(xtable(summary(model_3)))
 ```
 
 ### Modelo 4: En desarrollo
