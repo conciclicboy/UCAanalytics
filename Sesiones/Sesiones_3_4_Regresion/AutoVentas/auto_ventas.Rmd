@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## El contexto de negocios
 La industria automovilística puede indicar el estado y dirección de la economía estadounidense. Después de los gastos en vivienda, los autos son los productos en los que más puede gastar un consumidor promedio. Las ventas de autos son un aproximado de la confianza del consumidor.
 
-Debido a su nivel de relevancia en la economía norteamericana, no sería absurdo suponer que las ventas de autos pueden estar siendo influenciadas por factores macroeconómicos como el producto interno bruto y la tasa de desempleo, así como factores propios de la industria automovilística.
+Debido a su nivel de relevancia en la economía norteamericana, no sería absurdo suponer que las ventas de autos pueden estar siendo ..influenciadas por factores macroeconómicos como el producto interno bruto y la tasa de desempleo, así como factores propios de la industria automovilística.
 
 Una empresa que se dedica a fabricar accesorios para autos está interesada en saber cual es el mercado potencial que tendrán el próximo año. El departamento de finanzas hace sus proyecciones basados en el número de autos que se estima vender en el país, y hasta ese momento habían estado usando las ventas del último período anterior como la mejor aproximación a las ventas del siguiente período. Este año decidieron cambiar de estrategia encargando al departamento de analítica el diseño de una herramienta que les ayudara a determinar cuál sería el mercado.
 
@@ -125,7 +125,7 @@ pl+ geom_line(aes(y=Car),color="blue")+geom_line(aes(y=Truck),color="darkred")+t
 
 Basado en la gráfica anterior podemos inferir que hay temporadas a lo largo del tiempo. En nuestro caso, como tenemos datos distribuidos trimestralmente, suena lógico pensar un efecto temporal cada trimestre. Es por ello que se incluyeron las variables categóricas Q1, Q2, Q3, etc. En nuestro caso dicha variable ya venía incluida en la base, eso sale más fácil hacerlo desde excel, pero tampoco es difícil calcularla directamente en R.
 
-Ahora bien, de acuerdo a la gráfica anterior no parece haber ninguna anormalidad en la distribución de autos vendidos, sin embargo nunca está demás crear un histograma para ver si en efecto no hay valores extremos que pudieran arruinar el ajuste del modelo.
+Ahora bien, parecen haber pocas anormalidades en el número de camiones vendidos con un pico en finales de 2005, y dos claras tendencias de declive a partir del año 2007 y de incremento continuado desde el año 2009.
 
 
 ```{r,message=FALSE,warning=FALSE, echo=FALSE}
@@ -315,7 +315,7 @@ Que la diferencia sea tan grande indica que el modelo está terriblemente sobrea
 
 ### Modelo 2: Reduciendo ventana de entrenamiento
 
-Un detalle en particular con las series de tiempo es que las relaciones son dinámicas y las tendencias cambian a lo largo de los años: hay crisis y buenos tiempos. En ese sentido debemos limitar la ventana temporal de entrenamiento, pues no siempre se encontrarán las mismas características. Analizando la historia, recordemos que tuvimos dos períodos de crisis en los úlimos 20 años, la burbuja **.com** en 2000-2001 y la crisis hipotecaria del 2008, cuyo impacto duró hasta medidados de 2009. Definamos entonces, un período de entrenamiento desde un año "X" hasta 2016 y uno de evaluación del año 2017 entrenando nuevamente el modelo con todas las variables.
+Un detalle en particular con las series de tiempo es que las relaciones son dinámicas y las tendencias cambian a lo largo de los años: hay crisis y buenos tiempos. En ese sentido debemos limitar la ventana temporal de entrenamiento, pues no siempre se encontrarán las mismas características. Analizando la historia, recordemos que tuvimos dos períodos de crisis en los úlimos 20 años, la burbuja **.com** en 2000-2001 y la crisis hipotecaria del 2008, cuyo impacto duró hasta medidados de 2009 (y sus efectos pueden verse reflejados en una de las gráficas anteriores). Definamos entonces, un período de entrenamiento desde un año "X" hasta 2016 y uno de evaluación del año 2017 entrenando nuevamente el modelo con todas las variables.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(glmnet)
@@ -456,13 +456,14 @@ print(paste("Test Error: ",mae3))
 #knitr::kable(xtable(summary(model_3)))
 ```
 
-En este caso, los resultados del modelo empeoraron. Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo, mientras que acá fue nuestro propio criterio y análisis explorativo lo que generó los resultados. Pero no nos desanimemos, muchas veces los mejores resultados se obtienen haciendo un cuidadoso análisis explorativo más que dejando los modelos correr como cajas negras.
+En este caso, los resultados del modelo empeoraron. Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo, mientras que acá fue nuestro propio criterio y análisis explorativo lo que generó los resultados. Pero no nos desanimemos, muchas veces los mejores resultados se obtienen haciendo un cuidadoso análisis explorativo más que dejando los modelos correr como cajas negras, y en efecto, lo que potenció los resultados fue visualizar diferentes épocas en la serie de tiempo.
 
 
 ## Camiones
-Repitamos los mismos experimentos para los camiones
+Repitamos los mismos experimentos para los camiones, iniciando en el mismo período
 
-### Modelo 4: En desarrollo
+### Modelo 1: Todas las variables
+
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 #library(xgboost)
 
