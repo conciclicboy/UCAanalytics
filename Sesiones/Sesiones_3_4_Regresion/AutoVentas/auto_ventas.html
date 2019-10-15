@@ -840,36 +840,48 @@ div.tocify {
 <pre><code>## [1] &quot;Test Error:  118637.651381872&quot;</code></pre>
 <p>Que la diferencia sea tan grande indica que el modelo está terriblemente sobreajustado a los datos de entrenamiento. Debemos entonces reducir este sobreajuste, para lo cual crearemos más modelos. Hay dos formas de reducirlo: limitando el número de variables; y en series de tiempo, limitando la ventana de entrenamiento.</p>
 </div>
-<div id="modelo-2-limitando-el-numero-de-variables-regularizando" class="section level3">
-<h3>Modelo 2: Limitando el número de variables (Regularizando)</h3>
-<p>Una técnica muy conocida para limitar el efecto de incluir demasiadas variables es Regularizando. La regularización reduce el efecto de incluir demasiadas variables en el modelo penalizando por cada variable extra. Los métodos más famosos son la Regresión Contraida (Ridge Regression) y Regresión Lasso. Al correr el modelo utilizando una Regresión Contraída obtenemos los siguientes resultados:</p>
-<pre><code>## [1] &quot;train set:  46540.9286703781&quot;</code></pre>
-<pre><code>## [1] &quot;test set:  113604.728552238&quot;</code></pre>
-<p>En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, esto indica que, aunque aún no sea un buen modelo, si ha mejorado su poder predictivo.</p>
+<div id="modelo-2-reduciendo-ventana-de-entrenamiento" class="section level3">
+<h3>Modelo 2: Reduciendo ventana de entrenamiento</h3>
+<p>Un detalle en particular con las series de tiempo es que las relaciones son dinámicas y las tendencias cambian a lo largo de los años: hay crisis y buenos tiempos. En ese sentido debemos limitar la ventana temporal de entrenamiento, pues no siempre se encontrarán las mismas características. Analizando la historia, recordemos que tuvimos dos períodos de crisis en los úlimos 20 años, la burbuja <strong>.com</strong> en 2000-2001 y la crisis hipotecaria del 2008, cuyo impacto duró hasta medidados de 2009. Definamos entonces, un período de entrenamiento desde un año “X” hasta 2016 y uno de evaluación del año 2017 entrenando nuevamente el modelo con todas las variables.</p>
+<pre><code>## [1] &quot;Train Error:  27471.4444488892&quot;</code></pre>
+<pre><code>## [1] &quot;Test Error:  33678.6884282487&quot;</code></pre>
+<p>Y mágicamente nuestro error se redujo en ambos conjuntos, entrenamiento y evaluación. Pero estos dos siguen aún siendo muy diferentes, lo que da indicios que aún podemos mejorar.</p>
+<ul>
+<li>¿Puede usted imaginar que año se utilizó para este cálculo?</li>
+<li>¿Pruebe con varias opciones para “X”, porqué los resultados son tan similares o tan diferentes?</li>
+</ul>
 </div>
-<div id="modelo-3-reduciendo-ventana-de-entrenamiento" class="section level3">
-<h3>Modelo 3: Reduciendo ventana de entrenamiento</h3>
-<p>Un detalle en particular con las series de tiempo es que las relaciones son dinámicas y las tendencias cambian a lo largo de los años: hay crisis y buenos tiempos. En ese sentido debemos limitar la ventana temporal de entrenamiento, pues no siempre se encontrarán las mismas características. Analizando la historia, recordemos que tuvimos dos períodos de crisis en los úlimos 20 años, la burbuja <strong>.com</strong> en 2000-2001 y la crisis hipotecaria del 2008, cuyo impacto duró hasta medidados de 2009. Definamos entonces, un período de entrenamiento desde 2010 hasta 2016 y uno de evaluación del año 2017 entrenando nuevamente con una ridge regression.</p>
-<pre><code>## [1] &quot;train set:  37970.8301744281&quot;</code></pre>
-<pre><code>## [1] &quot;test set:  44838.0578363281&quot;</code></pre>
-<p>Y mágicamente nuestro error se redujo en ambos conjuntos, entrenamiento y evaluación. Pruebe usted modificando la ventana de entrenamiento hasta 2009 o hasta 2008. ¿Porqué los resultados son tan similares o tan diferentes?</p>
+<div id="modelo-3-limitando-el-numero-de-variables-regularizando" class="section level3">
+<h3>Modelo 3: Limitando el número de variables (Regularizando)</h3>
+<p>Una técnica muy conocida para limitar el efecto de incluir demasiadas variables es Regularizando. La regularización reduce el efecto de incluir demasiadas variables en el modelo penalizando por cada variable extra. Los métodos más famosos son la Regresión Contraida (Ridge Regression) y Regresión Lasso. Al correr el modelo utilizando Lasso obtenemos los siguientes resultados:</p>
+<pre><code>## [1] &quot;train set:  28568.1861059014&quot;</code></pre>
+<pre><code>## [1] &quot;test set:  31382.1547867942&quot;</code></pre>
+<p>En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, haciendo que el desempeño de ambos sea muy cercano. Esto indica que hemos optimizado nuestro <strong>modelo lineal</strong> con estas variables predictivas (no necesariamente el mejor modelo).</p>
 </div>
-<div id="modelo-4-utilizando-las-variables-de-la-exploracion-visual." class="section level3">
-<h3>Modelo 4: Utilizando las variables de la exploración visual.</h3>
-<p>Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Si utilizamos el modelo completo con esas variables y luego hacemos eliminación sucesiva de variables (backward) obtenemos lo siguiente:</p>
+<div id="modelo-4-utilizando-la-exploracion-visual." class="section level3">
+<h3>Modelo 4: Utilizando la exploración visual.</h3>
+<p>Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Si utilizamos el modelo completo con esas variables sin realizar ninguna regularización:</p>
 <pre><code>## [1] &quot;Train Error:  38230.0172043068&quot;</code></pre>
 <pre><code>## [1] &quot;Test Error:  49818.1317367819&quot;</code></pre>
+<p>En este caso, los resultados del modelo empeoraron. Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo, mientras que acá fue nuestro propio criterio y análisis explorativo lo que generó los resultados. Pero no nos desanimemos, muchas veces los mejores resultados se obtienen haciendo un cuidadoso análisis explorativo más que dejando los modelos correr como cajas negras.</p>
 </div>
+</div>
+<div id="camiones-1" class="section level2">
+<h2>Camiones</h2>
+<p>Repitamos los mismos experimentos para los camiones</p>
 <div id="modelo-4-en-desarrollo" class="section level3">
 <h3>Modelo 4: En desarrollo</h3>
 </div>
 </div>
-<div id="evaluando-los-modelos" class="section level2">
-<h2>Evaluando los modelos</h2>
-</div>
 <div id="conclusiones-en-desarrollo" class="section level2">
 <h2>Conclusiones (… en desarrollo)</h2>
-<p>*Blah Blah Blah &gt; Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.</p>
+<ul>
+<li>Conclusión 1</li>
+<li>Conclusión 2</li>
+</ul>
+<blockquote>
+<p>Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.</p>
+</blockquote>
 </div>
 
 

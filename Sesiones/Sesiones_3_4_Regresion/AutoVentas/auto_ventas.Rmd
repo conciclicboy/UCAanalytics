@@ -295,8 +295,8 @@ Aunque la mayoría de valores p son cercanos a cero, el modelo incluye algunas v
 ```{r, echo=FALSE,warning=FALSE, message=FALSE }
 library(Metrics)
 
-train_set<-b[year(b$Date)< 2017,]
-test_set<-b[year(b$Date) >= 2017,]
+#train_set<-b[year(b$Date)< 2017,]
+#test_set<-b[year(b$Date) >= 2017,]
 
 # Sacando predicciones
 pred_train_1<-predict(model_1,train_set)
@@ -312,56 +312,10 @@ print(paste("Test Error: ",mae1))
 
 Que la diferencia sea tan grande indica que el modelo está terriblemente sobreajustado a los datos de entrenamiento. Debemos entonces reducir este sobreajuste, para lo cual crearemos más modelos. Hay dos formas de reducirlo: limitando el número de variables; y en series de tiempo, limitando la ventana de entrenamiento.
 
-### Modelo 2: Limitando el número de variables (Regularizando)
-Una técnica muy conocida para limitar el efecto de incluir demasiadas variables es Regularizando. La regularización reduce el efecto de incluir demasiadas variables en el modelo penalizando por cada variable extra. Los métodos más famosos son la Regresión Contraida (Ridge Regression) y Regresión Lasso. Al correr el modelo utilizando una Regresión Contraída obtenemos los siguientes resultados:
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(glmnet)
+### Modelo 2: Reduciendo ventana de entrenamiento
 
-X_train<-train_set[,c("Time","Year", "Q1", "Q2", "Q3",
-                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
-                   "US_Population_millions", "Unemployment", 
-                   "Disposible_Income_Capita_Real", "Saving_Capital",
-                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
-                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
-
-X_test<-test_set[,c("Time","Year", "Q1", "Q2", "Q3",
-                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
-                   "US_Population_millions", "Unemployment", 
-                   "Disposible_Income_Capita_Real", "Saving_Capital",
-                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
-                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
-
-y_train<-train_set$Car
-y_test<- test_set$Car
-
-#lambda <- 10^seq(10, -2, length = 100)
-
-model_2<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
-                family="gaussian", alpha = 0, nlambda=15)
-
-# Sacando predicciones
-pred_train_2=predict(model_2, newx = as.matrix(X_train), s = "lambda.min")
-pred_test_2=predict(model_2, newx = as.matrix(X_test), s = "lambda.min")
-
-#Mean Absolute Error
-mae_train2<-mae(train_set$Car,pred_train_2)
-mae2<-mae(test_set$Car,pred_test_2)
-
-# reportando errores
-print(paste("train set: ",mae_train2))
-print(paste("test set: ",mae2))
-
-# Imprimiendo resultado
-#knitr::kable(xtable(summary(model_2)))
-```
-
-En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, esto indica que, aunque aún no sea un buen modelo, si ha mejorado su poder predictivo.
-
-
-### Modelo 3: Reduciendo ventana de entrenamiento
-
-Un detalle en particular con las series de tiempo es que las relaciones son dinámicas y las tendencias cambian a lo largo de los años: hay crisis y buenos tiempos. En ese sentido debemos limitar la ventana temporal de entrenamiento, pues no siempre se encontrarán las mismas características. Analizando la historia, recordemos que tuvimos dos períodos de crisis en los úlimos 20 años, la burbuja **.com** en 2000-2001 y la crisis hipotecaria del 2008, cuyo impacto duró hasta medidados de 2009. Definamos entonces, un período de entrenamiento desde 2010 hasta 2016 y uno de evaluación del año 2017 entrenando nuevamente con una ridge regression.
+Un detalle en particular con las series de tiempo es que las relaciones son dinámicas y las tendencias cambian a lo largo de los años: hay crisis y buenos tiempos. En ese sentido debemos limitar la ventana temporal de entrenamiento, pues no siempre se encontrarán las mismas características. Analizando la historia, recordemos que tuvimos dos períodos de crisis en los úlimos 20 años, la burbuja **.com** en 2000-2001 y la crisis hipotecaria del 2008, cuyo impacto duró hasta medidados de 2009. Definamos entonces, un período de entrenamiento desde un año "X" hasta 2016 y uno de evaluación del año 2017 entrenando nuevamente el modelo con todas las variables.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(glmnet)
@@ -390,8 +344,67 @@ y_test<- test_set$Car
 
 #lambda <- 10^seq(10, -2, length = 100)
 
+#model_2<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
+#                family="gaussian", alpha = 0, nlambda=15)
+
+
+model_2 <- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
+             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
+             US_Population_millions+ Unemployment+
+             Disposible_Income_Capita_Real+ Saving_Capital+
+             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
+             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+           data=train_set)
+
+
+# Sacando predicciones
+pred_train_2<-predict(model_2,train_set)
+pred_test_2<-predict(model_2,test_set)
+
+#Mean Absolute Error
+mae2<-mae(test_set$Car,pred_test_2)
+mae_train2<-mae(train_set$Car,pred_train_2)
+
+print(paste("Train Error: ",mae_train2))
+print(paste("Test Error: ",mae2))
+
+# Imprimiendo resultado
+#knitr::kable(xtable(summary(model_2)))
+```
+
+Y mágicamente nuestro error se redujo en ambos conjuntos, entrenamiento y evaluación. Pero estos dos siguen aún siendo muy diferentes, lo que da indicios que aún podemos mejorar.
+
+* ¿Puede usted imaginar que año se utilizó para este cálculo?
+* ¿Pruebe con varias opciones para "X", porqué los resultados son tan similares o tan diferentes?
+
+
+### Modelo 3: Limitando el número de variables (Regularizando)
+Una técnica muy conocida para limitar el efecto de incluir demasiadas variables es Regularizando. La regularización reduce el efecto de incluir demasiadas variables en el modelo penalizando por cada variable extra. Los métodos más famosos son la Regresión Contraida (Ridge Regression) y Regresión Lasso. Al correr el modelo utilizando Lasso obtenemos los siguientes resultados:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(glmnet)
+
+X_train<-train_set[,c("Time","Year", "Q1", "Q2", "Q3",
+                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
+                   "US_Population_millions", "Unemployment", 
+                   "Disposible_Income_Capita_Real", "Saving_Capital",
+                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
+                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
+
+X_test<-test_set[,c("Time","Year", "Q1", "Q2", "Q3",
+                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
+                   "US_Population_millions", "Unemployment", 
+                   "Disposible_Income_Capita_Real", "Saving_Capital",
+                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
+                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
+
+y_train<-train_set$Car
+y_test<- test_set$Car
+
+#lambda <- 10^seq(10, -2, length = 100)
+
 model_2<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
-                family="gaussian", alpha = 0, nlambda=15)
+                family="gaussian", alpha = 1, nlambda=15)
 
 # Sacando predicciones
 pred_train_2=predict(model_2, newx = as.matrix(X_train), s = "lambda.min")
@@ -409,16 +422,13 @@ print(paste("test set: ",mae2))
 #knitr::kable(xtable(summary(model_2)))
 ```
 
-Y mágicamente nuestro error se redujo en ambos conjuntos, entrenamiento y evaluación.
-Pruebe usted modificando la ventana de entrenamiento hasta 2009 o hasta 2008. 
-¿Porqué los resultados son tan similares o tan diferentes?
+En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, haciendo que el desempeño de ambos sea muy cercano. Esto indica que hemos optimizado nuestro **modelo lineal** con estas variables predictivas (no necesariamente el mejor modelo).
 
 
 
-### Modelo 4: Utilizando las variables de la exploración visual.
+### Modelo 4: Utilizando la exploración visual.
 
-Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Si utilizamos el modelo completo con esas variables y luego hacemos eliminación sucesiva de variables (backward) obtenemos lo siguiente:
-
+Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Si utilizamos el modelo completo con esas variables sin realizar ninguna regularización:
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 # Modelo
@@ -429,12 +439,6 @@ model_3<- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
                Household_Debt_Capital+ Consumer_Confidence+ 
                RealGDP+ Fed_Funds_Rate+ Nonfarm_Payrolls,
            data=train_set)
-
-
-
-# Eliminando variables
-#temporal<-ols_step_backward_aic(model_3)
-#model_3<-temporal$model
 
 # Sacando predicciones
 pred_train_3=predict(model_3,train_set)
@@ -451,6 +455,12 @@ print(paste("Test Error: ",mae3))
 # Imprimiendo resultado
 #knitr::kable(xtable(summary(model_3)))
 ```
+
+En este caso, los resultados del modelo empeoraron. Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo, mientras que acá fue nuestro propio criterio y análisis explorativo lo que generó los resultados. Pero no nos desanimemos, muchas veces los mejores resultados se obtienen haciendo un cuidadoso análisis explorativo más que dejando los modelos correr como cajas negras.
+
+
+## Camiones
+Repitamos los mismos experimentos para los camiones
 
 ### Modelo 4: En desarrollo
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
@@ -484,27 +494,10 @@ print(paste("Test Error: ",mae3))
 ```
 
 
-## Evaluando los modelos
-
-
-```{r,message=FALSE, warning=FALSE, echo=FALSE}
-
-#Librería de métricas
-#install.packages("Metrics")
-#library(Metrics)
-#mae1<-mae(test_set$price,pred_test_1)
-#mae2<-mae(test_set$price,pred_test_2)
-#mae3<-mae(test_set$price,pred_test_3)
-#mae4<-mae(test_set$price,pred_test_4)
-
-# Mostrando resultados
-#print((paste("Modelo 1:", mae1)))
-#print((paste("Modelo 2:", mae2)))
-#print((paste("Modelo 3:", mae3)))
-#print((paste("Modelo 4:", mae4)))
-
-```
-
 ## Conclusiones (... en desarrollo)
-*Blah Blah Blah
+
+* Conclusión 1
+* Conclusión 2
+
+
 > Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.
