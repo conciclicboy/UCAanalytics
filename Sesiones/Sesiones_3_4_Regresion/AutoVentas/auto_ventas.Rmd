@@ -257,33 +257,20 @@ Nuevamente, eso puede sonar a que estamos haciendo prueba y error, pero en efect
 Comencemos por incluir todas las variables posibles y todos los datos de entrenamiento desde 1994 hasta 2016. Estos son los resultados del modelo:
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
-# Creando modelo
-#model_1<- lm(formula = price ~ room_type + neighborhood + 
-#             reviews +overall_satisfaction + accommodates +
-#             bedrooms,data = train_set)
-
-
-# Sacando predicciones
-#pred_train_1=predict(model_1,train_set)#entrenamiento
-#pred_test_1=predict(model_1,test_set)#evaluación
-
-# Reportando modelo: usted solo necesita poner "summary(model)"
-# Eso le entrega los resultados del modelo pero se imprime en formato feo
-# Nosotros lo vamos a imprimir como una "xtable" en "knitr::kable"
-#library(xtable)
-#knitr::kable(xtable(summary(model_1)))
-
-# Librerías de utilidad 
-library(olsrr)
-library(xtable)
 
 # Modelo
 model_1<- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
-             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
-             US_Population_millions+ Unemployment+
-             Disposible_Income_Capita_Real+ Saving_Capital+
-             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
-             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+             #CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
+             #US_Population_millions+ Unemployment+
+             #Disposible_Income_Capita_Real+ Saving_Capital+
+             #Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
+             #US_Urban_CPI_Change+ Nonfarm_Payrolls,
+               Inventories+CPI_New_Cars+CPI_Used_Cars+Gas_Prices+
+               Cons_Conf_Autos+Miles_Driven+Bank_Auto_Interest_Rate+
+               US_Population_millions+Unemployment+Disposible_Income_Capita_Real+
+               Saving_Capital+ Household_Debt_Capital+US_House_Price_Inflation+
+               Consumer_Confidence+RealGDP+Fed_Funds_Rate+US_Urban_CPI_Change+
+               Nonfarm_Payrolls, 
            data=train_set)
 
 # Imprimiendo resultado
@@ -465,34 +452,157 @@ Repitamos los mismos experimentos para los camiones, iniciando en el mismo perí
 ### Modelo 1: Todas las variables
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
-#library(xgboost)
-
-# XGBoost, a diferencia de lm, no convierte las variables categóricas que aparecen como
-# caracteres a variables binarias (0/1). Tendremos que usar la codificación
-
-# Primero vamos a definir las matrices de entrenamiento y evaluación
-#X_train<- train_set[,c(colnames(vecindarios),colnames(tipos_cuarto),"reviews",
-#                       "overall_satisfaction", "accommodates","bedrooms",
-#                       "longitude", "latitude")]
-
-#X_test<- test_set[,c(colnames(vecindarios),colnames(tipos_cuarto),"reviews",
-#                       "overall_satisfaction", "accommodates","bedrooms",
-#                     "longitude", "latitude")]
-
-# Luego definimos los vectores de la variable dependiente
-#y_train<- train_set$price
-#y_test<-test_set$price
 
 # Modelo
-#model_4 <- xgboost(data = as.matrix(X_train), label = as.matrix(y_train), max.depth = 4, 
-#                   eta = 0.3, nthread = 2, nrounds = 100, objective = "reg:linear",
-#                   eval_metric="rmse",verbose = 0)
+model_1<- lm(Truck ~ Time + Year+ Q1+ Q2+ Q3+
+             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
+             US_Population_millions+ Unemployment+
+             Disposible_Income_Capita_Real+ Saving_Capital+
+             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
+             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+           data=train_set)
 
-# Predicciones
-#pred_train_4<-predict(model_4,as.matrix(X_train))
-#pred_test_4<-predict(model_4,as.matrix(X_test))
+# Sacando predicciones
+pred_train_1<-predict(model_1,train_set)
+pred_test_1<-predict(model_1,test_set)
+
+#Mean Absolute Error
+mae1<-mae(test_set$Truck,pred_test_1)
+mae_train1<-mae(train_set$Truck,pred_train_1)
+
+#Reportando
+print(paste("Train Error: ",mae_train1))
+print(paste("Test Error: ",mae1))
 
 ```
+
+Los primeros resultados son buenos. Intentemos ahora regularizar el modelo.
+
+### Modelo 2: Regularizando
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(glmnet)
+
+####################### NO TOCAR ######################
+X_train<-train_set[,c("Time","Year", "Q1", "Q2", "Q3",
+                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
+                   "US_Population_millions", "Unemployment", 
+                   "Disposible_Income_Capita_Real", "Saving_Capital",
+                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
+                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
+
+X_test<-test_set[,c("Time","Year", "Q1", "Q2", "Q3",
+                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
+                   "US_Population_millions", "Unemployment", 
+                   "Disposible_Income_Capita_Real", "Saving_Capital",
+                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
+                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
+####################### NO TOCAR ######################
+
+
+
+############### PUEDE MODIFICAR VARIABLE DEPENDIENTE ###########
+y_train<-train_set$Truck
+y_test<- test_set$Truck
+############### PUEDE MODIFICAR VARIABLE DEPENDIENTE ###########
+
+
+
+########## alpha= 0 para Ridge Reg / alpha =1 para Lasso #########
+model_2<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
+                family="gaussian", alpha = 1, nlambda=15)
+########## alpha= 0 para Ridge Reg / alpha =1 para Lasso #########
+
+
+
+####################### NO TOCAR ######################
+# Sacando predicciones
+pred_train_2=predict(model_2, newx = as.matrix(X_train), s = "lambda.min")
+pred_test_2=predict(model_2, newx = as.matrix(X_test), s = "lambda.min")
+
+#Mean Absolute Error
+mae_train2<-mae(y_train,pred_train_2)
+mae2<-mae(y_test,pred_test_2)
+
+# reportando errores
+print(paste("train set: ",mae_train2))
+print(paste("test set: ",mae2))
+####################### NO TOCAR ######################
+
+
+# Imprimiendo resultado
+#knitr::kable(xtable(summary(model_2)))
+```
+
+Los resultados de nuestra predicción mejoraron aún más.
+
+### Modelo 3: Usando exploración visual
+También podemos apelar a nuestro buen criterio usando las variables que parecen tener más correlación con la variable dependiente. Pero esta vez volveremos a hacer el diagrama de dispersión para datos de años recientes con el propósito de quitar el sesgo de los años de crisis.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+
+# Tomaremos los datos desde Septiembre 2009 hasta el final
+# Como ya están ordenados solo agarro de la fila 187 hasta el final
+
+visualize(dataset=b[187:nrow(b),],
+          xvar=c("Inventories", "CPI_New_Cars", "CPI_Used_Cars",
+                 "Gas_Prices", "", "Miles_Driven"),
+          yvar="Truck",
+          type="scatter",
+          custom=FALSE
+)
+
+visualize(dataset=b[187:nrow(b),],
+          xvar=c("Bank_Auto_Interest_Rate", "US_Population_millions", "Unemployment",
+                 "Disposible_Income_Capita_Real", "Saving_Capital", "Household_Debt_Capital"),
+          yvar="Truck",
+          type="scatter",
+          custom=FALSE
+)
+Cons_Conf_Autos
+
+visualize(dataset=b[187:nrow(b),],
+          xvar=c("US_House_Price_Inflation", "Consumer_Confidence", "RealGDP",
+                 "Fed_Funds_Rate", "US_Urban_CPI_Change", "Nonfarm_Payrolls"),
+          yvar="Truck",
+          type="scatter",
+          custom=FALSE
+)
+
+```
+
+Parece haber correlación con muchas variables. Lo que haremos es simplementa eliminar algunas variables que no parezcan tener correlación con la variable dependiente: Saving_Capital, Cons_Conf_Autos
+
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+
+# Modelo
+model_3<- lm(Truck ~ Time + Year+ Q1+ Q2+ Q3+
+             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
+             US_Population_millions+ Unemployment+
+             Disposible_Income_Capita_Real+
+             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
+             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+           data=train_set)
+
+# Sacando predicciones
+pred_train_3<-predict(model_3,train_set)
+pred_test_3<-predict(model_3,test_set)
+
+#Mean Absolute Error
+mae3<-mae(test_set$Truck,pred_test_3)
+mae_train3<-mae(train_set$Truck,pred_train_3)
+
+#Reportando
+print(paste("Train Error: ",mae_train3))
+print(paste("Test Error: ",mae3))
+
+```
+
+
+### Modelo 4: Usando Gradient Boosting
+
 
 
 ## Conclusiones (... en desarrollo)
