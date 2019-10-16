@@ -258,32 +258,26 @@ Comencemos por incluir todas las variables posibles y todos los datos de entrena
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 
+library(xtable)
 # Modelo
 model_1<- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
-             #CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
-             #US_Population_millions+ Unemployment+
-             #Disposible_Income_Capita_Real+ Saving_Capital+
-             #Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
-             #US_Urban_CPI_Change+ Nonfarm_Payrolls,
                Inventories+CPI_New_Cars+CPI_Used_Cars+Gas_Prices+
                Cons_Conf_Autos+Miles_Driven+Bank_Auto_Interest_Rate+
                US_Population_millions+Unemployment+Disposible_Income_Capita_Real+
                Saving_Capital+ Household_Debt_Capital+US_House_Price_Inflation+
                Consumer_Confidence+RealGDP+Fed_Funds_Rate+US_Urban_CPI_Change+
-               Nonfarm_Payrolls, 
+               Nonfarm_Payrolls,
            data=train_set)
 
 # Imprimiendo resultado
 knitr::kable(xtable(summary(model_1)))
+
 ```
 
 Aunque la mayoría de valores p son cercanos a cero, el modelo incluye algunas variables que no son estadísticamente significativas, lo cual es indicio que debemos reducir el número de variables. Veamos ahora cual es el Mean Square Error en los conjuntos de entrenamiento y validación:
 
 ```{r, echo=FALSE,warning=FALSE, message=FALSE }
 library(Metrics)
-
-#train_set<-b[year(b$Date)< 2017,]
-#test_set<-b[year(b$Date) >= 2017,]
 
 # Sacando predicciones
 pred_train_1<-predict(model_1,train_set)
@@ -311,38 +305,14 @@ library(glmnet)
 train_set<-b[(year(b$Date)>=2010)&(year(b$Date)< 2017),]
 test_set<-b[year(b$Date) >= 2017,]
 
-
-X_train<-train_set[,c("Time","Year", "Q1", "Q2", "Q3",
-                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
-                   "US_Population_millions", "Unemployment", 
-                   "Disposible_Income_Capita_Real", "Saving_Capital",
-                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
-                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
-
-X_test<-test_set[,c("Time","Year", "Q1", "Q2", "Q3",
-                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
-                   "US_Population_millions", "Unemployment", 
-                   "Disposible_Income_Capita_Real", "Saving_Capital",
-                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
-                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
-
-y_train<-train_set$Car
-y_test<- test_set$Car
-
-#lambda <- 10^seq(10, -2, length = 100)
-
-#model_2<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
-#                family="gaussian", alpha = 0, nlambda=15)
-
-
-model_2 <- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
-             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
-             US_Population_millions+ Unemployment+
-             Disposible_Income_Capita_Real+ Saving_Capital+
-             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
-             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+model_2<- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
+               Inventories+CPI_New_Cars+CPI_Used_Cars+Gas_Prices+
+               Cons_Conf_Autos+Miles_Driven+Bank_Auto_Interest_Rate+
+               US_Population_millions+Unemployment+Disposible_Income_Capita_Real+
+               Saving_Capital+ Household_Debt_Capital+US_House_Price_Inflation+
+               Consumer_Confidence+RealGDP+Fed_Funds_Rate+US_Urban_CPI_Change+
+               Nonfarm_Payrolls,
            data=train_set)
-
 
 # Sacando predicciones
 pred_train_2<-predict(model_2,train_set)
@@ -355,17 +325,47 @@ mae_train2<-mae(train_set$Car,pred_train_2)
 print(paste("Train Error: ",mae_train2))
 print(paste("Test Error: ",mae2))
 
-# Imprimiendo resultado
-#knitr::kable(xtable(summary(model_2)))
 ```
 
-Y mágicamente nuestro error se redujo en ambos conjuntos, entrenamiento y evaluación. Pero estos dos siguen aún siendo muy diferentes, lo que da indicios que aún podemos mejorar.
+Y mágicamente nuestro error se redujo en ambos conjuntos, entrenamiento y evaluación.
 
 * ¿Puede usted imaginar que año se utilizó para este cálculo?
 * ¿Pruebe con varias opciones para "X", porqué los resultados son tan similares o tan diferentes?
 
+Por otro lado, estos dos siguen aún siendo muy diferentes, lo que da indicios que aún podemos mejorar.
 
-### Modelo 3: Limitando el número de variables (Regularizando)
+
+### Modelo 3: Utilizando la exploración visual.
+
+Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Podemos intentar reducir el número de variables manualmente para ver que sucede con el error:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+model_3 <- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
+             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
+             US_Population_millions+ Unemployment+
+             Disposible_Income_Capita_Real+ Saving_Capital+
+             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
+             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+           data=train_set)
+
+# Sacando predicciones
+pred_train_3<-predict(model_3,train_set)
+pred_test_3<-predict(model_3,test_set)
+
+#Mean Absolute Error
+mae3<-mae(test_set$Car,pred_test_3)
+mae_train3<-mae(train_set$Car,pred_train_3)
+
+print(paste("Train Error: ",mae_train3))
+print(paste("Test Error: ",mae3))
+
+```
+
+Ahora hemos llegado a un punto donde tanto el error de entrenamiento como el error de evaluación son muy similares, pero aún tenemos una pequeña diferencia que puede ser mejorada, solo que en este caso parece muy difícil hacerlo de forma visual, y debemos recurrir a técnicas más avanzadas.
+
+
+### Modelo 4: Limitando el número de variables (Regularizando)
 Una técnica muy conocida para limitar el efecto de incluir demasiadas variables es Regularizando. La regularización reduce el efecto de incluir demasiadas variables en el modelo penalizando por cada variable extra. Los métodos más famosos son la Regresión Contraida (Ridge Regression) y Regresión Lasso. Al correr el modelo utilizando Lasso obtenemos los siguientes resultados:
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -388,68 +388,31 @@ X_test<-test_set[,c("Time","Year", "Q1", "Q2", "Q3",
 y_train<-train_set$Car
 y_test<- test_set$Car
 
-#lambda <- 10^seq(10, -2, length = 100)
 
-model_2<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
+model_4<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
                 family="gaussian", alpha = 1, nlambda=15)
 
 # Sacando predicciones
-pred_train_2=predict(model_2, newx = as.matrix(X_train), s = "lambda.min")
-pred_test_2=predict(model_2, newx = as.matrix(X_test), s = "lambda.min")
+pred_train_4=predict(model_4, newx = as.matrix(X_train), s = "lambda.min")
+pred_test_4=predict(model_4, newx = as.matrix(X_test), s = "lambda.min")
 
 #Mean Absolute Error
-mae_train2<-mae(train_set$Car,pred_train_2)
-mae2<-mae(test_set$Car,pred_test_2)
+mae_train4<-mae(train_set$Car,pred_train_4)
+mae4<-mae(test_set$Car,pred_test_4)
 
 # reportando errores
-print(paste("train set: ",mae_train2))
-print(paste("test set: ",mae2))
+print(paste("train set: ",mae_train4))
+print(paste("test set: ",mae4))
 
-# Imprimiendo resultado
-#knitr::kable(xtable(summary(model_2)))
 ```
 
-En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, haciendo que el desempeño de ambos sea muy cercano. Esto indica que hemos optimizado nuestro **modelo lineal** con estas variables predictivas (no necesariamente el mejor modelo).
-
-
-
-### Modelo 4: Utilizando la exploración visual.
-
-Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Si utilizamos el modelo completo con esas variables sin realizar ninguna regularización:
-
-```{r,message=FALSE, warning=FALSE, echo=FALSE}
-# Modelo
-
-model_3<- lm(Car ~ Time + Year+ Q1+ Q2+ Q3+
-               Inventories+CPI_Used_Cars+ US_Population_millions+
-               Unemployment+ Disposible_Income_Capita_Real+
-               Household_Debt_Capital+ Consumer_Confidence+ 
-               RealGDP+ Fed_Funds_Rate+ Nonfarm_Payrolls,
-           data=train_set)
-
-# Sacando predicciones
-pred_train_3=predict(model_3,train_set)
-pred_test_3=predict(model_3,test_set)
-
-#Mean Absolute Error
-mae3<-mae(test_set$Car,pred_test_3)
-mae_train3<-mae(train_set$Car,pred_train_3)
-
-#Reportando errores
-print(paste("Train Error: ",mae_train3))
-print(paste("Test Error: ",mae3))
-
-# Imprimiendo resultado
-#knitr::kable(xtable(summary(model_3)))
-```
-
-En este caso, los resultados del modelo empeoraron. Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo, mientras que acá fue nuestro propio criterio y análisis explorativo lo que generó los resultados. Pero no nos desanimemos, muchas veces los mejores resultados se obtienen haciendo un cuidadoso análisis explorativo más que dejando los modelos correr como cajas negras, y en efecto, lo que potenció los resultados fue visualizar diferentes épocas en la serie de tiempo.
+En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, haciendo que el desempeño de ambos sea muy cercano. Esto indica que hemos optimizado nuestro **modelo lineal** con estas variables predictivas (no necesariamente el mejor modelo). Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo. Pero tenga en cuenta que lo que en realidad redujo el error significativamente no fue la caja negra de la regularización, sino más bien la reducción de variables y la reducción de la ventana de entrenamiento que elegimos de forma visual, una vez hecho eso se procedió a optimizar el modelo con la regularización.
 
 
 ## Camiones
-Repitamos los mismos experimentos para los camiones, iniciando en el mismo período
+Repitamos el proceso para los camiones
 
-### Modelo 1: Todas las variables
+### Modelo 1: Todas las variables con la ventana de tiempo reducida.
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 
@@ -536,70 +499,6 @@ print(paste("test set: ",mae2))
 ```
 
 Los resultados de nuestra predicción mejoraron aún más.
-
-### Modelo 3: Usando exploración visual
-También podemos apelar a nuestro buen criterio usando las variables que parecen tener más correlación con la variable dependiente. Pero esta vez volveremos a hacer el diagrama de dispersión para datos de años recientes con el propósito de quitar el sesgo de los años de crisis.
-
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
-
-# Tomaremos los datos desde Septiembre 2009 hasta el final
-# Como ya están ordenados solo agarro de la fila 187 hasta el final
-
-visualize(dataset=b[187:nrow(b),],
-          xvar=c("Inventories", "CPI_New_Cars", "CPI_Used_Cars",
-                 "Gas_Prices", "", "Miles_Driven"),
-          yvar="Truck",
-          type="scatter",
-          custom=FALSE
-)
-
-visualize(dataset=b[187:nrow(b),],
-          xvar=c("Bank_Auto_Interest_Rate", "US_Population_millions", "Unemployment",
-                 "Disposible_Income_Capita_Real", "Saving_Capital", "Household_Debt_Capital"),
-          yvar="Truck",
-          type="scatter",
-          custom=FALSE
-)
-Cons_Conf_Autos
-
-visualize(dataset=b[187:nrow(b),],
-          xvar=c("US_House_Price_Inflation", "Consumer_Confidence", "RealGDP",
-                 "Fed_Funds_Rate", "US_Urban_CPI_Change", "Nonfarm_Payrolls"),
-          yvar="Truck",
-          type="scatter",
-          custom=FALSE
-)
-
-```
-
-Parece haber correlación con muchas variables. Lo que haremos es simplementa eliminar algunas variables que no parezcan tener correlación con la variable dependiente: Saving_Capital, Cons_Conf_Autos
-
-
-```{r,message=FALSE, warning=FALSE, echo=FALSE}
-
-# Modelo
-model_3<- lm(Truck ~ Time + Year+ Q1+ Q2+ Q3+
-             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
-             US_Population_millions+ Unemployment+
-             Disposible_Income_Capita_Real+
-             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
-             US_Urban_CPI_Change+ Nonfarm_Payrolls,
-           data=train_set)
-
-# Sacando predicciones
-pred_train_3<-predict(model_3,train_set)
-pred_test_3<-predict(model_3,test_set)
-
-#Mean Absolute Error
-mae3<-mae(test_set$Truck,pred_test_3)
-mae_train3<-mae(train_set$Truck,pred_train_3)
-
-#Reportando
-print(paste("Train Error: ",mae_train3))
-print(paste("Test Error: ",mae3))
-
-```
-
 
 ### Modelo 4: Usando Gradient Boosting
 
