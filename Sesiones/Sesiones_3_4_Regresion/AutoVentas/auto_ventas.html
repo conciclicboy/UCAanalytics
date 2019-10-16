@@ -906,26 +906,31 @@ div.tocify {
 <p>Una técnica muy conocida para limitar el efecto de incluir demasiadas variables es Regularizando. La regularización reduce el efecto de incluir demasiadas variables en el modelo penalizando por cada variable extra. Los métodos más famosos son la Regresión Contraida (Ridge Regression) y Regresión Lasso. Al correr el modelo utilizando Lasso obtenemos los siguientes resultados:</p>
 <pre><code>## [1] &quot;train set:  28434.6541880839&quot;</code></pre>
 <pre><code>## [1] &quot;test set:  27485.6885304132&quot;</code></pre>
-<p>En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, haciendo que el desempeño de ambos sea muy cercano. Esto indica que hemos optimizado nuestro <strong>modelo lineal</strong> con estas variables predictivas (no necesariamente el mejor modelo). Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo, lo cual en ciertas ocasiones puede tener más poder que nuestro propio criterio y análisis explorativo. Ahora bien, recordemos que lo que en realidad redujo el error significativamente no fue una caja negra, sino más bien la reducción de variables y la reducción de la ventana de entrenamiento, una vez hecho eso se procedió a optimizar el modelo con la regularización.</p>
+<p>En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, haciendo que el desempeño de ambos sea muy cercano. Esto indica que hemos optimizado nuestro <strong>modelo lineal</strong> con estas variables predictivas (no necesariamente el mejor modelo). Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo. Pero tenga en cuenta que lo que en realidad redujo el error significativamente no fue la caja negra de la regularización, sino más bien la reducción de variables y la reducción de la ventana de entrenamiento que elegimos de forma visual, una vez hecho eso se procedió a optimizar el modelo con la regularización.</p>
 </div>
 </div>
 <div id="camiones-1" class="section level2">
 <h2>Camiones</h2>
-<p>Repitamos los mismos experimentos para los camiones, iniciando en el mismo período</p>
-<div id="modelo-1-todas-las-variables" class="section level3">
-<h3>Modelo 1: Todas las variables</h3>
-<pre><code>## [1] &quot;Train Error:  30032.5220615638&quot;</code></pre>
-<pre><code>## [1] &quot;Test Error:  32969.5095971625&quot;</code></pre>
-<p>Los primeros resultados son buenos. Intentemos ahora regularizar el modelo.</p>
+<p>Repitamos el proceso para los camiones</p>
+<div id="modelo-1-datos-completos" class="section level3">
+<h3>Modelo 1: Datos completos</h3>
+<p>Usemos todas las variables en todos los períodos</p>
+<pre><code>## [1] &quot;Train Error:  38008.9850274646&quot;</code></pre>
+<pre><code>## [1] &quot;Test Error:  65098.270455496&quot;</code></pre>
+<p>El modelo está sobreajustado. Tiene posibilidad de mejora</p>
 </div>
-<div id="modelo-2-regularizando" class="section level3">
-<h3>Modelo 2: Regularizando</h3>
-<pre><code>## [1] &quot;train set:  32159.4506820398&quot;</code></pre>
-<pre><code>## [1] &quot;test set:  34645.5206058629&quot;</code></pre>
-<p>Los resultados de nuestra predicción mejoraron aún más.</p>
+<div id="modelo-2-reduciendo-ventana-de-entrenamiento-1" class="section level3">
+<h3>Modelo 2: Reduciendo ventana de entrenamiento</h3>
+<pre><code>## [1] &quot;Train Error:  30471.4615268323&quot;</code></pre>
+<pre><code>## [1] &quot;Test Error:  35259.5986614333&quot;</code></pre>
+<p>Aún hay diferencia pero esta es pequeña, intentemos ahora seleccionar variables.</p>
 </div>
-<div id="modelo-4-usando-gradient-boosting" class="section level3">
-<h3>Modelo 4: Usando Gradient Boosting</h3>
+<div id="modelo-3-reduciendo-variables-con-regularizacion-en-desarrollo" class="section level3">
+<h3>Modelo 3: Reduciendo variables con regularización (…en desarrollo)</h3>
+<p>Como la diferencia es pequeña, en este caso podemos proceder a regularizar el modelo directamente.</p>
+<pre><code>## [1] &quot;train set:  32376.6934340627&quot;</code></pre>
+<pre><code>## [1] &quot;test set:  68210.1252195519&quot;</code></pre>
+<p>…parece que no funciona…</p>
 </div>
 </div>
 <div id="conclusiones-en-desarrollo" class="section level2">

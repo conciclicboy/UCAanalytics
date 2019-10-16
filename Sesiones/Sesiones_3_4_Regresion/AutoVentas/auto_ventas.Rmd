@@ -299,8 +299,6 @@ Que la diferencia sea tan grande indica que el modelo está terriblemente sobrea
 Un detalle en particular con las series de tiempo es que las relaciones son dinámicas y las tendencias cambian a lo largo de los años: hay crisis y buenos tiempos. En ese sentido debemos limitar la ventana temporal de entrenamiento, pues no siempre se encontrarán las mismas características. Analizando la historia, recordemos que tuvimos dos períodos de crisis en los úlimos 20 años, la burbuja **.com** en 2000-2001 y la crisis hipotecaria del 2008, cuyo impacto duró hasta medidados de 2009 (y sus efectos pueden verse reflejados en una de las gráficas anteriores). Definamos entonces, un período de entrenamiento desde un año "X" hasta 2016 y uno de evaluación del año 2017 entrenando nuevamente el modelo con todas las variables.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(glmnet)
-
 
 train_set<-b[(year(b$Date)>=2010)&(year(b$Date)< 2017),]
 test_set<-b[year(b$Date) >= 2017,]
@@ -412,17 +410,22 @@ En este caso, hemos logrado reducir el error de evaluación y aumentado el error
 ## Camiones
 Repitamos el proceso para los camiones
 
-### Modelo 1: Todas las variables con la ventana de tiempo reducida.
+### Modelo 1: Datos completos
+Usemos todas las variables en todos los períodos
 
-```{r,message=FALSE, warning=FALSE, echo=FALSE}
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+train_set<-b[year(b$Date)< 2017,]
+test_set<-b[year(b$Date) >= 2017,]
 
 # Modelo
 model_1<- lm(Truck ~ Time + Year+ Q1+ Q2+ Q3+
-             CPI_Used_Cars+ Gas_Prices+ Miles_Driven+
-             US_Population_millions+ Unemployment+
-             Disposible_Income_Capita_Real+ Saving_Capital+
-             Household_Debt_Capital+ RealGDP+ Fed_Funds_Rate+
-             US_Urban_CPI_Change+ Nonfarm_Payrolls,
+               Inventories+CPI_New_Cars+CPI_Used_Cars+Gas_Prices+
+               Cons_Conf_Autos+Miles_Driven+Bank_Auto_Interest_Rate+
+               US_Population_millions+Unemployment+Disposible_Income_Capita_Real+
+               Saving_Capital+ Household_Debt_Capital+US_House_Price_Inflation+
+               Consumer_Confidence+RealGDP+Fed_Funds_Rate+US_Urban_CPI_Change+
+               Nonfarm_Payrolls,
            data=train_set)
 
 # Sacando predicciones
@@ -433,76 +436,78 @@ pred_test_1<-predict(model_1,test_set)
 mae1<-mae(test_set$Truck,pred_test_1)
 mae_train1<-mae(train_set$Truck,pred_train_1)
 
-#Reportando
 print(paste("Train Error: ",mae_train1))
 print(paste("Test Error: ",mae1))
 
 ```
 
-Los primeros resultados son buenos. Intentemos ahora regularizar el modelo.
+El modelo está sobreajustado. Tiene posibilidad de mejora
 
-### Modelo 2: Regularizando
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(glmnet)
-
-####################### NO TOCAR ######################
-X_train<-train_set[,c("Time","Year", "Q1", "Q2", "Q3",
-                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
-                   "US_Population_millions", "Unemployment", 
-                   "Disposible_Income_Capita_Real", "Saving_Capital",
-                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
-                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
-
-X_test<-test_set[,c("Time","Year", "Q1", "Q2", "Q3",
-                   "CPI_Used_Cars", "Gas_Prices", "Miles_Driven",
-                   "US_Population_millions", "Unemployment", 
-                   "Disposible_Income_Capita_Real", "Saving_Capital",
-                   "Household_Debt_Capital", "RealGDP", "Fed_Funds_Rate",
-                   "US_Urban_CPI_Change", "Nonfarm_Payrolls")]
-####################### NO TOCAR ######################
+### Modelo 2: Reduciendo ventana de entrenamiento
 
 
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 
-############### PUEDE MODIFICAR VARIABLE DEPENDIENTE ###########
-y_train<-train_set$Truck
-y_test<- test_set$Truck
-############### PUEDE MODIFICAR VARIABLE DEPENDIENTE ###########
-
+train_set<-b[(year(b$Date)>=2010)&(year(b$Date)< 2017),]
+test_set<-b[year(b$Date) >= 2017,]
 
 
-########## alpha= 0 para Ridge Reg / alpha =1 para Lasso #########
-model_2<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
-                family="gaussian", alpha = 1, nlambda=15)
-########## alpha= 0 para Ridge Reg / alpha =1 para Lasso #########
+# Modelo
+model_2<- lm(Truck ~ Time + Year+ Q1+ Q2+ Q3+
+               Inventories+CPI_New_Cars+CPI_Used_Cars+Gas_Prices+
+               Cons_Conf_Autos+Miles_Driven+Bank_Auto_Interest_Rate+
+               US_Population_millions+Unemployment+Disposible_Income_Capita_Real+
+               Saving_Capital+ Household_Debt_Capital+US_House_Price_Inflation+
+               Consumer_Confidence+RealGDP+Fed_Funds_Rate+US_Urban_CPI_Change+
+               Nonfarm_Payrolls,
+           data=train_set)
 
-
-
-####################### NO TOCAR ######################
 # Sacando predicciones
-pred_train_2=predict(model_2, newx = as.matrix(X_train), s = "lambda.min")
-pred_test_2=predict(model_2, newx = as.matrix(X_test), s = "lambda.min")
+pred_train_2<-predict(model_2,train_set)
+pred_test_2<-predict(model_2,test_set)
 
 #Mean Absolute Error
-mae_train2<-mae(y_train,pred_train_2)
-mae2<-mae(y_test,pred_test_2)
+mae2<-mae(test_set$Truck,pred_test_2)
+mae_train2<-mae(train_set$Truck,pred_train_2)
 
-# reportando errores
-print(paste("train set: ",mae_train2))
-print(paste("test set: ",mae2))
-####################### NO TOCAR ######################
+print(paste("Train Error: ",mae_train2))
+print(paste("Test Error: ",mae2))
 
-
-# Imprimiendo resultado
-#knitr::kable(xtable(summary(model_2)))
 ```
 
-Los resultados de nuestra predicción mejoraron aún más.
+Aún hay diferencia pero esta es pequeña, intentemos ahora seleccionar variables.
 
-### Modelo 4: Usando Gradient Boosting
+### Modelo 3: Reduciendo variables con regularización (...en desarrollo)
+Como la diferencia es pequeña, en este caso podemos proceder a regularizar el modelo directamente.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+X_train<-train_set[,c(c("Time","Year", "Q1", "Q2", "Q3"),colnames(b)[10:ncol(b)])]
+
+X_test<-test_set[,c(c("Time","Year", "Q1", "Q2", "Q3"),colnames(b)[10:ncol(b)])]
+
+y_train<-train_set$Truck
+y_test<- test_set$Truck
 
 
+model_4<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
+                family="gaussian", alpha = 1, nlambda=100)
+
+#model_4<- lm(y_train~as.matrix(X_train))
+
+# Sacando predicciones
+pred_train_4=predict(model_4, newx = as.matrix(X_train), s = "lambda.min")
+pred_test_4=predict(model_4, newx = as.matrix(X_test), s = "lambda.min")
+
+#Mean Absolute Error
+mae_train4<-mae(y_train,pred_train_4)
+mae4<-mae(y_test,pred_test_4)
+
+# reportando errores
+print(paste("train set: ",mae_train4))
+print(paste("test set: ",mae4))
+
+```
+...parece que no funciona...
 
 ## Conclusiones (... en desarrollo)
 
