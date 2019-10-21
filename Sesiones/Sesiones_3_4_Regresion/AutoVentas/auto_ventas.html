@@ -905,8 +905,8 @@ div.tocify {
 <div id="modelo-4-limitando-el-numero-de-variables-regularizando" class="section level3">
 <h3>Modelo 4: Limitando el número de variables (Regularizando)</h3>
 <p>Una técnica muy conocida para limitar el efecto de incluir demasiadas variables es Regularizando. La regularización reduce el efecto de incluir demasiadas variables en el modelo penalizando por cada variable extra. Los métodos más famosos son la Regresión Contraida (Ridge Regression) y Regresión Lasso. Al correr el modelo utilizando Lasso obtenemos los siguientes resultados:</p>
-<pre><code>## [1] &quot;train set:  28428.4728750843&quot;</code></pre>
-<pre><code>## [1] &quot;test set:  27127.5413996709&quot;</code></pre>
+<pre><code>## [1] &quot;train set:  28434.6541880839&quot;</code></pre>
+<pre><code>## [1] &quot;test set:  27485.6885304132&quot;</code></pre>
 <p>En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, haciendo que el desempeño de ambos sea muy cercano. Esto indica que hemos optimizado nuestro <strong>modelo lineal</strong> con estas variables predictivas (no necesariamente el mejor modelo). Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo. Pero tenga en cuenta que lo que en realidad redujo el error significativamente no fue la caja negra de la regularización, sino más bien la reducción de variables y la reducción de la ventana de entrenamiento que elegimos de forma visual, una vez hecho eso se procedió a optimizar el modelo con la regularización.</p>
 </div>
 </div>
@@ -936,8 +936,8 @@ div.tocify {
 <div id="modelo-4-regularizando" class="section level3">
 <h3>Modelo 4: Regularizando</h3>
 <p>Apliquemos entonces regularización al modelo anterior</p>
-<pre><code>## [1] &quot;train set:  33477.3757994472&quot;</code></pre>
-<pre><code>## [1] &quot;test set:  26293.4543057382&quot;</code></pre>
+<pre><code>## [1] &quot;train set:  33551.7103332015&quot;</code></pre>
+<pre><code>## [1] &quot;test set:  27459.3625106085&quot;</code></pre>
 <p>Sorpresivamente el error de evaluación es mucho menor que el error de entrenamiento. Pero no nos asustemos, esto no es un síntoma de un modelo con sobreajuste. ¿Puede usted imaginar que es?</p>
 <p>Y recordemos como siempre, que usted no puede nunca dar por finalizado el proceso de modelación. Siempre pueden existir maneras de mejorar el análisis, pero debe saber reconocer cuando vale la pena invertir esfuerzos en ello.</p>
 <blockquote>

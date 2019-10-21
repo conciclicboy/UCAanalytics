@@ -555,7 +555,7 @@ print(paste("test set: ",mae3))
 ```
 Sorpresivamente el error de evaluación es mucho menor que el error de entrenamiento. Pero no nos asustemos, esto no es un síntoma de un modelo con sobreajuste. ¿Puede usted imaginar que es?
 
-Y recordemos como siempre, que usted no puede nunca dar por finalizado el proceso de modelación. Siempre pueden existir maneras de mejorar el análisis, pero debe saber reconocer cuando vale la pena invertir esfuerzos en ello.
 
+Y recordemos como siempre, que usted no puede nunca dar por finalizado el proceso de modelación. Siempre pueden existir maneras de mejorar el análisis, pero debe saber reconocer cuando vale la pena invertir esfuerzos en ello.
 
 > Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.
