@@ -184,8 +184,7 @@ visualize(dataset=b,
 ```
 
 Bien, de los gráficos anteriores podemos inferir que variables tienen correlaciones aproximadamente lineales con nuestros datos. Este proceso de exploración puede también ser efectuado sacando las correlaciones entre variables (esto último lo puede hacer en excel o en R, pero si son demasiados datos excel tronará).
-Las variables que parecen relevantes son: Inventarios, CPI autos usados, Población, Desempleo, Capital Disponible (Disposible Income), Deuda de Hogares (Household Debt), Confianza del consumidor, PIB (GDP), Fed Funds Rate, Non Farm Payrolls.
-
+Las variables que parecen relevantes son: Inventories, CPI_Used_Cars, US_Population_millions, Unemployment,Disposible_Income_Capita_Real, Household_Debt_Capital, Consumer_Confidence, RealGDP, Fed_Funds_Rate, Nonfarm_Payrolls.
 
 #### Camiones
 
@@ -338,7 +337,8 @@ Por otro lado, estos dos siguen aún siendo muy diferentes, lo que da indicios q
 
 ### Modelo 3: Utilizando la exploración visual.
 
-Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Podemos intentar reducir el número de variables manualmente para ver que sucede con el error:
+Ahora bien, recordemos que en la fase de exploración habíamos seleccionado un conjunto de variables que tenían potencial de ser significativas dada su fuerte correlación con la variable objetivo. Podemos intentar reducir el número de variables manualmente para ver que sucede con el error. Podemos primero seleccionar las variables de tiempo **Time, Year, Q1, Q2, Q3**. Luego las variables de la exploración visual. Usted puede iniciar probando con las variables encontradas en la exploración visual y luego añadir/remover variables dependiendo del desempeño del error de evaluación. En nuestro caso, después de intentar con prueba y error se encontraron las siguientes:  **CPI_Used_Cars, Gas_Prices, Miles_Driven, US_Population_millions, Unemployment, Disposible_Income_Capita_Real, Saving_Capital, Household_Debt_Capital, RealGDP, Fed_Funds_Rate, US_Urban_CPI_Change, Nonfarm_Payrolls**.
+
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
