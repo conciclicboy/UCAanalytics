@@ -262,6 +262,7 @@ div.tocify {
 
 <div id="prediciendo-ventas-de-autos-en-usa" class="section level2">
 <h2>Prediciendo ventas de autos en USA</h2>
+<p><strong>Este caso está basado en el curso de regresión aplicada de Columbia Business School. Puede encontrar la solución original en el archivo <a href="http://www.columbia.edu/~dj114/8114projects.htm">Auto Sales Fall 2017</a></strong></p>
 </div>
 <div id="el-contexto-de-negocios" class="section level2">
 <h2>El contexto de negocios</h2>
@@ -911,7 +912,7 @@ div.tocify {
 </div>
 <div id="camiones-1" class="section level2">
 <h2>Camiones</h2>
-<p>Repitamos el proceso para los camiones</p>
+<p>Repitamos el proceso para los camiones. Estos son los valores que yo encontré:</p>
 <div id="modelo-1-datos-completos" class="section level3">
 <h3>Modelo 1: Datos completos</h3>
 <p>Usemos todas las variables en todos los períodos</p>
@@ -925,23 +926,24 @@ div.tocify {
 <pre><code>## [1] &quot;Test Error:  35259.5986614333&quot;</code></pre>
 <p>Aún hay diferencia pero esta es pequeña, intentemos ahora seleccionar variables.</p>
 </div>
-<div id="modelo-3-reduciendo-variables-con-regularizacion-en-desarrollo" class="section level3">
-<h3>Modelo 3: Reduciendo variables con regularización (…en desarrollo)</h3>
-<p>Como la diferencia es pequeña, en este caso podemos proceder a regularizar el modelo directamente.</p>
-<pre><code>## [1] &quot;train set:  32376.6934340627&quot;</code></pre>
-<pre><code>## [1] &quot;test set:  68210.1252195519&quot;</code></pre>
-<p>…parece que no funciona…</p>
+<div id="modelo-3-reduciendo-variables" class="section level3">
+<h3>Modelo 3: Reduciendo variables</h3>
+<p>Podemos ahora seleccionar en base a los diagramas de dispersión las variables que creamos pueden reduicir el error del modelo aún más.</p>
+<pre><code>## [1] &quot;train set:  113537.047625911&quot;</code></pre>
+<pre><code>## [1] &quot;test set:  386403.8256796&quot;</code></pre>
+<p>Este modelo parece tener un buen ajuste ya que el error de entrenamiento y el de evaluación son muy parecidos. Parece muy difícil poder mejorarlo manualmente.</p>
 </div>
-</div>
-<div id="conclusiones-en-desarrollo" class="section level2">
-<h2>Conclusiones (… en desarrollo)</h2>
-<ul>
-<li>Conclusión 1</li>
-<li>Conclusión 2</li>
-</ul>
+<div id="modelo-4-regularizando" class="section level3">
+<h3>Modelo 4: Regularizando</h3>
+<p>Apliquemos entonces regularización al modelo anterior</p>
+<pre><code>## [1] &quot;train set:  33551.7103332015&quot;</code></pre>
+<pre><code>## [1] &quot;test set:  27459.3625106085&quot;</code></pre>
+<p>Sorpresivamente el error de evaluación es mucho menor que el error de entrenamiento. Pero no nos asustemos, esto no es un síntoma de un modelo con sobreajuste. ¿Puede usted imaginar que es?</p>
+<p>Y recordemos como siempre, que usted no puede nunca dar por finalizado el proceso de modelación. Siempre pueden existir maneras de mejorar el análisis, pero debe saber reconocer cuando vale la pena invertir esfuerzos en ello.</p>
 <blockquote>
 <p>Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.</p>
 </blockquote>
+</div>
 </div>
 
 
