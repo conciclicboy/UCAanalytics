@@ -21,6 +21,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Prediciendo ventas de autos en USA
 
+**Este caso está basado en el curso de regresión aplicada de Columbia Business School. Puede encontrar la solución original en el archivo [Auto Sales Fall 2017](http://www.columbia.edu/~dj114/8114projects.htm)**
+
+
 ## El contexto de negocios
 La industria automovilística puede indicar el estado y dirección de la economía estadounidense. Después de los gastos en vivienda, los autos son los productos en los que más puede gastar un consumidor promedio. Las ventas de autos son un aproximado de la confianza del consumidor.
 
@@ -408,7 +411,7 @@ En este caso, hemos logrado reducir el error de evaluación y aumentado el error
 
 
 ## Camiones
-Repitamos el proceso para los camiones
+Repitamos el proceso para los camiones. Estos son los valores que yo encontré:
 
 ### Modelo 1: Datos completos
 Usemos todas las variables en todos los períodos
@@ -477,42 +480,82 @@ print(paste("Test Error: ",mae2))
 
 Aún hay diferencia pero esta es pequeña, intentemos ahora seleccionar variables.
 
-### Modelo 3: Reduciendo variables con regularización (...en desarrollo)
-Como la diferencia es pequeña, en este caso podemos proceder a regularizar el modelo directamente.
+### Modelo 3: Reduciendo variables 
+Podemos ahora seleccionar en base a los diagramas de dispersión las variables que creamos pueden reduicir el error del modelo aún más.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-X_train<-train_set[,c(c("Time","Year", "Q1", "Q2", "Q3"),colnames(b)[10:ncol(b)])]
 
-X_test<-test_set[,c(c("Time","Year", "Q1", "Q2", "Q3"),colnames(b)[10:ncol(b)])]
+#Modelo
+model_3<- lm(Truck~Time+Year+Q1+Q2+Q3+CPI_New_Cars+ 
+               +Cons_Conf_Autos+Miles_Driven+US_Population_millions+
+               Unemployment+Disposible_Income_Capita_Real+
+               US_House_Price_Inflation+Consumer_Confidence+RealGDP+
+               Fed_Funds_Rate+Nonfarm_Payrolls, data = train_set)
+
+
+#Predicciones
+pred_train_3<-predict(model_3,train_set)
+pred_test_3<-predict(model_3,test_set)
+
+
+#Error Absoluto Medio
+mae_train3<-mae(y_train,pred_train_3)
+mae3<-mae(y_test,pred_test_3)
+
+#Reportando error
+print(paste("train set: ",mae_train3))
+print(paste("test set: ",mae3))
+
+```
+
+Este modelo parece tener un buen ajuste ya que el error de entrenamiento y el de evaluación son muy parecidos. Parece muy difícil poder mejorarlo manualmente.
+
+
+### Modelo 4: Regularizando
+Apliquemos entonces regularización al modelo anterior
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+X_train<-train_set[,c("Time","Year", "Q1","Q2","Q3",
+               "CPI_New_Cars", "Cons_Conf_Autos","Miles_Driven",
+               "US_Population_millions","Unemployment",
+               "Disposible_Income_Capita_Real",
+               "US_House_Price_Inflation",
+               "Consumer_Confidence","RealGDP","Fed_Funds_Rate",
+               "Nonfarm_Payrolls")]
+
+X_test<-test_set[,c("Time","Year", "Q1","Q2","Q3",
+               "CPI_New_Cars", 
+               "Cons_Conf_Autos","Miles_Driven",
+               "US_Population_millions","Unemployment",
+               "Disposible_Income_Capita_Real",
+               "US_House_Price_Inflation",
+               "Consumer_Confidence","RealGDP","Fed_Funds_Rate",
+               "Nonfarm_Payrolls")]
 
 y_train<-train_set$Truck
 y_test<- test_set$Truck
 
+model_3<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
+                family="gaussian", alpha = 1, nlambda=25)
 
-model_4<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
-                family="gaussian", alpha = 1, nlambda=100)
-
-#model_4<- lm(y_train~as.matrix(X_train))
 
 # Sacando predicciones
-pred_train_4=predict(model_4, newx = as.matrix(X_train), s = "lambda.min")
-pred_test_4=predict(model_4, newx = as.matrix(X_test), s = "lambda.min")
+pred_train_3=predict(model_3, newx = as.matrix(X_train), s = "lambda.min")
+pred_test_3=predict(model_3, newx=as.matrix(X_test), s = "lambda.min")
 
 #Mean Absolute Error
-mae_train4<-mae(y_train,pred_train_4)
-mae4<-mae(y_test,pred_test_4)
+mae_train3<-mae(y_train,pred_train_3)
+mae3<-mae(y_test,pred_test_3)
 
 # reportando errores
-print(paste("train set: ",mae_train4))
-print(paste("test set: ",mae4))
+print(paste("train set: ",mae_train3))
+print(paste("test set: ",mae3))
 
 ```
-...parece que no funciona...
+Sorpresivamente el error de evaluación es mucho menor que el error de entrenamiento. Pero no nos asustemos, esto no es un síntoma de un modelo con sobreajuste. ¿Puede usted imaginar que es?
 
-## Conclusiones (... en desarrollo)
-
-* Conclusión 1
-* Conclusión 2
+Y recordemos como siempre, que usted no puede nunca dar por finalizado el proceso de modelación. Siempre pueden existir maneras de mejorar el análisis, pero debe saber reconocer cuando vale la pena invertir esfuerzos en ello.
 
 
 > Analítica de datos es un proceso iterativo, podríamos necesitar regresar a nuestros datos originales en cualquier momento y seleccionar nuevos atributos, así como diferentes herramientas de regresión y modelamiento.
