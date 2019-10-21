@@ -14,9 +14,12 @@ output:
       in_header: ../../AnalyticsStyles/default.sty
 ---
 
+**Este caso ha sido traducido a español del curso de analítica aplicada de INSEAD. Puede encontrar la solución original en el archivo [Classification (Extra Material)](http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/Sessions67/ClassificationAnalysisReading.html). El código original ha sufrido pocas modificaciones.**
 
-```{r echo=FALSE, message=FALSE}
-make_pdf_file = 0 # SET THIS TO 1 IF WE COMPILE PDF FILE, 0 OTHERWISE (FOR HTML)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+make_pdf_file = 0 # DEJE 0 SI PARA PRODUCIR UN ARCHIVO HTML, 1 PARA UN PDF
 
 local_directory = "."
 source(paste(local_directory,"../../AnalyticsLibraries/library.R", sep="/"))
@@ -185,7 +188,7 @@ Q16.27 | ¿Es una marca que impresiona otros?"
 
 Procedamos a leer los datos y verlos para algunos clientes. Así es como los primeros 10 de 2813 filas se ven:
 
-```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+```{r echo=FALSE, warning=FALSE, message=FALSE, prompt=FALSE, results='asis'}
 # let's make the data into data.matrix classes so that we can easier visualize them
 ProjectData = data.matrix(ProjectData)
 
@@ -298,7 +301,7 @@ Notemos sin embargo que:
 
 Una simple herramienta de visualización que puede evaluar el poder discriminativo de las variables independientes es el **box plot** (diagrama de caja). Esa visualización representa simple resumen de las estadísticas de una variable independiente (media, mediana, máximo, mínimo, cuantiles, etc.) Por ejemplo, considere el box plot para nuestros datos de la clase 0: 
 
-```{r, fig.height=4.5}
+```{r, fig.height=4.5,warning=FALSE}
 DVvalues = unique(estimation_data[,dependent_variable])
 x0 = estimation_data[which(estimation_data[,dependent_variable]==DVvalues[1]),independent_variables]
 x1 = estimation_data[which(estimation_data[,dependent_variable]==DVvalues[2]),independent_variables]
@@ -313,7 +316,7 @@ set_swatch(swatch.default)
 
 y clase 1:
 
-```{r, fig.height=4.5}
+```{r, fig.height=4.5, warning=FALSE}
 swatch.default <- as.character(swatch())
 set_swatch(c(swatch.default[1], colorRampPalette(RColorBrewer::brewer.pal(12, "Paired"))(ncol(x1))))
 ggplot(melt(cbind.data.frame(n=1:nrow(x1), x1), id="n"), aes(x=n, y=value, colour=variable)) + geom_boxplot(fill="#FFFFFF", size=0.66, position=position_dodge(1.1*nrow(x1)))

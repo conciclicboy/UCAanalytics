@@ -20,8 +20,8 @@ always_allow_html: yes
 ```{r echo=FALSE, message=FALSE}
 make_pdf_file = 0 # Haga este número 1 si quiere un archivo PDF, 0 para HTML
 
-source("../AnalyticsLibraries/library.R")
-source("../AnalyticsLibraries/heatmapOutput.R")
+source("../../AnalyticsLibraries/library.R")
+source("../../AnalyticsLibraries/heatmapOutput.R")
 
 # Opciones de paquetes
 ggthemr('fresh')  # tema de ggplot

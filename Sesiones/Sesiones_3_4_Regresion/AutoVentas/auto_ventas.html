@@ -262,7 +262,7 @@ div.tocify {
 
 <div id="prediciendo-ventas-de-autos-en-usa" class="section level2">
 <h2>Prediciendo ventas de autos en USA</h2>
-<p><strong>Este caso está basado en el curso de regresión aplicada de Columbia Business School. Puede encontrar la solución original en el archivo <a href="http://www.columbia.edu/~dj114/8114projects.htm">Auto Sales Fall 2017</a></strong></p>
+<p><strong>Este caso está basado en el curso de regresión aplicada de Columbia Business School. Puede encontrar la solución original en el archivo <a href="http://www.columbia.edu/~dj114/8114projects.htm">Auto Sales Fall 2017</a>. Las modificaciones y soluciones alternativas son responsabilidad de Eduardo Aguilar.</strong></p>
 </div>
 <div id="el-contexto-de-negocios" class="section level2">
 <h2>El contexto de negocios</h2>
@@ -905,8 +905,8 @@ div.tocify {
 <div id="modelo-4-limitando-el-numero-de-variables-regularizando" class="section level3">
 <h3>Modelo 4: Limitando el número de variables (Regularizando)</h3>
 <p>Una técnica muy conocida para limitar el efecto de incluir demasiadas variables es Regularizando. La regularización reduce el efecto de incluir demasiadas variables en el modelo penalizando por cada variable extra. Los métodos más famosos son la Regresión Contraida (Ridge Regression) y Regresión Lasso. Al correr el modelo utilizando Lasso obtenemos los siguientes resultados:</p>
-<pre><code>## [1] &quot;train set:  28568.1861059014&quot;</code></pre>
-<pre><code>## [1] &quot;test set:  31382.1547867942&quot;</code></pre>
+<pre><code>## [1] &quot;train set:  28434.6541880839&quot;</code></pre>
+<pre><code>## [1] &quot;test set:  27485.6885304132&quot;</code></pre>
 <p>En este caso, hemos logrado reducir el error de evaluación y aumentado el error del entrenamiento, haciendo que el desempeño de ambos sea muy cercano. Esto indica que hemos optimizado nuestro <strong>modelo lineal</strong> con estas variables predictivas (no necesariamente el mejor modelo). Esto se debe a que la regularización automáticamente eligió las variables con más poder predictivo. Pero tenga en cuenta que lo que en realidad redujo el error significativamente no fue la caja negra de la regularización, sino más bien la reducción de variables y la reducción de la ventana de entrenamiento que elegimos de forma visual, una vez hecho eso se procedió a optimizar el modelo con la regularización.</p>
 </div>
 </div>

@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Prediciendo ventas de autos en USA
 
-**Este caso está basado en el curso de regresión aplicada de Columbia Business School. Puede encontrar la solución original en el archivo [Auto Sales Fall 2017](http://www.columbia.edu/~dj114/8114projects.htm)**
+**Este caso está basado en el curso de regresión aplicada de Columbia Business School. Puede encontrar la solución original en el archivo [Auto Sales Fall 2017](http://www.columbia.edu/~dj114/8114projects.htm). Las modificaciones y soluciones alternativas son responsabilidad de Eduardo Aguilar.**
 
 
 ## El contexto de negocios
