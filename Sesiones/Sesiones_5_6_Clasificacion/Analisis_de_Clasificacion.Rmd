@@ -19,6 +19,8 @@ output:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
+########################   NO TOCAR    #############################
+
 make_pdf_file = 0 # DEJE 0 SI PARA PRODUCIR UN ARCHIVO HTML, 1 PARA UN PDF
 
 local_directory = "."
