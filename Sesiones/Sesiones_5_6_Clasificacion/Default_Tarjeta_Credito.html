@@ -260,10 +260,7 @@ div.tocify {
 </div>
 
 
-<!-- **Nota:** Asumiendo que el directorio de trabajo es  "MYDIRECTORY/INSEADAnalytics" (donde usted ha clonado el material del curso), puede crear un archivo html corriendo en la consola el comando rmarkdown::render("CourseSessions/ClassificationProcessCreditCardDefault.Rmd") -->
-<pre><code>## Warning: New theme missing the following elements: axis.ticks.length.x,
-## axis.ticks.length.x.top, axis.ticks.length.x.bottom, axis.ticks.length.y,
-## axis.ticks.length.y.left, axis.ticks.length.y.right</code></pre>
+<p><strong>Este caso ha sido traducido a español del curso de analítica aplicada de INSEAD. Puede encontrar la solución original en el archivo <a href="http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/ClassificationProcessCreditCardDefault.html">Classification for Credit Default</a>. El código original ha sufrido pocas modificaciones.</strong></p>
 <div id="el-contexto-de-negocios" class="section level1">
 <h1>El Contexto de Negocios</h1>
 <p>Un emisor de tarjetas de crédito de Taiwan quiere mejorar la predicción de la probabilidad de impago de sus clientes, así como identificar las carcaterísticas clave que determinan esta probabilidad. Esto informaría al emisor acerca de a quien dar una tarjeta así como que límite dar. También ayudaría al emisor a tener un mejor entendimiento de sus actuales y potenciales consumidores, lo cuál afectaría su futura estrategia, incluyendo sus planes de ofrecer productos crediticios específicos a sus consumidores.</p>
@@ -723,7 +720,7 @@ div.tocify {
 <hr>
 
 </div>
-<div id="un-proceso-de-clasificacion" class="section level1">
+<div id="un-proceso-de-clasificación" class="section level1">
 <h1>Un proceso de Clasificación</h1>
 <blockquote>
 <p>Es importante recordar que los proyectos de analítica requieren de un delicado balance entre experimentación e intuición, pero también siguiendo un proceso. El valor de seguir un proceso es para evitar ser engañado por la aleatoriedad en los datos y encontrar “patrones y resultados” que pueden estar explicados principalmente por nuestro propio sesgo y no por hechos/datos en sí. <strong>No existe tal cosa cómo el mejor proceso</strong> de clasificación. Sin embargo, tenemos que empezar por algo, así que haremos uso del siguiente proceso:</p>
@@ -788,7 +785,7 @@ div.tocify {
 </tbody>
 </table>
 </div>
-<div id="paso-3-analisis-simple" class="section level2">
+<div id="paso-3-análisis-simple" class="section level2">
 <h2>Paso 3: Análisis simple</h2>
 <p>La buena analítica de datos comienza con un buen conocimiento contextual, así como con análisis exploratorio simple y visualizaciones elementales. En el caso de la clasificación, uno puede explorar esas “clasificaciones simples”&quot; evaluando como difieren las clases a lo largo de cualquiera de las variables independientes. Por ejemplo, estas son las estadísticas de nuestras variables independientes a lo largo de las dos clases, clase 1, “default”:</p>
 <table>
@@ -1336,7 +1333,7 @@ div.tocify {
 <li></li>
 </ul>
 </div>
-<div id="paso-4-clasificacion-e-interpretacion" class="section level2">
+<div id="paso-4-clasificación-e-interpretación" class="section level2">
 <h2>Paso 4: Clasificación e Interpretación</h2>
 <p>Una vez se decide cuáles variables dependientes e independientes a utilizar (las cuáles pueden ser revisadas en iteraciones posteriores), uno puede usar un gran número de métodos de clasificación para desarrollar un modelo que pueda separar ambas clases.</p>
 <blockquote>
@@ -1856,7 +1853,7 @@ div.tocify {
 </table>
 <p>En general, no es necesario que todos los modelos coincidan en los factores más importantes: cuando hay una diferencia mayor, particularmente entre modelos que tengan resultados satisfactorios como discutiremos después, podríamos necesitar cambiar el análisis global, incluyendo el objetivo del análisis, así como los datos usados, ya que los resultados podrían no ser robustos. <strong>Como siempre, interpretar y usar los resultados de analítica de datos requiere un balance entre análisis cuantitativo y cualitativo.</strong></p>
 </div>
-<div id="paso-5-precision-del-conjunto-de-validacion." class="section level2">
+<div id="paso-5-precisión-del-conjunto-de-validación." class="section level2">
 <h2>Paso 5: Precisión del conjunto de validación.</h2>
 <p>Utilizando las probabilidades de las predicciones del conjunto de validación, cómo se mencionó antes, se pueden generar medidas de desempeño de la clasificación. Antes de discutirlas, notemos que, dada la probabilidad de pertenecer a una clase, <strong>una opción de predicción razonable sería simplemente predecir la clase que tenga la probabilidad de ocurrencia más alta (o la más frecuente)</strong>. Sin embargo, esta no tiene que ser la única opción en la práctica.</p>
 <blockquote>
@@ -1873,7 +1870,7 @@ div.tocify {
 <li></li>
 </ul>
 <p>Para diferentes opciones de umbral de probabilidad, uno puede medir varias métricas de desempeño, las cuales se describen a continuación.</p>
-<div id="proporcion-de-aciertos-hit-ratio" class="section level3">
+<div id="proporción-de-aciertos-hit-ratio" class="section level3">
 <h3>1. Proporción de aciertos (Hit ratio)</h3>
 <p>Es simplemente el porcentaje de observaciones que han sido correctamente clasificadas (la clase predecida es la clase real). Podemos simplemente contar el número de datos de validación clasificados correctamente y dividir ese número entre el número total de observaciones del conjunto de validación, utilizando dos CART y una regresión logística. Los siguientes son los porcentajes de acierto utilizando un umbral de probabilidad de 50%:</p>
 <table>
@@ -1926,7 +1923,7 @@ div.tocify {
 </table>
 <p>Un simple punto de referencia para comparar el desempeño de un modelo de clasificación es el <strong>criterio de la máxima oportunidad</strong>. Este mide la proporción de la clase más grande. Para nuestros datos de validación el grupo más grande son las personas que no entran en default: 2397 de 3000 personas. Claramente, si clasificamos todos los individuos dentro del grupo más grande, podemos tener una tasa de aciertos del 79.9%, sin hacer ningún trabajo. Uno puede alcanzar al menos una tasa de aciertos de al menos la máxima oportunidad, aunque como veremos más adelante aún hay más criterios de desempeño a considerar.</p>
 </div>
-<div id="matriz-de-confusion." class="section level3">
+<div id="matriz-de-confusión." class="section level3">
 <h3>2. Matriz de Confusión.</h3>
 <p>La matriz de confusión muestra el número de datos que ha sido clasificado correctamente para cada clase. Por ejemplo, para el método con la tasa de aciertos más alta en los datos de validación (entre la regresión logística y los dos modelos CART), y para un umbral de probabilidad del 50%, la matriz de confusión es:</p>
 <table>
@@ -2045,7 +2042,7 @@ div.tocify {
 <p>Notemos que para maximizar la ganancia esperada necesitamos tener una estimación de la ganancia o pérdida para cada uno de los cuatro escenarios! Esto puede ser difícil de evaluar, por lo que normalmente se necesita realizar cierto análisis de sensibilidad a las ganancias y pérdidas que han sido asumidas. Por ejemplo, podemos generar diferentes curvas de ganancia (el peor caso, el mejor caso, y el caso promedio) y ver cuánto varía la mejor ganancia, y más importante ver <strong>como varía nuestro modelo de clasificación y umbral de probabilidad correspondiente a la mejor ganancia</strong>, ya que es lo que eventualmente debemos decidir.</p>
 </div>
 </div>
-<div id="paso-6-precision-del-modelo" class="section level2">
+<div id="paso-6-precisión-del-modelo" class="section level2">
 <h2>Paso 6: Precisión del modelo</h2>
 <p>Habiendo iterado los pasos 2-5 hasta que estemos satisfechos con el desempeño del modelo en los datos de validación, en este paso necesitamos hacer el análisis del desempeño hecho en el paso 5 para los datos de evaluación (test set). Esta es la medida de desempeño que mejor representa lo que uno esperaría en la práctica una vez implementada la solución, <strong>asumiendo (como siempre) que los datos utilizados en el análisis son representativos de la situación en la que será implementado el sistema.</strong></p>
 <p>Veamos en nuestro caso la <strong>hit ratio, matriz de confusión, curva ROC, curva gains, y curva de ganancias</strong> para los datos de evaluación. Para el the hit ratio y la matriz de confusión usamos 50% como el umbral de probabilidad de la clasificación.</p>

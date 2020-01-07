@@ -20,6 +20,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## AirBnB Pricing Tool
+**Este caso está basado en el curso de analítica aplicada de INSEAD. Puede encontrar la solución original en el archivo [AirBnB Pricing Tool](http://inseaddataanalytics.github.io/INSEADAnalytics/groupprojects/January2018FBL/Airbnb_Pricing_TeamR_MASTER.HTML). Las modificaciones y soluciones alternativas son responsabilidad de Eduardo Aguilar**
+
 
 ## El contexto de negocios
 AirBnB fue fundada en 2008 por Brian Cheski, Joe Gebbia y Nathan Blecharczyk como AirBed & Breakfast, un sitio de ventas online para servicios de hospedajes de corto tiempo que incluía personas comunes y profesionales dedicados a ese negocio. Con el paso de los años, el porcentaje de personas que se dedican profesionalmente a recibir huéspedes ha incrementado, y está comenzando a desplazar a las personas comunes que ponen sus propiedades en alquiler, amenazando la naturaleza y propuesta de valor de AirBnB que ofrecía servicios económicos y personalizados. En este contexto, el departamento de marketing desea iniciar una campaña para atraer más anfitriones privados. Para hacer esto, ellos solicitaron al departamento de analítica crear un modelo que ayudara a entender a anfitriones potenciales cuanto dinero podrían obtener por poner su propiedad a disposición de AirBnB.

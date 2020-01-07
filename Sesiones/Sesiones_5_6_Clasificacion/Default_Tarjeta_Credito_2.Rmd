@@ -3,7 +3,7 @@ title: "Clasificación en Pago de Tarjetas de Crédito - Más Métodos de Clasif
 author: "Theos Evgeniou, Spyros Zoumpoulis. Traducción por Eduardo Aguilar, UCA."
 output:
   html_document:
-    css: ../AnalyticsStyles/default.css
+    css: ../../AnalyticsStyles/default.css
     theme: paper
     toc: yes
     toc_float:
@@ -11,17 +11,18 @@ output:
       smooth_scroll: yes
   pdf_document:
     includes:
-      in_header: ../AnalyticsStyles/default.sty
+      in_header: ../../AnalyticsStyles/default.sty
 always_allow_html: yes
 ---
 
-<!-- **Nota:** Asumiendo que el directorio de trabajo es  "MYDIRECTORY/INSEADAnalytics" (donde usted ha clonado el material del curso), puede crear un archivo html corriendo en la consola el comando rmarkdown::render("CourseSessions/ClassificationProcessCreditCardDefault.Rmd") -->
+**Este caso ha sido traducido a español del curso de analítica aplicada de INSEAD. Puede encontrar la solución original en el archivo  [Classification for Credit Default More Methods](http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/ClassificationProcessCreditCardDefaultMoreMethods.html). El código original ha sufrido pocas modificaciones.**
 
-```{r echo=FALSE, message=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 make_pdf_file = 0 # Haga este número 1 si quiere un archivo PDF, 0 para HTML
 
-source("../AnalyticsLibraries/library.R")
-source("../AnalyticsLibraries/heatmapOutput.R")
+source("../../AnalyticsLibraries/library.R")
+source("../../AnalyticsLibraries/heatmapOutput.R")
 
 # Opciones de paquetes
 ggthemr('fresh')  # tema de ggplot
@@ -30,9 +31,11 @@ opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.2)
 options(knitr.kable.NA = '')
 ```
 
+
+
 ```{r echo=FALSE, message=FALSE}
 # Por favor INGRESE el nombre del archivo
-datafile_name = "../Data/UCI_Credit_Card.csv"
+datafile_name = "../../Data/UCI_Credit_Card.csv"
 ProjectData <- read.csv(datafile_name)
 # Convertimos los datos a la clase data.matrix para que sea mas fácil de manipular
 ProjectData <- data.matrix(ProjectData)
@@ -261,7 +264,7 @@ Notemos sin embargo que:
 
 Una simple herramienta de visualización que puede evaluar el poder discriminativo de las variables independientes es el **box plot** (diagrama de caja). Esa visualización representa simple resumen de las estadísticas de una variable independiente (media, mediana, máximo, mínimo, cuantiles, etc.) Por ejemplo, considere el box plot de nuestros datos para las variables de estatus de pago en la clase 1: 
 
-```{r echo=FALSE, fig.height=4.5}
+```{r echo=FALSE, fig.height=4.5, warning=FALSE}
 # Please ENTER the selected independent variables for which to draw box plots. 
 # Please use numbers, not column names. E.g., c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8.
 boxplots_independent_variables = c(7:12) # use only the PAY_ variables
@@ -281,7 +284,7 @@ set_swatch(swatch.default)
 
 y la clase 0:
 
-```{r echo=FALSE, fig.height=4.5}
+```{r echo=FALSE, fig.height=4.5, warning=FALSE}
 swatch.default <- as.character(swatch())
 set_swatch(c(swatch.default[1], colorRampPalette(RColorBrewer::brewer.pal(12, "Paired"))(ncol(x0))))
 ggplot(melt(cbind.data.frame(n=1:nrow(x0), x0), id="n"), aes(x=n, y=value, colour=variable)) + geom_boxplot(fill="#FFFFFF", size=0.66, position=position_dodge(1.1*nrow(x0)))
@@ -305,7 +308,7 @@ Una vez se decide cuáles variables dependientes e independientes a utilizar (la
 > Algunos de los métodos de clasificación utilizados ampliamente son: árboles de clasificación y regresión (CART), boosted trees, support vector machines, redes neuronales, k vecinos más cercanos (KNN), regresión logística, lasso, bosques aleatorios, deep learning methods, etc. 
 
 ```{r echo=FALSE, results='asis'}
-cat("In this report we consider only the following classification methods:",paste(Reduce(paste,sapply(head(which(methods_short==1),-1), function(i) paste(names_of_methods_short[i],",",sep=""))),paste(names_of_methods_short[tail(which(methods_short==1),1)],".",sep=""),sep=" "), "Understanding how these methods work is beyond the scope of this note - there are many references available online for all these classification methods.")
+cat("En este reporte solo consideramos los siguientes métodos de clasificación:",paste(Reduce(paste,sapply(head(which(methods_short==1),-1), function(i) paste(names_of_methods_short[i],",",sep=""))),paste(names_of_methods_short[tail(which(methods_short==1),1)],".",sep=""),sep=" "), "Understanding how these methods work is beyond the scope of this note - there are many references available online for all these classification methods.")
 ```
 
 ```{r echo=FALSE}

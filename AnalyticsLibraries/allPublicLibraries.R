@@ -34,7 +34,7 @@ if (require(highlight)==FALSE){install.packages("highlight")}; library(highlight
 if (require(Cairo)==FALSE){install.packages("Cairo")}; library(Cairo)
 if (require(cairoDevice)==FALSE){install.packages("cairoDevice")}; library(cairoDevice)
 
-#if (require(rggobi)==FALSE){install.packages("rggobi")}; library(rggobi)
-#if (require(RODBC)==FALSE){install.packages("RODBC")}; library(RODBC)
-#if (require(xlsx)==FALSE){install.packages("xlsx")}; library(xlsx)
-#if (require(rattle)==FALSE){install.packages("rattle")}; library(rattle)
+if (require(rggobi)==FALSE){install.packages("rggobi")}; library(rggobi)
+if (require(RODBC)==FALSE){install.packages("RODBC")}; library(RODBC)
+if (require(xlsx)==FALSE){install.packages("xlsx")}; library(xlsx)
+if (require(rattle)==FALSE){install.packages("rattle")}; library(rattle)
