@@ -713,4 +713,4 @@ Solo después de cierto número de evaluaciones de robustez, perfilamientos e in
 
 > Data Analytics es un proceso iterativo, por lo tanto podríamos necesitar retornar a nuestros datos originales en cualquier punto y seleccionar nuevos atributos así como nuevos clusters.
 
-**Hasta entonces...**
+**Hasta entonces..**
