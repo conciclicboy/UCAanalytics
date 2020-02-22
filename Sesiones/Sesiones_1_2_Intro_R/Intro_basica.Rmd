@@ -11,9 +11,10 @@ output: html_document
 
 <br>
  
-**Nota:** usted puede crear un archivo html corriendo en la consola el siguiente comando: 
+Este documento es una adaptación en español del [archivo original](http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/Session1/Session1inclass.html) del curso de INSEADanalytics.
 
-rmarkdown::render("CourseSessions/Session1/Session1traducida.Rmd")
+
+**Nota:** Para que su computadora pueda leer tildes y caracteres no ingleses deberá guardar el archivo en File --> "Save witrh encoding"--> UTF-8 y después compilarlo. Si usted quiere crear un archivo html puede hacerlo de dos formas: presionando el botón Knit o corriendo en la consola el comando *rmarkdown::render("Intro_basica.Rmd")*
 
 Si tiene un error es posible que su directorio haya cambiado, en cuyo caso deberá ajustar los nombres de las carpetas.
 

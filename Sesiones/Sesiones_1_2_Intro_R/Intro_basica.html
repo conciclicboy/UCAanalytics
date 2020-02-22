@@ -184,8 +184,9 @@ summary {
 
 
 <p><br></p>
-<p><strong>Nota:</strong> usted puede crear un archivo html corriendo en la consola el siguiente comando:</p>
-<p>rmarkdown::render(“CourseSessions/Session1/Session1traducida.Rmd”)</p>
+<p>Este documento es una adaptación en español del <a href="http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/Session1/Session1inclass.html">archivo original</a> del curso de INSEADanalytics.</p>
+<p><strong>Nota:</strong> Para que su computadora pueda leer tildes y caracteres no ingleses deberá guardar el archivo en File –&gt; “Save witrh encoding”–&gt; UTF-8 y después compilarlo. Si usted quiere crear un archivo html puede presionar el botón Knit o corriendo en la consola el siguiente comando: <em>rmarkdown::render(“Intro_basica.Rmd”)</em></p>
+<p>Si tiene un error es posible que su directorio haya cambiado, en cuyo caso deberá ajustar los nombres de las carpetas.</p>
 <p>El propósito de esta sesión es familiarizarse con:</p>
 <ol style="list-style-type: decimal">
 <li>Funcionalidades básicas de R;</li>
@@ -208,7 +209,7 @@ summary {
 <p>Comencemos.</p>
 <p><strong>Nota:</strong> usted puede siempre utilizar la función <code>help</code>en Rstudio para encontrar información acerca de cualquier función de R (por ejemplo escriba <code>help(list.files)</code> para poder leer lo que la el comando <code>list.files</code> hace).</p>
 <hr>
-<div id="instalacion" class="section level3">
+<div id="instalación" class="section level3">
 <h3>Instalación</h3>
 <p>Primero, notemos que la estructura de este archivo cuando se abre en RStudio. Esto es llamado <a href="http://rmarkdown.rstudio.com/">archivo Markdown</a> (con extensión .Rmd). Los archivos Markdown son excelentes maneras de crear reportes reproducibles, reutilizables y fáciles de modificar. Esto porque se puede combinar texto con código dentro del mismo archivo. El código puede ser insertado añadiendo <em>bloques de código</em> los cuales, como se describe abajo, son efectivamente porciones de código que empiezan con:</p>
 <p>“```{r eval = TRUE, echo=TRUE, comment=NA, warning=FALSE, message=FALSE,results=‘markup’}”&quot;</p>
@@ -259,7 +260,7 @@ ncol(ProjectData)</code></pre>
 <hr>
 </div>
 </div>
-<div id="anadiendo-librerias" class="section level3">
+<div id="añadiendo-librerías" class="section level3">
 <h3>Añadiendo librerías</h3>
 <p>Uno de los mayroes beneficios de utilizar software libre es la impresionante disponibilidad de muchas funciones así como código que la gente desarrolla y comparte. Hay un rápido crecimiento de herramientas (libres) que se pueden utilizar (incluso en sus trabajos), y así evitar reinventar la rueda y subirse a la ola.</p>
 <p>Hay muchas más formas de adquirir nuevas herramientas. Primero, las herramientas “maduras/probadas” están disponibles como paquetes que se pueden instalar en RStudio. Eche un vistazo aquí <a href="https://cran.r-project.org/web/packages/available_packages_by_name.html">lista de paquetes en R</a> y vea cuales le gustan.</p>
@@ -292,7 +293,7 @@ plot(AAPL$AAPL.Open)</code></pre>
 <p><strong>Nota:</strong> Algunas librerías podrían requerir que reinicie RStudio o instale otro software o o reinicie totalmente su computadora.</p>
 <p><strong>Nota:</strong> Hay maneras eficientes de instalar paquetes. Por ejemplo, uno puede usar algo como lo que usamos <a href="https://github.com/InseadDataAnalytics/INSEADAnalytics/blob/master/CourseSessions/Session1/library.R">en este código.</a></p>
 </div>
-<div id="obteniendo-codigo-de-repositorios-en-github" class="section level3">
+<div id="obteniendo-código-de-repositorios-en-github" class="section level3">
 <h3>Obteniendo código de Repositorios en Github</h3>
 <p>Un método alternativo para obtener código (y ver códigos de ejemplo - la mejor forma de aprender) es simplemente buscando en el vasto número de cuentas de github públicas. Por ejemplo, esta lista de <a href="https://github.com/trending?l=R">repositories de moda</a> (toma tiempo crearlas!) o incluso el <a href="https://github.com/wch/r-source">mismo código fuente de R</a> o por supuesto links de muchos otros <a href="http://www.r-bloggers.com/tag/github/">recursos en R</a>. Bienvenido a este nuevo mundo!</p>
 <div id="preguntas" class="section level4">
@@ -320,7 +321,7 @@ colnames(ProjectData)[1:10]
 <hr>
 <hr>
 </div>
-<div id="exploracion-de-datos-un-caso-de-segmentacion-de-mercado" class="section level3">
+<div id="exploración-de-datos-un-caso-de-segmentación-de-mercado" class="section level3">
 <h3>Exploración de Datos: Un caso de segmentación de Mercado</h3>
 <p>A continuación se cargarán los datos del caso de estudio <a href="http://inseaddataanalytics.github.io/INSEADAnalytics/Boats-A-prerelease.pdf">“Botes (A): Un caso de Segmentación de Mercados”</a> - usted puede ver la descripción de los datos en el apéndice (por supuesto los datos no son los verdaderos datos del negocio porque esos son confidenciales, pero tienen el mismo espíritu). El caso está basado en un verdadero proyecto de la compañía (líder en el mercado de botes) que hizo un análisis de segmentación de mercados para redefinir las estrategias de desarrollo de su marca y nuevos productos. La información de negocios relacionada al proyecto está en <a href="http://inseaddataanalytics.github.io/INSEADAnalytics/BoatsSegmentationCaseSlides.pdf">Diapositivas Caso de estudio Segmentación de Mercados</a>. Desarrollaremos esta solución de segmentación paso a paso utilizando las herramientas que discutiremos en las sesiones futuras - vea por ejemplo las herramientas de las <a href="https://github.com/InseadDataAnalytics/INSEADAnalytics/tree/master/CourseSessions/Sessions23">sesiones 2-3</a> y también todos los apuntos de las sesiones 3-6.</p>
 <p>Empecemos con una simple exploración de los datos por ahora. Obtengamos primero un resumen de estadísticas descriptivas. Por ejemplo la segunda columna (Q1.1) tiene las siguientes estadísticas descriptivas:</p>
