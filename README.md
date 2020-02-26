@@ -3,7 +3,7 @@
 El curso comprende una introducción a herramientas analíticas aplicadas a problemas de negocios. En la actualidad existen varias herramientas Business Analytics que pueden ayudar al análisis de la información, este curso será desarrollado con el software estadístico R. Se desarrollarán casos de estudio implementando algoritmos de machine learning en finanzas y marketing, y se espera que al finalizar el curso el estudiante no solamente sea capaz de ejecutar archivos en R, sino que desarrolle la capacidad de entender que quiere obtener y que modelo debe utilizar para obtenerlo, sin importar la herramienta que esté utilizando.
 
 ## Sitio en construcción:
-### Los detalles de inscripción y fecha de inicio se darán en el mes de octubre previa coordinación con la administración de la maestría en finanzas de la UCA
+### Los detalles de inscripción y fecha de inicio se darán en el mes de Marzo previa coordinación con el departamento de operaciones y sistemas de la [UCA] (http://www.uca.edu.sv/)
 
 ### Profesor:
 [Eduardo Arnoldo Aguilar Cañas](https://sv.linkedin.com/in/eduardoaguilar-sv)
