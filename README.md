@@ -59,7 +59,7 @@ El contenido ha sido clonado del curso de Business Analytics de la escuela de ne
 
 Dicho curso fue diseñado para que estudiantes sin un conocimiento de programación o estadística aprendan a usar herramientas analíticas.
 
-Todos los participantes deben tener instalado y funcionando el software en su computadora antes del inicio del tema 1. Para ello se tendrá una sesión de introducción e instalación del software, o puede instalar personalmente siguiendo las indicaciones del [tutorial de instalación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesion_0_instalacion/Tutorial.pdf), o puede seguir paso a paso los [videos de instalación](https://docs.google.com/document/d/1NCwyFpmBtBSUrRxWQ9xv5lD8VX_MUPode0hODerJl0Y/edit#heading=h.ln4ur33cg0v7).
+Todos los participantes deben tener instalado y funcionando el software en su computadora antes del inicio del tema 1. Para ello se tendrá una sesión de introducción e instalación del software, o puede instalar personalmente siguiendo las indicaciones del [tutorial de instalación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesion_0_instalacion/Tutorial.pdf), o puede seguir paso a paso los [videos de instalación](https://www.youtube.com/watch?v=gyxNUA_TAng&list=PL4k5nnVdm4ZzauFbbw9SaLaTuVQKgfN7g).
 
 En las primeras dos sesiones se practicará el uso del software y sus funcionalidades básicas, en las siguientes 6 sesiones se desarrollarán aplicaciones de algoritmos de machine learning para solucionar problemas de negocios en marketing y finanzas. Se espera que los participantes sean capaces de modificar plantillas prediseñadas para ajustarlas a los problemas en estudio. 
 
@@ -101,7 +101,7 @@ En esta etapa experimental se tendrá una o dos tareas, pero no serán evaluadas
 
 ### Sesión 0: Instalación
 Esta sesión consistirá en una pequeña introducción al curso y la instalación de los softwares requeridos: R, RStudio, Git (junto con la creación de su cuenta de github).
-Usted puede omitir esta sesión siguiendo las indicaciones del [tutorial de instalación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesion_0_instalacion/Tutorial.pdf) o los [videos de instalación](https://docs.google.com/document/d/1NCwyFpmBtBSUrRxWQ9xv5lD8VX_MUPode0hODerJl0Y/edit#heading=h.ln4ur33cg0v7).
+Usted puede omitir esta sesión siguiendo las indicaciones del [tutorial de instalación](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesion_0_instalacion/Tutorial.pdf) o los [videos de instalación](https://www.youtube.com/watch?v=gyxNUA_TAng&list=PL4k5nnVdm4ZzauFbbw9SaLaTuVQKgfN7g).
 Explore las funcionalidades de R y trate de ejecutar los archivos por su cuenta.
 
 ### Sesiones 1-2: Introducción a R
