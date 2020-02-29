@@ -185,7 +185,7 @@ summary {
 
 <p><br></p>
 <p>Este documento es una adaptación en español del <a href="http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/Session1/Session1inclass.html">archivo original</a> del curso de INSEADanalytics.</p>
-<p><strong>Nota:</strong> Para que su computadora pueda leer tildes y caracteres no ingleses deberá guardar el archivo en File –&gt; “Save witrh encoding”–&gt; UTF-8 y después compilarlo. Si usted quiere crear un archivo html puede presionar el botón Knit o corriendo en la consola el siguiente comando: <em>rmarkdown::render(“Intro_basica.Rmd”)</em></p>
+<p><strong>Nota:</strong> Para que su computadora pueda leer tildes y caracteres no ingleses deberá guardar el archivo en File –&gt; “Save witrh encoding”–&gt; UTF-8 y después compilarlo. Si usted quiere crear un archivo html puede hacerlo de dos formas: presionando el botón Knit o corriendo en la consola el comando <em>rmarkdown::render(“Intro_basica.Rmd”)</em></p>
 <p>Si tiene un error es posible que su directorio haya cambiado, en cuyo caso deberá ajustar los nombres de las carpetas.</p>
 <p>El propósito de esta sesión es familiarizarse con:</p>
 <ol style="list-style-type: decimal">
@@ -197,10 +197,9 @@ summary {
 </ol>
 <p>Antes de empezar, asegúrese que ha descargado los archivos de la <a href="https://github.com/InseadDataAnalytics/INSEADAnalytics/tree/master/CourseSessions/Session1">sesión 1</a> en su repositorio de github (si descarga el repositorio del curso desde github usted también descarga las sesiones automáticamente). Para confirmar, usted también puede correr el archivo “update_fork.R” el cual se encuentra en el directorio principal del curso.</p>
 <p>Note que también manejar los directorios puede ser una frustrante y continua fuente de problemas, por lo que se recomienda aprender esos comandos de R para encontrar cual es su directorio de trabajo actual y, si es necesario, cambiar el directorio donde usted lo necesita (donde usted tiene los archivos de la clase). Por ejemplo, asumiendo que nos encontramos en la ubicación “MYDIRECTORY/INSEADAnalytics”, podemos hacer lo siguiente:</p>
-<pre class="r"><code># Este comando muestra el directorio donde nos encontramos (Nota: el
-# caracter '#' al inicio de una línea de código indica que la línea no debe
-# ser ejecutada y es sólo un comentario, por lo tanto debe ser removido para
-# correr la línea:
+<pre class="r"><code># Este comando muestra el directorio donde nos encontramos (Nota: el caracter '#'
+# al inicio de una línea de código indica que la línea no debe ser ejecutada y es
+# sólo un comentario, por lo tanto debe ser removido para correr la línea:
 
 # getwd()
 

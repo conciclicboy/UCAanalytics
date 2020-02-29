@@ -57,23 +57,23 @@ y terminan con los mismos caracteres ```.
 
 Usted también puede empezar un bloque de código seleccionando la siguiente opción de RStudio
 
-![""](LineaCodigo.png)
+![""](images/LineaCodigo.png)
 
 
 La cual generará el siguiente código
 
-![""](NuevaLinea.png)
+![""](images/NuevaLinea.png)
 
 
 Cuando se compila el archivo se ejecuta todo el documento fusionando perfectamente los bloques de texto como los bloques de código R.
 
 Usted puede crear un nuevo documento .Rmd seleccionando "R Markdown" como se muestra en la imagen:
 
-![""](newRmd.png)
+![""](images/newRmd.png)
 
 En general, una vez se ha creado cualquier archivo, se le solicitará darle un nombre al archivo cuando trate de guardarlo por primera vez: 
 
-![""](savefile.png)
+![""](images/savefile.png)
 
 
 Los archivos Markdown (extensión .Rmd) no son como los típicos archivos *R Script* (que terminan en .R). Los últimos sólo contienen código, así como funciones que deseamos construir. El archivo [example .R file](https://github.com/InseadDataAnalytics/INSEADAnalytics/blob/master/CourseSessions/Session1/library.R) es un ejemplo de un archivo puro de R. Uno puede incorporar archivos .R en el documento .Rmd simplemente añadiendolos, como se muestra a continuación:
@@ -85,7 +85,7 @@ Note que solo escribimos **library.R** porque el directorio contiene el archivo,
 
 Tenga en cuenta también que la estructura del [directorio sesión 1](https://github.com/InseadDataAnalytics/INSEADAnalytics/tree/master/CourseSessions/Session1). Todo lo que contiene (además de unos archivos de imágenes) es un archivo .Rmd, un .R y una carpeta donde guardamos los datos. Podemos crear carpetas nuevas usando la opción "New Folder".
 
-![""](newfolder.png)
+![""](images/newfolder.png)
 
 
 #### Ejercicios
@@ -116,14 +116,14 @@ Hay muchas más formas de adquirir nuevas herramientas. Primero, las herramienta
 
 Para instalar un paquete en R de click en el menú "Packages" y después en el botón "Install" y escriba el nombre del paquete que desea instalar, también seleccione la casilla "Install dependencies", como se indica en la imagen: 
 
-!["¿Cómo instalar un paquete?"](installpackage.png)
+!["¿Cómo instalar un paquete?"](images/installpackage.png)
 
 Esto descargará el paquete (por lo tanto usted necesita estar conectado). Usted puede después cargar la librería ya sea seleccionándolaen la lista de paquetes instalados utilizando el comando `library` en R, por ejemplo veamos la librería de modelación financiera `library("quantmod")`. 
 
-!["¿Cómo cargar un paquete instalado? (seleccionandolo)"](loadpackageclick.png)
+!["¿Cómo cargar un paquete instalado? (seleccionandolo)"](images/loadpackageclick.png)
 
 
-!["¿Cómo cargar un paquete instalado? (programando)"](loadpackagecommand.png)
+!["¿Cómo cargar un paquete instalado? (programando)"](images/loadpackagecommand.png)
 
 Una vez se tiene la librería se puede dar click en el (en el menú "Packages") para verificar los comandos disponibles (también disponible en la [lista de paquetes de R ](https://cran.r-project.org/web/packages/available_packages_by_name.html), por ejemplo en este caso para [documentación de quantmod).](https://cran.r-project.org/web/packages/quantmod/quantmod.pdf). Usted puede entonce explorar- siempre buscando en internet el código ejemplo (por ej: para [ejemplos quantmode](https://www.quantmod.com/examples/). 
 

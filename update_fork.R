@@ -1,4 +1,4 @@
-# Sync a forked copy of INSEADAnalytics with the master project.
+# Sincroniza una copia clonada de UCAanalytics con el respectivo master project.
 
 if (!suppressWarnings(require(git2r))) {
   install.packages("git2r", repos="http://cran.r-project.org/", quiet=TRUE)
@@ -15,6 +15,7 @@ if (is.null(conf$local$user.name) && is.null(conf$global$user.name)) {
   message("Su usuario de Github username aún no ha sifo configurado para este repositorio.")
   config(repo, user.name=readline("Github username: "))
 }
+
 if (is.null(conf$local$user.email) && is.null(conf$global$user.email)) {
   message("Su email de Github aún no ha sifo configurado para este repositorio.")
   config(repo, user.email=readline("Github email: "))
@@ -31,4 +32,3 @@ message("
   
   push(repo, credentials=cred_user_pass(readline('Github username: '), readline('Github password: ')))
 ")
-# push(repo, credentials=cred_user_pass(readline("Github username: "), readline("Github password: ")))
