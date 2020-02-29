@@ -5,7 +5,7 @@
 
 ---
 title: "Sesión 1"
-author: "T. Evgeniou (traducción: Eduardo Aguilar)"
+author: "T. Evgeniou (adaptación: Eduardo Aguilar)"
 output: html_document
 ---
 
