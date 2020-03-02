@@ -4,7 +4,6 @@ author: "Eduardo Aguilar"
 output: html_document
 ---
 
-
 Rstudio le permite crear diferentes tipos de archivos: RScript, R Notebook, R Markdown, Shinny Web App. Nosotros vamos a utilizar principalmente archivos R Markdown y RScript.
 
 Un archivo RScript es un archivo que simplemente guarda código de R. Normalmente estos archivos tienen una extensión *.R*.
@@ -18,7 +17,16 @@ Mientras que un [archivo Markdown](http://rmarkdown.rstudio.com/) es una combina
 ![""](images/FileTypes.png)
 </center>
 
-**Nota:** Para que su computadora pueda leer tildes y caracteres no ingleses deberá guardar el archivo en File --> "Save with encoding"--> UTF-8 y después compilarlo. El encoding por default de R no es UTF-8.
+
+También puede ver los tipos de documentos desde la pestaña *Files*:
+
+<center>
+![""](images/newRmd.png)
+
+</center>
+
+
+**Nota:** Si crea un archivo nuevo, para que su computadora pueda leer tildes y caracteres no ingleses deberá guardar el archivo en File --> "Save with encoding"--> UTF-8 y después compilarlo. El encoding por default de R no es UTF-8.
 
 Antes de empezar, asegúrese que ha descargado los archivos de la [sesión 1](https://github.com/conciclicboy/UCAanalytics/tree/master/Sesiones/Sesiones_1_2_Intro_R)  en su repositorio de github (si descarga el repositorio del curso desde github usted también descarga las sesiones automáticamente). Para confirmar, usted también puede correr el archivo "update_fork.R" el cual se encuentra en el directorio principal del curso.
 
@@ -46,7 +54,7 @@ Usted notará que la consola de R no mostrará un resultado cuando encuentre un 
 Para crear un archivo R Markdown de click en R Markdown de la figura anterior. Eso desplegará una nueva ventana donde debe indicar el tipo de archivo que desea compilar.
 
 <center>
-![""](images/New_R_Markdown.png){width=500px} 
+![""](images/New_R_Markdown.png){width=500px}
 </center>
 
 Usted deberá seleccionar HTML o un documento word porque no necesitan de instalaciones adicionales, si quiere un documento pdf deberá instalar LaTex que es un procesador de texto científico. Mi recomendación es que utilicen un HTML por facilidad. Al seleccionarlo debe añadir un nombre y dar click ok.
