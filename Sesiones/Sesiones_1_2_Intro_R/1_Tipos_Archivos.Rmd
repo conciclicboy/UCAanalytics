@@ -128,5 +128,30 @@ Una vez usted ha borrado ese archivo procederá a cerrar y reiniciar R (o Restar
 </center>
 
 
+### Error por Actualización
+
+También se puede dar el caso que las librerías ya no estén disponibles para la versión de R que usted maneja. Por ejemplo, la librería glmnet (que usted instala cuando ejecuta el archivo library.R) solo está disponible para versiones de R >= 3.6.0 ya que se actualizó en diciembre 2019. Vea la documentación de [glmnet](https://cran.r-project.org/web/packages/glmnet/glmnet.pdf).
+
+Si usted tiene una versión de R menor a 3.6.0 le aparecerá el siguiente error:
+
+<center>
+![""](images/glmnet.png){width=500px}
+</center>
+
+<br>
+
+Lo que quiere decir que el instalador de librerías no funcionó como debía ser. Si intentamos instalar la librería de forma manual obtenemos el siguiente error:
+
+<center>
+![""](images/glmnet2.png){width=400px}
+</center>
+
+<br>
+
+Eso indica que para reparar el error debemos actualizar R.
+Para actualizar R instalaremos la librería **installr**, llamaremos a la librería **library(installr)** y ejecutaremos la función **updateR()**.
+
+
+
 
 
