@@ -113,7 +113,7 @@ Estas sesiones consistirán en una introducción a lectura, manipulación y escr
 * [Data Frames](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/2_DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
 
 
-### Sesiones 3-4: Regresión y pronósticos (... en construcción)
+### Sesiones 3-4: Regresión y pronósticos
 En estas sesiones se introducirá la herramienta de pronóstico más común de toda la matemática aplicada: la regresión.
 
 * Introducción: modelos lineales y modelos basados en árboles.
