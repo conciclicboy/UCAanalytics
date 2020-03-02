@@ -149,8 +149,11 @@ Lo que quiere decir que el instalador de librerías no funcionó como debía ser
 <br>
 
 Eso indica que para reparar el error debemos actualizar R.
-Para actualizar R instalaremos la librería **installr**, llamaremos a la librería **library(installr)** y ejecutaremos la función **updateR()**.
+Para actualizar R instalaremos la librería **installr**, llamaremos a la librería **library(installr)** y ejecutaremos la función **updateR()**. Eso descargará la versión más actualizada de R.
 
+Cuando haya actualizado R, cierre RStudio y vuélvalo a abrir. Si escribe en la consola **sessionInfo()** podrá verificar que la versión más actualizada de R está instalada. Ahora puede volver a compilar el archivo.
+
+**Nota**: como descargó una nueva versión de R, es posible que tenga que volver a descargar todas las librerías que descargó anteriormente.
 
 
 
