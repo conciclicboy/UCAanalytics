@@ -107,12 +107,13 @@ Explore las funcionalidades de R y trate de ejecutar los archivos por su cuenta.
 ### Sesiones 1-2: Introducción a R
 Estas sesiones consistirán en una introducción a lectura, manipulación y escritura de datos en R.
 
-* [Introducción básica a R](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/Intro_basica.html): funcionalidades básicas, Lectura/ Escritura de Información, Manipulaciones de datos simples.
-* [Cálculos básicos en R](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/Conceptos_Basicos.html): operaciones con los tipos de datos básicos.
-* [Data Frames](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
+* [Tipos de Archivos en RStudio](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/1_Tipos_Archivos.html): creación de archivos, ejecución del código, compilación y errores frecuentes.
+* [Introducción básica a R](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/1_Intro_basica.html): manejo de directorios, lectura/escritura de información, uso de librerías, estadísticas descriptivas, gráficas simples.
+* [Cálculos básicos en R](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/2_Calculos_Basicos.html): operaciones con los tipos de datos básicos.
+* [Data Frames](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_1_2_Intro_R/2_DataFrames.html): introducción a las estructuras de datos Data Frames y manipulaciones básicas de los mismos.
 
 
-### Sesiones 3-4: Regresión y pronósticos (... en construcción)
+### Sesiones 3-4: Regresión y pronósticos
 En estas sesiones se introducirá la herramienta de pronóstico más común de toda la matemática aplicada: la regresión.
 
 * Introducción: modelos lineales y modelos basados en árboles.
