@@ -118,9 +118,9 @@ En estas sesiones se introducirá la herramienta de pronóstico más común de t
 
 * Introducción: modelos lineales y modelos basados en árboles.
 * Implementación en R y proceso de diagnóstico/validación.
-* Se desarrollará en clase el caso de [Ventas de Autos en USA](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AutoVentas/auto_ventas.html)
-* Se desarrollará en clase el caso de [AirBnB](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AirBNB_prices/airbnb.html)
-
+* Se desarrollará en clase el caso de [Ventas de Autos en USA](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AutoVentas/auto_ventas_report.html)
+* Se desarrollará en clase el caso de [AirBnB](https://conciclicboy.github.io/UCAanalytics/Sesiones/Sesiones_3_4_Regresion/AirBNB_prices/airbnb_report.html)
+ 
 ### Sesiones 5-6: Clasificación y predicción de cuentas por cobrar
 Estas sesiones abordarán un problema más específica que la regresión: la clasificación.
 
