@@ -92,7 +92,7 @@ Leyendo los datos: completar el siguiente bloque de código
 Vamos a ver que hay dentro de cada variable para decidir si vamos a botar algunas.
 
 ```{r, echo=TRUE}
-# 1. Utilice la función "summary" con el dataset "b"
+# 1. Utilice la función "summary" con la tabla "b"
 
 ```
 
@@ -106,8 +106,8 @@ Ya que hay columnas que están llenas de campos vacíos o extraños las vamos a 
 ```{r, echo=TRUE}
 
 # 1. Elimine las variables que tienen valores NA
-#   Simplemente se asigna NULL a la variable que se desea eliminar:
-#b$var1 <- NULL
+#   Simplemente se asigna NULL a la variable que se desea eliminar
+#   Por ejemplo si quisiera eliminar var1 haría esto: b$var1 <- NULL
 
 ```
 
@@ -181,7 +181,6 @@ Cuando se trata de un problema de regresión o pronóstico, lo más apropiado es
 #)
 
 ```
-
 
 
 
