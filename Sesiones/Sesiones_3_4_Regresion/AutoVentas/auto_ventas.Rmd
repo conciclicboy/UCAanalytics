@@ -69,8 +69,6 @@ Fed Funds Rate       | Tasa de la Reserva Federal| [Reserva Federal](https://www
 Inflation            | Inflación                 | [Buró Estadísticas Laborales](https://www.bls.gov)
 Non Farm Payrolls    | Salarios sin Agricultura  | [Buró Estadísticas Laborales](https://www.bls.gov)
 
-
-
 Leyendo los datos:
 
 ```{r, echo=FALSE}
@@ -411,36 +409,33 @@ En este caso, hemos logrado reducir el error de evaluación y aumentado el error
 
 
 ## Camiones
-Repitamos el proceso para los camiones. Estos son los valores que yo encontré:
+Ahora será su turno para aplicar el mismo análisis pero aplicado solamente a camiones. Estos son los valores que yo encontré:
 
 ### Modelo 1: Datos completos
-Usemos todas las variables en todos los períodos
+Utilice todas las variables en todos los períodos
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 
-train_set<-b[year(b$Date)< 2017,]
-test_set<-b[year(b$Date) >= 2017,]
+# Cree los conjuntos de entrenamiento y evaluación, train_set antes de 2017
+# y test_set después de 2017
 
-# Modelo
-model_1<- lm(Truck ~ Time + Year+ Q1+ Q2+ Q3+
-               Inventories+CPI_New_Cars+CPI_Used_Cars+Gas_Prices+
-               Cons_Conf_Autos+Miles_Driven+Bank_Auto_Interest_Rate+
-               US_Population_millions+Unemployment+Disposible_Income_Capita_Real+
-               Saving_Capital+ Household_Debt_Capital+US_House_Price_Inflation+
-               Consumer_Confidence+RealGDP+Fed_Funds_Rate+US_Urban_CPI_Change+
-               Nonfarm_Payrolls,
-           data=train_set)
+#train_set<-b[... ,]
+#test_set<-b[... ,]
+
+# Modelo 1: Regresión lineal del precio (Truck) contra todas las variables
+#model_1<- lm(Truck ~ Time + ...,
+#             data=train_set)
 
 # Sacando predicciones
-pred_train_1<-predict(model_1,train_set)
-pred_test_1<-predict(model_1,test_set)
+#pred_train_1<-predict(model_1,train_set)
+#pred_test_1<-predict(...)
 
 #Mean Absolute Error
-mae1<-mae(test_set$Truck,pred_test_1)
-mae_train1<-mae(train_set$Truck,pred_train_1)
+#mae1<-mae(test_set$Truck,pred_test_1)
+#mae_train1<-mae(...)
 
-print(paste("Train Error: ",mae_train1))
-print(paste("Test Error: ",mae1))
+#print(paste("Train Error: ",mae_train1))
+#print(paste("Test Error: ",...))
 
 ```
 
@@ -451,64 +446,61 @@ El modelo está sobreajustado. Tiene posibilidad de mejora
 
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
 
-train_set<-b[(year(b$Date)>=2010)&(year(b$Date)< 2017),]
-test_set<-b[year(b$Date) >= 2017,]
+# Reduzca la ventana de entrenamiento a datos desde 2010 hasta 2017
+# y deje la ventana de evaluación a datos después de 2017
+
+#train_set<-b[(...)&(...),]
+#test_set<-b[...,]
 
 
 # Modelo
-model_2<- lm(Truck ~ Time + Year+ Q1+ Q2+ Q3+
-               Inventories+CPI_New_Cars+CPI_Used_Cars+Gas_Prices+
-               Cons_Conf_Autos+Miles_Driven+Bank_Auto_Interest_Rate+
-               US_Population_millions+Unemployment+Disposible_Income_Capita_Real+
-               Saving_Capital+ Household_Debt_Capital+US_House_Price_Inflation+
-               Consumer_Confidence+RealGDP+Fed_Funds_Rate+US_Urban_CPI_Change+
-               Nonfarm_Payrolls,
-           data=train_set)
+#model_2<- lm(Truck ~ Time + Year+ Q1,
+#           data=train_set)
 
 # Sacando predicciones
-pred_train_2<-predict(model_2,train_set)
-pred_test_2<-predict(model_2,test_set)
+#pred_train_2<-predict(model_2,train_set)
+#pred_test_2<-predict(...)
 
 #Mean Absolute Error
-mae2<-mae(test_set$Truck,pred_test_2)
-mae_train2<-mae(train_set$Truck,pred_train_2)
+#mae2<-mae(test_set$Truck,pred_test_2)
+#mae_train2<-mae(...)
 
-print(paste("Train Error: ",mae_train2))
-print(paste("Test Error: ",mae2))
+#print(paste("Train Error: ",mae_train2))
+#print(paste(...))
 
 ```
 
 Aún hay diferencia pero esta es pequeña, intentemos ahora seleccionar variables.
 
 ### Modelo 3: Reduciendo variables 
-Podemos ahora seleccionar en base a los diagramas de dispersión las variables que creamos pueden reduicir el error del modelo aún más.
+Podemos ahora seleccionar en base a los diagramas de dispersión las variables que creamos pueden reducir el error del modelo aún más.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-#Modelo
-model_3<- lm(Truck~Time+Year+Q1+Q2+Q3+CPI_New_Cars+ 
-               +Cons_Conf_Autos+Miles_Driven+US_Population_millions+
-               Unemployment+Disposible_Income_Capita_Real+
-               US_House_Price_Inflation+Consumer_Confidence+RealGDP+
-               Fed_Funds_Rate+Nonfarm_Payrolls, data = train_set)
+# Seleccione variables en base a los diagramas de dispersión
+# Deje todas las variables de tiempo Time, Year, Q1, Q2, Q3
+# y seleccione unas 7-11 variables más
 
-#Datos Reales
-y_train<-train_set$Truck
-y_test<- test_set$Truck
+#model_3<- lm(Truck~Time+Year+Q1+Q2+Q3+CPI_New_Cars+ 
+#               Fed_Funds_Rate+Nonfarm_Payrolls, data = train_set)
+
+
+# Creando variable dependiente
+#y_train<-train_set$Truck
+#y_test<- ...
 
 #Predicciones
-pred_train_3<-predict(model_3,train_set)
-pred_test_3<-predict(model_3,test_set)
-
+#pred_train_3<-predict(model_3,train_set)
+#pred_test_3<-predict(...)
 
 
 #Error Absoluto Medio
-mae_train3<-mae(y_train,pred_train_3)
-mae3<-mae(y_test,pred_test_3)
+#mae_train3<-mae(y_train,pred_train_3)
+#mae3<-mae(...)
 
 #Reportando error
-print(paste("train set: ",mae_train3))
-print(paste("test set: ",mae3))
+#print(paste("train set: ",mae_train3))
+#print(paste(...))
 
 ```
 
@@ -519,43 +511,44 @@ Este modelo parece tener un buen ajuste ya que el error de entrenamiento y el de
 Apliquemos entonces regularización al modelo anterior
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+# Para utilizar un modelo regularizado usaremos la librería glmnet
+# Esta librería no lee los datos de la misma forma, así que crearemos
+# los conjuntos de entrenamiento y evaluación desde antes
+
 library(glmnet)
 
-X_train<-train_set[,c("Time","Year", "Q1","Q2","Q3",
-               "CPI_New_Cars", "Cons_Conf_Autos","Miles_Driven",
-               "US_Population_millions","Unemployment",
-               "Disposible_Income_Capita_Real",
-               "US_House_Price_Inflation",
-               "Consumer_Confidence","RealGDP","Fed_Funds_Rate",
-               "Nonfarm_Payrolls")]
+# 1. Cree los conjuntos X_train y X_test con las mismas variables del 
+#    modelo anterior
 
-X_test<-test_set[,c("Time","Year", "Q1","Q2","Q3",
-               "CPI_New_Cars", 
-               "Cons_Conf_Autos","Miles_Driven",
-               "US_Population_millions","Unemployment",
-               "Disposible_Income_Capita_Real",
-               "US_House_Price_Inflation",
-               "Consumer_Confidence","RealGDP","Fed_Funds_Rate",
-               "Nonfarm_Payrolls")]
+#X_train<-train_set[,c("Time","Year", "Q1","Q2","Q3",
+#               "Fed_Funds_Rate","Nonfarm_Payrolls")]
 
-y_train<-train_set$Truck
-y_test<- test_set$Truck
+#X_test<-test_set[,c("Time","Year", "Q1","Q2","Q3",
+#               "Fed_Funds_Rate","Nonfarm_Payrolls")]
 
-model_4<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
-                family="gaussian", alpha = 1, nlambda=25)
+# 2. Variables dependientes
+#y_train <- train_set$Truck
+#y_test <- ...
 
 
-# Sacando predicciones
-pred_train_4=predict(model_4, newx = as.matrix(X_train), s = "lambda.min")
-pred_test_4=predict(model_4, newx=as.matrix(X_test), s = "lambda.min")
+# 3. Modelo
+#model_4<-cv.glmnet(as.matrix(X_train),as.matrix(y_train),
+#                family="gaussian", alpha = 1, nlambda=25)
 
-#Mean Absolute Error
-mae_train4<-mae(y_train,pred_train_4)
-mae4<-mae(y_test,pred_test_4)
+
+# 4. Sacando predicciones
+#pred_train_4=predict(model_4, newx = as.matrix(X_train), s = "lambda.min")
+#pred_test_4=predict(...)
+
+# 5. Mean Absolute Error
+#mae_train4<-mae(y_train,pred_train_4)
+#mae4<-mae(...)
 
 # reportando errores
-print(paste("train set: ",mae_train4))
-print(paste("test set: ",mae4))
+#print(paste("train set: ",mae_train4))
+#print(paste(...))
 
 ```
 Sorpresivamente el error de evaluación es mucho menor que el error de entrenamiento. Pero no nos asustemos, esto no es un síntoma de un modelo con sobreajuste. ¿Puede usted imaginar que es?
