@@ -2,7 +2,9 @@
 Las metodologías analíticas se están volviendo una necesidad en organizaciones que recopilan una cantidad creciente de datos. Ya no solamente es necesario ordenar los datos y generar información, sino encontrar la manera de transformar esa información en una estrategia de negocios.
 Una de las ventajas de generar información es que se puede saber con claridad que sucedió en el pasado y que es lo que está pasando actualmente, pero muy difícilmente podrá saber qué pasará en el futuro. Con el avance en la capacidad de cálculo de las computadoras y la popularización de metodologías analíticas es cada vez más factible predecir o mejorar las predicciones de lo que va suceder.
 
-Este curso comprende una introducción a las principales herramientas analíticas de machine learning con aplicaciones a casos de negocios. En la actualidad existen varias herramientas que pueden ayudar al análisis de la información como SPSS, SAS, FICO, Azure, Matlab, Python, etc., este curso será desarrollado con el software estadístico R. Se desarrollarán casos de estudio implementando algoritmos de machine learning en finanzas y marketing, y se espera que al finalizar el curso el estudiante no solamente sea capaz de ejecutar archivos en R, sino que desarrolle la capacidad de entender que quiere obtener y que modelo debe utilizar para obtenerlo, sin importar la herramienta que esté utilizando.
+Este curso comprende una introducción a las principales herramientas analíticas de machine learning con aplicaciones a casos de negocios. 
+
+En la actualidad existen varias herramientas que pueden ayudar al análisis de la información como SPSS, SAS, FICO, Azure, Matlab, Python, etc., este curso será desarrollado con el software estadístico R. Se desarrollarán casos de estudio implementando algoritmos de machine learning en finanzas y marketing, y se espera que al finalizar el curso el estudiante no solamente sea capaz de ejecutar archivos en R, sino que desarrolle la capacidad de entender que quiere obtener y que modelo debe utilizar para obtenerlo, sin importar la herramienta que esté utilizando.
 
 
 ## Sitio en construcción:
