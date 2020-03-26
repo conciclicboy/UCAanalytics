@@ -105,9 +105,10 @@ Ya que hay columnas que están llenas de campos vacíos o extraños las vamos a 
 
 ```{r, echo=TRUE}
 
-# 1. Elimine las variables que tienen valores NA
+#1. Elimine las variables que tienen valores NA
 #   Simplemente se asigna NULL a la variable que se desea eliminar
 #   Por ejemplo si quisiera eliminar var1 haría esto: b$var1 <- NULL
+
 
 ```
 
